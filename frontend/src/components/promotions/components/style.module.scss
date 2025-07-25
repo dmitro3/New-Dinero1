@@ -1,0 +1,128 @@
+.perspective {
+  perspective: 1000px;
+}
+.scrollbarcontainer {
+  overflow-x: scroll;
+  overflow-y: hidden;
+  scrollbar-width: none;
+}
+
+.scrollbarcontainer::-webkit-scrollbar {
+  display: none;
+}
+
+.cardFront,
+.cardBack {
+  backface-visibility: hidden;
+  transition: transform 0.5s ease-in-out;
+  height: 100%;
+}
+
+.cardFront {
+  transform: rotateY(0);
+}
+
+.cardBack {
+  transform: rotateY(180deg);
+  opacity: 0;
+  transition:
+    transform 0.5s ease-in-out,
+    opacity 0.5s ease-in-out;
+}
+
+.flip .cardFront {
+  transform: rotateY(-180deg);
+}
+
+.flip .cardBack {
+  transform: rotateY(0);
+  opacity: 1;
+}
+
+.terms {
+  overflow-y: auto;
+  max-height: calc(100% - 3rem);
+  padding: 1rem;
+}
+
+// .terms::-webkit-scrollbar {
+//   width: 0px;
+//   height: 0px;
+// }
+
+.textContent {
+  transition: opacity 0.5s ease-in-out;
+}
+
+.flip .textContent {
+  opacity: 1;
+}
+
+.cardsView {
+  display: grid;
+  gap: 1.5rem;
+
+  @media (max-width: 1023px) and (min-width: 651px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (max-width: 650px) {
+    grid-template-columns: repeat(1, 1fr);
+  }
+}
+
+.twoColumns {
+  display: grid;
+  gap: 1.5rem;
+
+  @media (min-width: 1024px) and (max-width: 1250px) {
+    grid-template-columns: repeat(1, 1fr);
+  }
+
+  @media (min-width: 1251px) and (max-width: 1600) {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+  @media (min-width: 1601) {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
+.threeColumns {
+  display: grid;
+  gap: 1.5rem;
+
+  @media (min-width: 1024px) and (max-width: 1250px) {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  @media (min-width: 1251px) and (max-width: 1600) {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+  @media (min-width: 1601) {
+    grid-template-columns: repeat(4, 1fr) !important;
+  }
+}
+.skeleton {
+  width: 100%;
+  border-radius: 0.5rem;
+
+  @media (min-width: 769px) and (max-width: 1250px) {
+    height: 200px;
+  }
+
+  @media (min-width: 1251px) and (max-width: 1600px) {
+    height: 250px;
+  }
+
+  @media (min-width: 1601px) {
+    height: 300px;
+  }
+}
+
+.cardsWidth{
+  width: 248px;
+@media (min-width: 1283px) {
+  width: 270px;
+  
+}
+}

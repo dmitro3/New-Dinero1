@@ -1,0 +1,9 @@
+.scrollbarcontainer {
+  overflow-x: scroll;
+  overflow-y: hidden;
+  scrollbar-width: none; 
+}
+
+.scrollbarcontainer::-webkit-scrollbar {
+  display: none; 
+}

@@ -1,0 +1,32 @@
+.loading {
+  height: 100vh;
+  font-size: 40px;
+  font-weight: 800;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  span {
+    display: inline-block;
+    margin: 1px;
+    color: rgb(var(--lb-purple-1000));;
+  }
+}
+.loading04 {
+  span {
+    animation: loading04 0.7s infinite;
+    @for $i from 1 through 6 {
+      &:nth-child(#{$i + 1}) {
+        animation-delay: #{$i * 0.1}s;
+      }
+    }
+  }
+}
+@keyframes loading04 {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(15px);
+  }
+}

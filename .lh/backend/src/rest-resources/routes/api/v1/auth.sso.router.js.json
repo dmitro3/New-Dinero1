@@ -1,0 +1,18 @@
+{
+    "sourceFile": "backend/src/rest-resources/routes/api/v1/auth.sso.router.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1753423507823,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1753423507823,
+            "name": "Commit-0",
+            "content": "const express = require('express');\r\nconst passport = require('passport');\r\nconst router = express.Router();\r\n\r\n// Google SSO\r\nrouter.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));\r\nrouter.get('/google/callback', passport.authenticate('google', { session: false }), (req, res) => {\r\n  // On success, redirect to frontend with JWT token\r\n  const token = req.user.token;\r\n  res.redirect(`${process.env.SSO_SUCCESS_REDIRECT}?token=${token}`);\r\n});\r\n\r\n// Facebook SSO\r\nrouter.get('/facebook', passport.authenticate('facebook', { scope: ['email'] }));\r\nrouter.get('/facebook/callback', passport.authenticate('facebook', { session: false }), (req, res) => {\r\n  // On success, redirect to frontend with JWT token\r\n  const token = req.user.token;\r\n  res.redirect(`${process.env.SSO_SUCCESS_REDIRECT}?token=${token}`);\r\n});\r\n\r\nmodule.exports = router; "
+        }
+    ]
+}

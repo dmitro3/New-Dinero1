@@ -1,0 +1,13 @@
+export * from './getGameCategory.service'
+export * from './getCasinoGames'
+export * from './getGameProviders.service'
+export * from './createFavoriteGame.service'
+export * from './removeFavoriteGame.service'
+export * from './getFavoriteGames.service'
+export * from './getCasinoTransactions.service'
+
+export * from './getAllGames'
+export * from './pragmaticGameCreatePlayer.service.js'
+export * from './pragmaticGameLaunchUrl.service.js'
+export * from './getSubCategoryGames.js'
+export * from './getLeaderBoardDetails.js'

@@ -1,0 +1,88 @@
+.paginationContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+
+  @media (max-width: 768px) {
+    padding: 0.3rem;
+  }
+}
+
+.paginationContent {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #fff;
+
+  @media (max-width: 480px) {
+    gap: 0.3rem;
+  }
+}
+
+.paginationButton {
+  padding: 0.4rem;
+  border-radius: 0.3rem;
+  background-color: rgba(var(--lb-purple-1300), 0.2);
+  border: 1px solid rgb(var(--lb-purple-1300));
+  transition:
+    opacity 0.2s,
+    background-color 0.2s;
+  cursor: pointer;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  @media (max-width: 480px) {
+    padding: 0.3rem;
+    font-size: 0.8rem;
+  }
+}
+
+.paginationLink {
+  padding: 0.4rem;
+  border-radius: 0.3rem;
+  border: 1px solid rgb(var(--lb-purple-800));
+  background-color: rgba(var(--lb-purple-800), 0.2);
+  color: #ccc;
+  cursor: pointer;
+  transition:
+    opacity 0.2s,
+    background-color 0.2s;
+
+  &:hover {
+    opacity: 0.8;
+  }
+
+  @media (max-width: 480px) {
+    padding: 0.3rem;
+    font-size: 0.8rem;
+  }
+}
+
+.active {
+  background-color: rgb(var(--lb-purple-800), 0.5);
+  color: #fff;
+  border-color: rgb(var(--lb-purple-800));
+}
+
+.paginationEllipsis {
+  padding: 0.4rem;
+  border-radius: 0.3rem;
+  background-color: rgba(var(--lb-purple-1200), 0.2);
+  border: 1px solid rgb(var(--lb-purple-1200));
+  transition: opacity 0.2s;
+
+  @media (max-width: 480px) {
+    padding: 0.3rem;
+    font-size: 0.8rem;
+  }
+}
+
+.disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}

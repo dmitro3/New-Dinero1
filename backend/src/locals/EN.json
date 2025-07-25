@@ -1,0 +1,14 @@
+{
+	"Internal Server Error": "Internal Server Error",
+	"InternalServerError": "InternalServerError",
+	"ReferenceError": "ReferenceError",
+	"InvalidToken": "InvalidToken",
+	"Either access token not passed or it is expired": "Either access token not passed or it is expired",
+	"GameNotFound": "GameNotFound",
+	"Game not found": "Game not found",
+	"PaymentProviderError": "PaymentProviderError",
+	"Payment failed, Payment provider is in-active or not supported for your region.": "Payment failed, Payment provider is in-active or not supported for your region.",
+	"UserInActive": "UserInActive",
+	"": "",
+	"TypeError": "TypeError"
+}

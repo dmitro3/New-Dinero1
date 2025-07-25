@@ -1,0 +1,22 @@
+{
+    "sourceFile": "frontend/src/components/LoginSignup/hooks/useUserAuth.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 1,
+            "patches": [
+                {
+                    "date": 1753424709536,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1753446937862,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -56,17 +56,17 @@\n       const apiMessage = error?.response?.data?.error || error?.errors?.message || error?.message || fallbackMessage;\n \n       setToastState({\n         showToast: true,\n-        message: apiMessage,\n+          message: apiMessage,\n         status: 'error',\n       });\n \n       // Set form error for geo/VPN block or other errors\n-      setError('username', {\n-        type: 'manual',\n-        message: apiMessage,\n-      });\n+        setError('username', {\n+          type: 'manual',\n+          message: apiMessage,\n+        });\n     }\n   };\n \n   const togglePasswordVisibility = () => {\n"
+                }
+            ],
+            "date": 1753424709536,
+            "name": "Commit-0",
+            "content": "'use client';\nimport { useForm } from 'react-hook-form';\nimport { userSignUp, userLogin } from '@/services/postRequest';\nimport { addLoginToken } from '@/services/storageUtils';\nimport { useState } from 'react';\nimport { useRouter, useSearchParams } from 'next/navigation';\nimport { useStateContext } from '@/store';\nimport useGetUserDeatil from '@/common/hook/useGetUserDeatil';\n\nconst useUserAuth = ({ setOpen = () => {}, isSignUp = false, setToastState }) => {\n  const [loading, setLoading] = useState(false);\n  const [showPassword, setShowPassword] = useState(false);\n  const navigate = useRouter();\n  const { dispatch } = useStateContext();\n  const { getUser } = useGetUserDeatil();\n  const searchParams = useSearchParams();\n  const refCode = searchParams.get('ref');\n\n  const { control, handleSubmit, setError } = useForm({\n    mode: 'onBlur',\n    defaultValues: {\n      username: '',\n      password: '',\n    },\n  });\n\n  const onSubmit = async (value) => {\n    const apiCall = isSignUp ? userSignUp : userLogin;\n    const payload = refCode ? { ...value, referralCode: refCode } : value;\n    setLoading(true);\n    try {\n      const response = await apiCall(payload);\n      const { data = {} } = response || {};\n\n      const { user: userInfo, accessToken } = data || {};\n\n      const token = isSignUp ? data?.user?.token : accessToken;\n\n      dispatch({ type: 'SET_USER', payload: userInfo });\n\n      addLoginToken(token);\n      setOpen(false);\n      setLoading(false);\n      getUser();\n      setToastState({\n        showToast: true,\n        message: `${isSignUp ? 'Signed Up' : 'Logged In'} Successfully`,\n        status: 'success',\n      });\n      navigate('/');\n    } catch (error) {\n      setLoading(false);\n\n      const fallbackMessage = 'An unknown error occurred';\n      // Prefer backend geo/VPN block error if present\n      const apiMessage = error?.response?.data?.error || error?.errors?.message || error?.message || fallbackMessage;\n\n      setToastState({\n        showToast: true,\n        message: apiMessage,\n        status: 'error',\n      });\n\n      // Set form error for geo/VPN block or other errors\n      setError('username', {\n        type: 'manual',\n        message: apiMessage,\n      });\n    }\n  };\n\n  const togglePasswordVisibility = () => {\n    setShowPassword((prev) => !prev);\n  };\n\n  return {\n    control,\n    handleSubmit,\n    onSubmit,\n    loading,\n    showPassword,\n    togglePasswordVisibility,\n  };\n};\n\nexport default useUserAuth;\n"
+        }
+    ]
+}

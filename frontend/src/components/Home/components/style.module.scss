@@ -1,0 +1,8 @@
+.scrollbarcontainer::-webkit-scrollbar {
+  display: none;
+  scrollbar-width: none;
+}
+
+.scrollbarcontainer {
+  scrollbar-width: none;
+}

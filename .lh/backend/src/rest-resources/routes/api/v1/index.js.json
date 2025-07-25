@@ -1,0 +1,18 @@
+{
+    "sourceFile": "backend/src/rest-resources/routes/api/v1/index.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1753423500202,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1753423500202,
+            "name": "Commit-0",
+            "content": "import express from 'express'\n\nimport { bannerRouter } from './banner.router'\nimport { casinoRouter } from './casino.router'\nimport { gsoftRouter } from './gsoft.router'\nimport { siteRouter } from './site.router'\nimport { userRouter } from './user.router'\nimport { leaderBoardRouter } from './leaderBoard.routes'\n// import { documentRouter } from './document.router'\n// import { affiliateRouter } from './affiliate.router'\nimport { paymentRouter } from './payment.router'\n// import {  } from './payment.router'\n// import contextMiddleware from '@src/rest-resources/middlewares/context.middleware'\nimport responseValidationMiddleware from '@src/rest-resources/middlewares/responseValidation.middleware'\nimport { faucetRouter } from './faucet.router'\nimport { packageRouter } from './package.router'\nimport spinWheelRouter from './spinWheel.router'\nimport { ticketRouter } from './ticket.router'\nimport { vipTierRouter } from './vipTier.router'\nimport { bonusRouter } from './bonus.routes'\nimport { notificationRouter } from './notification.routes'\nimport { liveChatRouter } from './liveChat.router'\nimport { postalCodeRouter } from './postalCode.routes'\nconst authSsoRouter = require('./auth.sso.router');\n\nconst v1router = express.Router()\nv1router.use('/vip-tier', vipTierRouter, responseValidationMiddleware({}))\nv1router.use('/bonus', bonusRouter, responseValidationMiddleware({}))\nv1router.use('/notification', notificationRouter, responseValidationMiddleware({}))\nv1router.use('/user', userRouter, responseValidationMiddleware({}))\nv1router.use('/casino', casinoRouter, responseValidationMiddleware({}))\nv1router.use('/banner', bannerRouter, responseValidationMiddleware({}))\nv1router.use('/callback/gsoft', gsoftRouter, responseValidationMiddleware({}))\nv1router.use('/payment', paymentRouter, responseValidationMiddleware({}))\nv1router.use('/postal-code', postalCodeRouter, responseValidationMiddleware({}))\nv1router.use('/package', packageRouter, responseValidationMiddleware({}))\nv1router.use('/spin-wheel-configuration', spinWheelRouter, responseValidationMiddleware({}))\nv1router.use('/faucet', faucetRouter, responseValidationMiddleware({}))\nv1router.use('/ticket', ticketRouter, responseValidationMiddleware({}))\nv1router.use('/live-chat', liveChatRouter, responseValidationMiddleware({}))\nv1router.use('/leader-board', leaderBoardRouter, responseValidationMiddleware({}))\nv1router.use('/auth/sso', authSsoRouter);\nv1router.use('/', siteRouter, responseValidationMiddleware({}))\n\n// v1router.use('/affiliate', requestValidationMiddleware({}), contextMiddleware(false), affiliateRouter, responseValidationMiddleware({}))\n// Casino Callbacks\nexport default v1router\n"
+        }
+    ]
+}

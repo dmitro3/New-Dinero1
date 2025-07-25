@@ -1,0 +1,8 @@
+.env
+**http_ca.crt
+node_modules/
+dist/*
+docs/
+logs/
+tmp/
+package-lock.json

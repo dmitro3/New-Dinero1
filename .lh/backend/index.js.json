@@ -1,0 +1,18 @@
+{
+    "sourceFile": "backend/index.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1753423521790,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1753423521790,
+            "name": "Commit-0",
+            "content": "import { createServer } from 'http'\nimport config from '@src/configs/app.config'\nimport app from '@src/rest-resources'\nimport socketServer from '@src/socket-resources'\nimport gracefulShutDown from '@src/libs/gracefulShutDown'\nimport { Logger } from '@src/libs/logger'\nconst passport = require('passport');\nconst GoogleStrategy = require('passport-google-oauth20').Strategy;\nconst FacebookStrategy = require('passport-facebook').Strategy;\nconst db = require('./src/db/models');\nconst jwt = require('jsonwebtoken');\n\npassport.use(new GoogleStrategy({\n  clientID: process.env.GOOGLE_CLIENT_ID,\n  clientSecret: process.env.GOOGLE_CLIENT_SECRET,\n  callbackURL: process.env.GOOGLE_CALLBACK_URL,\n}, async (accessToken, refreshToken, profile, done) => {\n  try {\n    let user = await db.User.findOne({ where: { googleId: profile.id } });\n    if (!user) {\n      user = await db.User.create({\n        googleId: profile.id,\n        email: profile.emails[0].value,\n        firstName: profile.name.givenName,\n        lastName: profile.name.familyName,\n        signInType: 'google',\n        isEmailVerified: true\n      });\n    }\n    const token = jwt.sign({ userId: user.userId }, process.env.JWT_LOGIN_SECRET, { expiresIn: '1d' });\n    user.token = token;\n    return done(null, user);\n  } catch (err) {\n    return done(err, null);\n  }\n}));\n\npassport.use(new FacebookStrategy({\n  clientID: process.env.FACEBOOK_APP_ID,\n  clientSecret: process.env.FACEBOOK_APP_SECRET,\n  callbackURL: process.env.FACEBOOK_CALLBACK_URL,\n  profileFields: ['id', 'emails', 'name']\n}, async (accessToken, refreshToken, profile, done) => {\n  try {\n    let user = await db.User.findOne({ where: { facebookId: profile.id } });\n    if (!user) {\n      user = await db.User.create({\n        facebookId: profile.id,\n        email: profile.emails ? profile.emails[0].value : null,\n        firstName: profile.name.givenName,\n        lastName: profile.name.familyName,\n        signInType: 'facebook',\n        isEmailVerified: true\n      });\n    }\n    const token = jwt.sign({ userId: user.userId }, process.env.JWT_LOGIN_SECRET, { expiresIn: '1d' });\n    user.token = token;\n    return done(null, user);\n  } catch (err) {\n    return done(err, null);\n  }\n}));\n\napp.use(passport.initialize());\n\nconst httpServer = createServer(app)\n\nsocketServer.attach(httpServer)\n\nhttpServer.listen({ port: config.get('port') }, () => {\n  Logger.info('Server Started', { message: `Listening On ${config.get('port')}` })\n})\n\nprocess.on('SIGTERM', gracefulShutDown)\nprocess.on('SIGINT', gracefulShutDown)\nprocess.on('SIGUSR2', gracefulShutDown)\n"
+        }
+    ]
+}

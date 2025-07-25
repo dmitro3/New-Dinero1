@@ -1,0 +1,119 @@
+.spinWheelContent {
+  // position: absolute;
+  // top: 50%;
+  // left: 50%;
+  width: 100%;
+  // transform: translate(-50%, -50%);
+  padding: 1rem;
+
+  @media (max-width: 767px) {
+    padding: 1rem;
+  }
+
+  h6 {
+    text-align: center;
+    font-weight: 800;
+    font-size: 17px;
+    color: white;
+    //   max-width: 450px;
+
+    @media (max-width: 767px) {
+      font-size: 15px;
+      margin-bottom: 10px;
+    }
+  }
+}
+
+.spinWheelWrap {
+  // height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 30px;
+
+  @media (max-width: 767px) {
+    height: 400px;
+    margin-top: 20px;
+  }
+
+  @media (max-width: 450px) {
+    height: 300px;
+    margin-top: 20px;
+  }
+
+  canvas {
+    height: 450px;
+    width: 450px;
+
+    @media (max-width: 767px) {
+      height: 300px;
+      width: 300px;
+    }
+
+    @media screen and (max-width: 450px) {
+      height: 220px;
+      width: 220px;
+    }
+  }
+}
+.congratulationsPopoverContent {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  text-align: center;
+
+  h3 {
+    text-align: center;
+    font-weight: 800;
+    color: white;
+
+    @media (max-width: 600px) {
+      font-size: 16px;
+    }
+  }
+
+  p {
+    font-size: 16px;
+    color: white;
+    font-weight: 800;
+
+    @media (max-width: 600px) {
+      font-size: 14px;
+    }
+  }
+}
+
+.congratulationsPopoverContentSecond {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  top: 50%;
+  left: 50%;
+  width: 100%;
+  text-align: center;
+  padding-top: 60%;
+
+  @media (max-width: 600px) {
+    padding-top: 90%;
+  }
+
+  h6 {
+    color: white;
+    font-size: 14px;
+
+    @media (max-width: 600px) {
+      font-size: 12px;
+    }
+  }
+
+  p {
+    font-size: 14px;
+    color: white;
+    font-weight: 800;
+
+    @media (max-width: 600px) {
+      font-size: 12px;
+    }
+  }
+}

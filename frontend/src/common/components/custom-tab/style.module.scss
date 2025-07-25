@@ -1,0 +1,49 @@
+.tabContainer {
+  // background: #000;
+  max-width: 100%;
+  color: #fff;
+  padding: 5px;
+  border-radius: 5px;
+  display: flex;
+  position: relative;
+  overflow-x: scroll;
+  width: max-content;
+  border-radius: 60px;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+.tabsValue {
+  font-size: 15px;
+  text-wrap: nowrap;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 5px;
+  color: #fff;
+  transition: 0.2s;
+  z-index: 9;
+  line-height: 16px;
+  // letter-spacing: 0.8px;
+  img {
+    margin-right: 3px;
+  }
+  &.active {
+    color: #fff;
+    // font-weight: 700;
+    transition: 0.2s;
+    // letter-spacing: .1px;
+  }
+}
+.activeSlider {
+  position: absolute;
+  left: 5px;
+  top: 5px;
+  bottom: 5px;
+  border-radius: 60px;
+  transition: 0.2s;
+  background: rgb(var(--secondary-btn-color));
+  color: #fff;
+  // transform: scale(1.02);
+}

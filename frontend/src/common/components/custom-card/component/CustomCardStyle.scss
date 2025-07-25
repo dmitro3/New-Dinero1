@@ -1,0 +1,131 @@
+.game-card {
+  border-radius: 0.5rem;
+  cursor: pointer;
+  overflow: hidden;
+  position: relative;
+  transition: 200ms all ease-in-out;
+  margin-top: 10px;
+  aspect-ratio: 0.77/1;
+
+
+  &.home-screen {
+    min-width: 160px;
+    aspect-ratio: 7 / 9;
+  }
+
+  .game-card-body {
+    width: 100%;
+    height: 100%;
+    // aspect-ratio: 0.77/1;
+    // min-height: 23.2vh;
+    // max-height: 100%;
+    // height: auto;
+
+    .game-img-wrap {
+      width: 100%;
+      height: 100%;
+      aspect-ratio: 0.77/1;
+
+      img.blured-bg-img {
+        width: 100%;
+        max-width: 100%;
+        height: 100%;
+        object-fit: fill;
+        // object-position: center;
+        // filter: brightness(0.75) blur(10px);
+        // position: absolute;
+        inset: 0;
+      }
+
+      .game-img-box {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        inset: 0;
+
+        img {
+          width: 100%;
+          max-width: 100%;
+          height: 100%;
+          object-fit: contain;
+          object-position: center;
+        }
+      }
+    }
+  }
+
+  .game-card-overlay {
+    width: 100%;
+    height: 100%;
+    background: var(--primaryDark-800);
+    border: 2px solid var(--primaryLight-1000);
+    border-radius: inherit;
+    opacity: 0;
+    box-shadow: 0 0 10px var(--primaryLight-1000) inset;
+    position: absolute;
+    inset: 0;
+    transform: scale(0);
+    transform-origin: center;
+    transition: 200ms all ease-in-out;
+
+    .play-btn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0);
+      opacity: 0;
+      padding: 5px 10px;
+      border-radius: 5px;
+      background: var(--primaryLight-900);
+      transition: 300ms all ease-in-out;
+    }
+
+    .favorite-btn {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      padding: 5px;
+      border-radius: 50%;
+      background: var(--primaryLight-900);
+    }
+  }
+
+  &:hover {
+    transform: translateY(-0.5rem);
+
+    .game-card-overlay {
+      opacity: 1;
+      transform: scale(1);
+
+      .play-btn {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+      }
+
+      .favorite-btn {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+  }
+}
+
+@media screen and (max-width: 850px) {
+  .game-card {
+    min-width: 110px;
+
+    &.home-screen {
+      min-width: 130px;
+    }
+  }
+}
+
+@media screen and (max-width: 767.98px) {
+  .game-card {
+    min-width: 90px;
+
+    &.home-screen {
+      min-width: 100px;
+    }
+  }
+}

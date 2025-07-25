@@ -1,0 +1,29 @@
+{
+  "env": {
+    "node": true,
+    "es2020": true,
+    "browser": true
+  },
+  "extends": ["eslint:recommended", "plugin:@typescript-eslint/recommended"],
+  "parser": "@typescript-eslint/parser",
+  "plugins": ["@typescript-eslint"],
+  "parserOptions": {
+    "ecmaVersion": 12,
+    "sourceType": "module"
+  },
+  "rules": {
+    // Custom ESLint rules go here
+    "react/react-in-jsx-scope": "off", // Next.js doesn"t require React to be imported in each file
+    "no-console": "warn", // Warn on console.log statements
+    "semi": ["error", "always"], // Enforce semicolons
+    "quotes": ["error", "single"], // Enforce single quotes
+    "jsx-quotes": ["error", "prefer-double"], // Enforce double quotes in JSX
+    "eqeqeq": "error", // Require strict equality operators
+    "react/jsx-props-no-spreading": "off", // Allow props spreading
+    "react/prop-types": "off",
+    "no-undef": "error",
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "no-unused-vars": "error",
+    "@typescript-eslint/no-require-imports": "off"
+  }
+}

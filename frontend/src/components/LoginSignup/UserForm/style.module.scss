@@ -1,0 +1,25 @@
+.container {
+  padding-right: 16px;
+  height: 100%;
+}
+
+.tabContainer {
+  display: flex;
+  cursor: pointer;
+  gap: 16px;
+  padding: 6px;
+}
+
+.label {
+  font-size: 18px;
+  color: #6f7d98;
+}
+
+.line {
+  background: #1f4071;
+  height: 4px;
+}
+
+.fullButton {
+  margin-top: auto;
+}
