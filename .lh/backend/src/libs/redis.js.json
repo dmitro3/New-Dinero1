@@ -1,0 +1,18 @@
+{
+    "sourceFile": "backend/src/libs/redis.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1753947816014,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1753947816014,
+            "name": "Commit-0",
+            "content": "// Temporary mock Redis to avoid connection errors\r\nclass MockRedis {\r\n  constructor() {\r\n    this.store = new Map()\r\n    this.subscribers = new Map()\r\n  }\r\n  \r\n  async ping() {\r\n    return 'PONG'\r\n  }\r\n  \r\n  async get(key) {\r\n    return this.store.get(key) || null\r\n  }\r\n  \r\n  async set(key, value, ttl = null) {\r\n    this.store.set(key, value)\r\n    if (ttl) {\r\n      setTimeout(() => this.store.delete(key), ttl * 1000)\r\n    }\r\n    return 'OK'\r\n  }\r\n  \r\n  async del(key) {\r\n    return this.store.delete(key) ? 1 : 0\r\n  }\r\n  \r\n  async quit() {\r\n    return 'OK'\r\n  }\r\n  \r\n  duplicate() {\r\n    return new MockRedis()\r\n  }\r\n\r\n  // Socket.IO Redis adapter methods\r\n  async psubscribe(pattern) {\r\n    return 'OK'\r\n  }\r\n\r\n  async subscribe(channel) {\r\n    return 'OK'\r\n  }\r\n\r\n  async unsubscribe(channel) {\r\n    return 'OK'\r\n  }\r\n\r\n  async punsubscribe(pattern) {\r\n    return 'OK'\r\n  }\r\n\r\n  async publish(channel, message) {\r\n    return 1\r\n  }\r\n\r\n  // Event emitter methods for Socket.IO\r\n  on(event, callback) {\r\n    // Mock event handling\r\n    return this\r\n  }\r\n\r\n  off(event, callback) {\r\n    return this\r\n  }\r\n\r\n  emit(event, data) {\r\n    // Mock event emission\r\n    return true\r\n  }\r\n}\r\n\r\n// Initialize mock Redis connections\r\nexport const client = new MockRedis()\r\nexport const redisPublisher = new MockRedis()\r\nexport const redisSubscriber = new MockRedis()\r\n\r\n// Cache functions\r\nexport const getCache = async (key) => {\r\n  return await client.get(key)\r\n}\r\n\r\nexport const setCache = async (key, value, expirationInSeconds = null) => {\r\n  return await client.set(key, value, expirationInSeconds)\r\n}\r\n\r\nexport const deleteCache = async (key) => {\r\n  return await client.del(key)\r\n}\r\n\r\n/**\r\n * Gracefully closes all Redis connections.\r\n */\r\nexport const closeConnections = async () => {\r\n  try {\r\n    await Promise.all([\r\n      client.quit(),\r\n      redisPublisher.quit(),\r\n      redisSubscriber.quit(),\r\n    ])\r\n  } catch (error) {\r\n    console.error('Error closing Redis connections:', error)\r\n  }\r\n}\r\n"
+        }
+    ]
+}

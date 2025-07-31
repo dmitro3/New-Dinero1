@@ -70,25 +70,62 @@ socketServer.attach(httpServer)
 // Test database connection before starting server
 const testDatabaseConnection = async () => {
   try {
+    // Log database configuration
+    Logger.info('Database Configuration:', {
+      database: config.get('sequelize.name'),
+      user: config.get('sequelize.user'),
+      readHost: config.get('sequelize.readHost'),
+      writeHost: config.get('sequelize.writeHost'),
+      port: config.get('sequelize.port'),
+      env: config.get('env')
+    })
+
+    // Log environment variables
+    Logger.info('Environment Variables:', {
+      DB_NAME: process.env.DB_NAME,
+      DB_USER: process.env.DB_USER,
+      DB_READ_HOST: process.env.DB_READ_HOST,
+      DB_WRITE_HOST: process.env.DB_WRITE_HOST,
+      DB_PORT: process.env.DB_PORT,
+      NODE_ENV: process.env.NODE_ENV
+    })
+
+    Logger.info('Attempting database connection...')
     await db.sequelize.authenticate()
-    Logger.info('Database Connected')
+    Logger.info('Database Connected Successfully')
     return true
   } catch (error) {
-    Logger.error('Database Connection Failed', { error: error.message })
+    Logger.error('Database Connection Failed', { 
+      error: error.message,
+      stack: error.stack,
+      code: error.code,
+      errno: error.errno,
+      sqlState: error.sqlState,
+      sqlMessage: error.sqlMessage
+    })
+    
+    // Log additional error details
+    console.error('Full Database Error:', error)
+    console.error('Error Code:', error.code)
+    console.error('Error Message:', error.message)
+    console.error('Error Stack:', error.stack)
+    
     return false
   }
 }
 
 // Start server only after database connection is established
 const startServer = async () => {
+  Logger.info('Starting server initialization...')
   const dbConnected = await testDatabaseConnection()
   
   if (!dbConnected) {
+    Logger.error('Server startup failed due to database connection error')
     process.exit(1)
   }
 
   httpServer.listen({ port: config.get('port') }, () => {
-    Logger.info('Server Connected')
+    Logger.info('Server Connected on port:', config.get('port'))
   })
 }
 

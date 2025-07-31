@@ -3,7 +3,7 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 1,
+            "activePatchIndex": 2,
             "patches": [
                 {
                     "date": 1753935395533,
@@ -12,6 +12,10 @@
                 {
                     "date": 1753935459846,
                     "content": "Index: \n===================================================================\n--- \n+++ \n@@ -16,9 +16,8 @@\n       host: config.get('sequelize.writeHost'),\n       port: config.get('sequelize.port')\n     }\n   },\n-  // logging: (logs) => Logger.info(`database query :: ${logs}`),\n   pool: {\n     max: 30,\n     min: 0,\n     acquire: 60000,\n@@ -52,5 +51,5 @@\n     ...dbSettings\n   }\n }[config.get('env')]\n \n-module.exports = databaseOptions\n+export default databaseOptions\n"
+                },
+                {
+                    "date": 1753947959256,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -24,9 +24,13 @@\n     idle: 5000\n   },\n   dialect: 'postgres',\n   dialectOptions: {\n-    application_name: config.get('app.name')\n+    application_name: config.get('app.name'),\n+    ssl: {\n+      require: true,\n+      rejectUnauthorized: false\n+    }\n   },\n   migrationStorage: 'sequelize',\n   migrationStorageTableName: 'sequelize_migration_meta',\n   seederStorage: 'sequelize',\n"
                 }
             ],
             "date": 1753935395533,

@@ -3,7 +3,7 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 3,
+            "activePatchIndex": 4,
             "patches": [
                 {
                     "date": 1753935500064,
@@ -20,6 +20,10 @@
                 {
                     "date": 1753935569335,
                     "content": "Index: \n===================================================================\n--- \n+++ \n@@ -30,23 +30,16 @@\n   .filter((file) => (\n     file.indexOf('.') !== 0 && file !== basename && file.slice(-3) === '.js'\n   ))\n \n-Logger.info('Loading Database Models', { \n-  modelCount: modelFiles.length,\n-  models: modelFiles \n-})\n-\n modelFiles.forEach((file) => {\n   const model = require(path.join(__dirname, file))(sequelize, Sequelize.DataTypes)\n   db[model.name] = model\n-  Logger.info(`Model Loaded: ${model.name}`)\n })\n \n Object.keys(db).forEach((modelName) => {\n   if (db[modelName].associate) {\n     db[modelName].associate(db)\n-    Logger.info(`Model Associations Created: ${modelName}`)\n   }\n })\n \n db.sequelize = sequelize\n"
+                },
+                {
+                    "date": 1753947723195,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -8,30 +8,49 @@\n const basename = _basename(__filename)\n const env = config.get('env')\n const dbConfig = require('@src/configs/database.config')[env]\n \n+// Log database configuration\n+Logger.info('Database Models Initialization:', {\n+  env: env,\n+  databaseOptions: databaseOptions ? 'Loaded' : 'Not loaded',\n+  dbConfig: dbConfig ? 'Loaded' : 'Not loaded'\n+})\n \n const db = {}\n let sequelize\n if (databaseOptions) {\n+  Logger.info('Using databaseOptions configuration')\n   sequelize = new Sequelize({\n     ...databaseOptions, \n     logging: false\n   })\n } else {\n+  Logger.info('Using dbConfig configuration')\n   sequelize = new Sequelize(\n     dbConfig.database,\n     dbConfig.username,\n     dbConfig.password,\n     dbConfig\n   )\n }\n \n+// Log sequelize configuration\n+Logger.info('Sequelize Configuration:', {\n+  database: sequelize.config.database,\n+  host: sequelize.config.host,\n+  port: sequelize.config.port,\n+  username: sequelize.config.username,\n+  dialect: sequelize.config.dialect\n+})\n+\n const modelFiles = readdirSync(__dirname)\n   .filter((file) => (\n     file.indexOf('.') !== 0 && file !== basename && file.slice(-3) === '.js'\n   ))\n \n+Logger.info('Loading model files:', modelFiles)\n+\n modelFiles.forEach((file) => {\n   const model = require(path.join(__dirname, file))(sequelize, Sequelize.DataTypes)\n   db[model.name] = model\n })\n@@ -44,10 +63,7 @@\n \n db.sequelize = sequelize\n db.Sequelize = Sequelize\n \n-Logger.info('Database Models Initialization Complete', {\n-  totalModels: Object.keys(db).length,\n-  models: Object.keys(db)\n-})\n+Logger.info('Database models loaded successfully')\n \n export default db\n"
                 }
             ],
             "date": 1753935500064,
