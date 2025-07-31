@@ -29,6 +29,8 @@ const useSendChat = ({ sendMessage }) => {
     // }
   };
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const handleClickOutside = (event) => {
       if (pickerRef.current && !pickerRef.current.contains(event.target)) {
         setIsGifOpen(!isGifOpen);

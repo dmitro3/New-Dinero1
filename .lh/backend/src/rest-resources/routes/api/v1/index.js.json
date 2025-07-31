@@ -3,11 +3,15 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 0,
+            "activePatchIndex": 1,
             "patches": [
                 {
                     "date": 1753423500202,
                     "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1753935381825,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -20,9 +20,9 @@\n import { bonusRouter } from './bonus.routes'\n import { notificationRouter } from './notification.routes'\n import { liveChatRouter } from './liveChat.router'\n import { postalCodeRouter } from './postalCode.routes'\n-const authSsoRouter = require('./auth.sso.router');\n+import authSsoRouter from './auth.sso.router'\n \n const v1router = express.Router()\n v1router.use('/vip-tier', vipTierRouter, responseValidationMiddleware({}))\n v1router.use('/bonus', bonusRouter, responseValidationMiddleware({}))\n"
                 }
             ],
             "date": 1753423500202,

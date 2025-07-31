@@ -26,7 +26,7 @@ import { isUserAuthenticated } from '@src/rest-resources/middlewares/isUserAuthe
 import { geoBlock } from '@src/rest-resources/middlewares/location.middleware'
 import { uploadSingle } from '@src/rest-resources/middlewares/multer.middleware'
 import requestValidationMiddleware from '@src/rest-resources/middlewares/requestValidation.middleware'
-const geoVpnBlockMiddleware = require('../../middlewares/geoVpnBlock.middleware');
+import geoVpnBlockMiddleware from '@src/rest-resources/middlewares/geoVpnBlock.middleware'
 
 // const upload = multer()
 const args = { mergeParams: true }

@@ -1,0 +1,30 @@
+{
+    "sourceFile": "backend/src/db/models/index.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 3,
+            "patches": [
+                {
+                    "date": 1753935500064,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1753935508228,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -36,19 +36,28 @@\n     port: dbConfig.port\n   })\n }\n \n-readdirSync(__dirname)\n+const modelFiles = readdirSync(__dirname)\n   .filter((file) => (\n     file.indexOf('.') !== 0 && file !== basename && file.slice(-3) === '.js'\n   ))\n-  .forEach((file) => {\n-    const model = require(path.join(__dirname, file))(sequelize, Sequelize.DataTypes)\n-    db[model.name] = model\n-  })\n+\n+Logger.info('Loading Database Models', { \n+  modelCount: modelFiles.length,\n+  models: modelFiles \n+})\n+\n+modelFiles.forEach((file) => {\n+  const model = require(path.join(__dirname, file))(sequelize, Sequelize.DataTypes)\n+  db[model.name] = model\n+  Logger.info(`Model Loaded: ${model.name}`)\n+})\n+\n Object.keys(db).forEach((modelName) => {\n   if (db[modelName].associate) {\n     db[modelName].associate(db)\n+    Logger.info(`Model Associations Created: ${modelName}`)\n   }\n })\n \n db.sequelize = sequelize\n"
+                },
+                {
+                    "date": 1753935561056,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -14,28 +14,17 @@\n let sequelize\n if (databaseOptions) {\n   sequelize = new Sequelize({\n     ...databaseOptions, \n-    logging: (sql) => Logger.info(`Database Query Executed - ${sql}`)\n+    logging: false\n   })\n-  Logger.info('Database Configuration Loaded', {\n-    database: databaseOptions.database,\n-    host: databaseOptions.replication?.read?.[0]?.host || databaseOptions.replication?.write?.host,\n-    port: databaseOptions.replication?.read?.[0]?.port || databaseOptions.replication?.write?.port,\n-    dialect: databaseOptions.dialect\n-  })\n } else {\n   sequelize = new Sequelize(\n     dbConfig.database,\n     dbConfig.username,\n     dbConfig.password,\n     dbConfig\n   )\n-  Logger.info('Database Configuration Loaded (Legacy)', {\n-    database: dbConfig.database,\n-    host: dbConfig.host,\n-    port: dbConfig.port\n-  })\n }\n \n const modelFiles = readdirSync(__dirname)\n   .filter((file) => (\n@@ -61,5 +50,11 @@\n })\n \n db.sequelize = sequelize\n db.Sequelize = Sequelize\n+\n+Logger.info('Database Models Initialization Complete', {\n+  totalModels: Object.keys(db).length,\n+  models: Object.keys(db)\n+})\n+\n export default db\n"
+                },
+                {
+                    "date": 1753935569335,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -30,23 +30,16 @@\n   .filter((file) => (\n     file.indexOf('.') !== 0 && file !== basename && file.slice(-3) === '.js'\n   ))\n \n-Logger.info('Loading Database Models', { \n-  modelCount: modelFiles.length,\n-  models: modelFiles \n-})\n-\n modelFiles.forEach((file) => {\n   const model = require(path.join(__dirname, file))(sequelize, Sequelize.DataTypes)\n   db[model.name] = model\n-  Logger.info(`Model Loaded: ${model.name}`)\n })\n \n Object.keys(db).forEach((modelName) => {\n   if (db[modelName].associate) {\n     db[modelName].associate(db)\n-    Logger.info(`Model Associations Created: ${modelName}`)\n   }\n })\n \n db.sequelize = sequelize\n"
+                }
+            ],
+            "date": 1753935500064,
+            "name": "Commit-0",
+            "content": "import config from '@src/configs/app.config'\nimport databaseOptions from '@src/configs/database.config'\nimport { Logger } from '@src/libs/logger'\nimport { readdirSync } from 'fs'\nimport path, { basename as _basename } from 'path'\nimport Sequelize from 'sequelize'\n\nconst basename = _basename(__filename)\nconst env = config.get('env')\nconst dbConfig = require('@src/configs/database.config')[env]\n\n\nconst db = {}\nlet sequelize\nif (databaseOptions) {\n  sequelize = new Sequelize({\n    ...databaseOptions, \n    logging: (sql) => Logger.info(`Database Query Executed - ${sql}`)\n  })\n  Logger.info('Database Configuration Loaded', {\n    database: databaseOptions.database,\n    host: databaseOptions.replication?.read?.[0]?.host || databaseOptions.replication?.write?.host,\n    port: databaseOptions.replication?.read?.[0]?.port || databaseOptions.replication?.write?.port,\n    dialect: databaseOptions.dialect\n  })\n} else {\n  sequelize = new Sequelize(\n    dbConfig.database,\n    dbConfig.username,\n    dbConfig.password,\n    dbConfig\n  )\n  Logger.info('Database Configuration Loaded (Legacy)', {\n    database: dbConfig.database,\n    host: dbConfig.host,\n    port: dbConfig.port\n  })\n}\n\nreaddirSync(__dirname)\n  .filter((file) => (\n    file.indexOf('.') !== 0 && file !== basename && file.slice(-3) === '.js'\n  ))\n  .forEach((file) => {\n    const model = require(path.join(__dirname, file))(sequelize, Sequelize.DataTypes)\n    db[model.name] = model\n  })\nObject.keys(db).forEach((modelName) => {\n  if (db[modelName].associate) {\n    db[modelName].associate(db)\n  }\n})\n\ndb.sequelize = sequelize\ndb.Sequelize = Sequelize\nexport default db\n"
+        }
+    ]
+}

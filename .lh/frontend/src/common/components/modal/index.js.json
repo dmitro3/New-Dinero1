@@ -1,0 +1,18 @@
+{
+    "sourceFile": "frontend/src/common/components/modal/index.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1753936958859,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1753936958859,
+            "name": "Commit-0",
+            "content": "/* eslint-disable no-undef */\n'use client';\nimport { useEffect, useRef } from 'react';\nimport style from './style.module.scss';\n\nconst Modal = ({\n    isOpen = false,\n    closeModal = () => { },\n    children = null,\n    isOuterClick = true,\n    isClosable = true,\n    childStyles = {},\n    isFullscreen = false,\n}) => {\n    const modalRef = useRef(null);\n\n    const closeOnOverlayClick = (e) => {\n        if (\n            isOuterClick &&\n            modalRef.current &&\n            !modalRef.current.contains(e.target)\n        ) {\n            closeModal();\n        }\n    };\n\n    useEffect(() => {\n        if (typeof window === 'undefined') return;\n        \n        if (isOpen) {\n            document.body.style.overflow = 'hidden';\n            document.body.style.height = '100vh';\n        } else {\n            document.body.style.overflow = '';\n            document.body.style.height = '';\n        }\n\n        return () => {\n            document.body.style.overflow = '';\n            document.body.style.height = '';\n        };\n    }, [isOpen]);\n\n    if (!isOpen) return null;\n\n    return (\n        <div\n            className={`${style.modalOverlay} ${isFullscreen ? style.fullScreenOverlay : ''}`}\n            onClick={closeOnOverlayClick}\n        >\n            <div\n                ref={modalRef}\n                className={`${style.modalContent} ${isFullscreen ? style.fullScreen : ''} ${style.mobileBottomSheet}`}\n                style={childStyles}\n            >\n                {isClosable && (\n                    <div className={style.closeButton} onClick={closeModal}>\n                        ×\n                    </div>\n                )}\n                {children}\n            </div>\n        </div>\n    );\n};\n\nexport default Modal;\n"
+        }
+    ]
+}

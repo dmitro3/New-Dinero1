@@ -1,0 +1,18 @@
+{
+    "sourceFile": "frontend/src/pixi-js-scripts/core/appPixi.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1753936856504,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1753936856504,
+            "name": "Commit-0",
+            "content": "/* eslint-disable no-undef */\n/* eslint-disable @typescript-eslint/no-unused-expressions */\nimport { settings } from '../settings.js';\n\nconst createPixiApp = () => {\n  const app = new PIXI.Application({\n    width: settings.originalWidth,\n    height: settings.originalHeight,\n    backgroundColor: settings.backgroundColor,\n    antialias: true,\n    // resolution: window.devicePixelRatio,\n    backgroundAlpha: settings.backgroundAlpha\n  });\n  globalThis.__PIXI_APP__ = app;\n\n  const div = settings.div();\n  if (div) {\n    div.appendChild(app.view);\n  }\n\n  const destroyPixiApp = () => app.destroy(true);\n\n  const appTransform = (x, y) => {\n    app.renderer.resize(x, y);\n  };\n\n  // appTransform(700, 500)\n  return {\n    app: app,\n    destroyPixi: destroyPixiApp,\n    resizePixiApp: appTransform\n  };\n};\n\nexport default createPixiApp;\n"
+        }
+    ]
+}

@@ -21,7 +21,7 @@ import { bonusRouter } from './bonus.routes'
 import { notificationRouter } from './notification.routes'
 import { liveChatRouter } from './liveChat.router'
 import { postalCodeRouter } from './postalCode.routes'
-const authSsoRouter = require('./auth.sso.router');
+import authSsoRouter from './auth.sso.router'
 
 const v1router = express.Router()
 v1router.use('/vip-tier', vipTierRouter, responseValidationMiddleware({}))

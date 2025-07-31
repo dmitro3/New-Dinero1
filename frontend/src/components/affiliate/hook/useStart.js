@@ -18,6 +18,8 @@ const useStart = () => {
 
   const refLink = user ? REF_LINK + user.username : 'Getting your link...';
   const handleClick = async () => {
+    if (typeof window === 'undefined') return;
+    
     try {
       const response = await getBannerDownload(); 
       const s3_url = response?.data?.bannerLinks;
@@ -37,6 +39,8 @@ const useStart = () => {
   };
 
   const handleCopy = async () => {
+    if (typeof window === 'undefined') return;
+    
     /* eslint-disable */
     if (window && window.isSecureContext && navigator.clipboard) {
       try {

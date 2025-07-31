@@ -3,11 +3,23 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 0,
+            "activePatchIndex": 3,
             "patches": [
                 {
                     "date": 1753423521790,
                     "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1753935389359,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -3,13 +3,13 @@\n import app from '@src/rest-resources'\n import socketServer from '@src/socket-resources'\n import gracefulShutDown from '@src/libs/gracefulShutDown'\n import { Logger } from '@src/libs/logger'\n-const passport = require('passport');\n-const GoogleStrategy = require('passport-google-oauth20').Strategy;\n-const FacebookStrategy = require('passport-facebook').Strategy;\n-const db = require('./src/db/models');\n-const jwt = require('jsonwebtoken');\n+import passport from 'passport'\n+import GoogleStrategy from 'passport-google-oauth20'\n+import FacebookStrategy from 'passport-facebook'\n+import db from '@src/db/models'\n+import jwt from 'jsonwebtoken'\n \n passport.use(new GoogleStrategy({\n   clientID: process.env.GOOGLE_CLIENT_ID,\n   clientSecret: process.env.GOOGLE_CLIENT_SECRET,\n"
+                },
+                {
+                    "date": 1753935491648,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -66,11 +66,48 @@\n const httpServer = createServer(app)\n \n socketServer.attach(httpServer)\n \n-httpServer.listen({ port: config.get('port') }, () => {\n-  Logger.info('Server Started', { message: `Listening On ${config.get('port')}` })\n-})\n+// Test database connection before starting server\n+const testDatabaseConnection = async () => {\n+  try {\n+    await db.sequelize.authenticate()\n+    Logger.info('Database Connected', { \n+      message: `Successfully connected to database: ${db.sequelize.config.database}`,\n+      host: db.sequelize.config.host,\n+      port: db.sequelize.config.port\n+    })\n+    return true\n+  } catch (error) {\n+    Logger.error('Database Connection Failed', { \n+      message: 'Unable to connect to the database',\n+      error: error.message \n+    })\n+    return false\n+  }\n+}\n \n+// Start server only after database connection is established\n+const startServer = async () => {\n+  const dbConnected = await testDatabaseConnection()\n+  \n+  if (!dbConnected) {\n+    Logger.error('Server Startup Failed', { \n+      message: 'Cannot start server without database connection' \n+    })\n+    process.exit(1)\n+  }\n+\n+  httpServer.listen({ port: config.get('port') }, () => {\n+    Logger.info('Server Started Successfully', { \n+      message: `HTTP Server listening on port ${config.get('port')}`,\n+      environment: config.get('env'),\n+      timestamp: new Date().toISOString()\n+    })\n+  })\n+}\n+\n+startServer()\n+\n process.on('SIGTERM', gracefulShutDown)\n process.on('SIGINT', gracefulShutDown)\n process.on('SIGUSR2', gracefulShutDown)\n"
+                },
+                {
+                    "date": 1753935553377,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -70,19 +70,12 @@\n // Test database connection before starting server\n const testDatabaseConnection = async () => {\n   try {\n     await db.sequelize.authenticate()\n-    Logger.info('Database Connected', { \n-      message: `Successfully connected to database: ${db.sequelize.config.database}`,\n-      host: db.sequelize.config.host,\n-      port: db.sequelize.config.port\n-    })\n+    Logger.info('Database Connected')\n     return true\n   } catch (error) {\n-    Logger.error('Database Connection Failed', { \n-      message: 'Unable to connect to the database',\n-      error: error.message \n-    })\n+    Logger.error('Database Connection Failed', { error: error.message })\n     return false\n   }\n }\n \n@@ -90,20 +83,13 @@\n const startServer = async () => {\n   const dbConnected = await testDatabaseConnection()\n   \n   if (!dbConnected) {\n-    Logger.error('Server Startup Failed', { \n-      message: 'Cannot start server without database connection' \n-    })\n     process.exit(1)\n   }\n \n   httpServer.listen({ port: config.get('port') }, () => {\n-    Logger.info('Server Started Successfully', { \n-      message: `HTTP Server listening on port ${config.get('port')}`,\n-      environment: config.get('env'),\n-      timestamp: new Date().toISOString()\n-    })\n+    Logger.info('Server Connected')\n   })\n }\n \n startServer()\n"
                 }
             ],
             "date": 1753423521790,

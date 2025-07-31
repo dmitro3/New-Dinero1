@@ -25,6 +25,8 @@ const Modal = ({
     };
 
     useEffect(() => {
+        if (typeof window === 'undefined') return;
+        
         if (isOpen) {
             document.body.style.overflow = 'hidden';
             document.body.style.height = '100vh';

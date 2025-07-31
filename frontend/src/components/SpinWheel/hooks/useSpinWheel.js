@@ -1,8 +1,4 @@
 import { getAllGCValues, getAllSCValues } from '@/lib/spinWheel.utils';
-import {
-  enableAssetsPixi,
-  pixiApplicationDestroy,
-} from '@/pixi-js-scripts/bridge';
 import { getSpinWheelData } from '@/services/getRequests';
 import { getAccessToken } from '@/services/storageUtils';
 import { useStateContext } from '@/store';
@@ -42,11 +38,19 @@ function useSpinWheel({ isOpen }) {
   }, [token]);
   // Initialize Pixi when wheelConfig is available
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     if (wheelConfig?.gc?.length && isOpen) {
-      enableAssetsPixi();
+      // Dynamically import pixi functions only on client side
+      import('@/pixi-js-scripts/bridge').then(({ enableAssetsPixi }) => {
+        enableAssetsPixi();
+      });
     }
     return () => {
-      pixiApplicationDestroy(); // Cleanup Pixi when the dialog is closed
+      // Dynamically import pixi functions only on client side
+      import('@/pixi-js-scripts/bridge').then(({ pixiApplicationDestroy }) => {
+        pixiApplicationDestroy(); // Cleanup Pixi when the dialog is closed
+      });
       dispatch({
         type: 'SET_SPIN_WHEEL_RESULT',
         payload: {

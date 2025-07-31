@@ -13,7 +13,10 @@ const createPixiApp = () => {
   });
   globalThis.__PIXI_APP__ = app;
 
-  settings.div() && settings.div().appendChild(app.view);
+  const div = settings.div();
+  if (div) {
+    div.appendChild(app.view);
+  }
 
   const destroyPixiApp = () => app.destroy(true);
 

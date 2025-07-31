@@ -1,5 +1,5 @@
-// const { Logger } = require('@src/libs/logger')
-const config = require('./app.config')
+// import { Logger } from '@src/libs/logger'
+import config from './app.config'
 
 const dbSettings = {
   database: config.get('sequelize.name'),
@@ -17,7 +17,6 @@ const dbSettings = {
       port: config.get('sequelize.port')
     }
   },
-  // logging: (logs) => Logger.info(`database query :: ${logs}`),
   pool: {
     max: 30,
     min: 0,
@@ -53,4 +52,4 @@ const databaseOptions = {
   }
 }[config.get('env')]
 
-module.exports = databaseOptions
+export default databaseOptions

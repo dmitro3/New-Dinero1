@@ -1,0 +1,26 @@
+{
+    "sourceFile": "frontend/src/components/SidebarSection/common/dialog-components/index.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 2,
+            "patches": [
+                {
+                    "date": 1753937062655,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1753937075877,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -22,13 +22,30 @@\n   faucet: Faucet,\n   livesupport: LiveSupport,\n   buy: BuyReedem,\n   redeem: BuyReedem,\n-  spinWheel: SpinWheel,\n+  // spinWheel: SpinWheel, // Dynamic import handled below\n };\n+\n const DialogComponentsMapping = ({ isOpen, handleClick, activeUrl }) => {\n-  const COMPONENT = COMPONENT_MAPPING?.[activeUrl];\n+  const [SpinWheelComponent, setSpinWheelComponent] = useState(null);\n \n+  // Dynamically import SpinWheel component only when needed\n+  useEffect(() => {\n+    if (activeUrl === 'spinWheel' && !SpinWheelComponent) {\n+      import('@/components/SpinWheel/components').then((module) => {\n+        setSpinWheelComponent(() => module.default);\n+      });\n+    }\n+  }, [activeUrl, SpinWheelComponent]);\n+\n+  let COMPONENT = COMPONENT_MAPPING?.[activeUrl];\n+  \n+  // Handle dynamic SpinWheel component\n+  if (activeUrl === 'spinWheel') {\n+    COMPONENT = SpinWheelComponent;\n+  }\n+\n   return COMPONENT ? (\n     <COMPONENT\n       isOpen={isOpen}\n       handleClick={handleClick}\n"
+                },
+                {
+                    "date": 1753937082038,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -8,8 +8,9 @@\n import Vip from '@/components/vip/components';\n import Faucet from '@/components/faucet/components';\n import LiveSupport from '@/components/live-support/component';\n import BuyReedem from '@/components/Buy-Reedem/components';\n+import { useState, useEffect } from 'react';\n // import SpinWheel from '@/components/SpinWheel/components'; // Dynamic import to avoid SSR issues\n const COMPONENT_MAPPING = {\n   tasklist: TaskList,\n   notice: Notice,\n"
+                }
+            ],
+            "date": 1753937062655,
+            "name": "Commit-0",
+            "content": "import Notice from '@/components/notice/components';\nimport UserInfo from '@/components/UserInfo/components';\nimport Logout from '@/components/logout/components';\nimport Transactions from '@/components/transaction/components';\nimport Share from '@/components/share/components';\nimport Seed from '@/components/Seed/components';\nimport TaskList from '@/components/TaskList/components';\nimport Vip from '@/components/vip/components';\nimport Faucet from '@/components/faucet/components';\nimport LiveSupport from '@/components/live-support/component';\nimport BuyReedem from '@/components/Buy-Reedem/components';\n// import SpinWheel from '@/components/SpinWheel/components'; // Dynamic import to avoid SSR issues\nconst COMPONENT_MAPPING = {\n  tasklist: TaskList,\n  notice: Notice,\n  myAccount: UserInfo,\n  logout: Logout,\n  transactions: Transactions,\n  share: Share,\n  seed: Seed,\n  vip: Vip,\n  faucet: Faucet,\n  livesupport: LiveSupport,\n  buy: BuyReedem,\n  redeem: BuyReedem,\n  spinWheel: SpinWheel,\n};\nconst DialogComponentsMapping = ({ isOpen, handleClick, activeUrl }) => {\n  const COMPONENT = COMPONENT_MAPPING?.[activeUrl];\n\n  return COMPONENT ? (\n    <COMPONENT\n      isOpen={isOpen}\n      handleClick={handleClick}\n      buttonType={activeUrl}\n    />\n  ) : null;\n};\n\nexport default DialogComponentsMapping;\n"
+        }
+    ]
+}

@@ -49,6 +49,8 @@ export function useBankTransfer() {
 
   // Load Plaid script
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     if (window.Plaid) {
       setPlaidLoaded(true);
       return;
@@ -68,7 +70,9 @@ export function useBankTransfer() {
     document.body.appendChild(script);
 
     return () => {
-      document.body.removeChild(script);
+      if (document.body.contains(script)) {
+        document.body.removeChild(script);
+      }
     };
   }, []);
 

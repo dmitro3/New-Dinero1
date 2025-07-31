@@ -13,7 +13,7 @@ export const settings = {
   originalHeight: 1000,
   backgroundColor: 0x00000,
   backgroundAlpha: 0,
-  div: () => document.getElementById('pixi-spin-wheel')
+  div: () => typeof document !== 'undefined' ? document.getElementById('pixi-spin-wheel') : null
 };
 
 export const spinWheelGCSettings = {

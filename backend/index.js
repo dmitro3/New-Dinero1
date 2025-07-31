@@ -4,11 +4,11 @@ import app from '@src/rest-resources'
 import socketServer from '@src/socket-resources'
 import gracefulShutDown from '@src/libs/gracefulShutDown'
 import { Logger } from '@src/libs/logger'
-const passport = require('passport');
-const GoogleStrategy = require('passport-google-oauth20').Strategy;
-const FacebookStrategy = require('passport-facebook').Strategy;
-const db = require('./src/db/models');
-const jwt = require('jsonwebtoken');
+import passport from 'passport'
+import GoogleStrategy from 'passport-google-oauth20'
+import FacebookStrategy from 'passport-facebook'
+import db from '@src/db/models'
+import jwt from 'jsonwebtoken'
 
 passport.use(new GoogleStrategy({
   clientID: process.env.GOOGLE_CLIENT_ID,
@@ -67,9 +67,32 @@ const httpServer = createServer(app)
 
 socketServer.attach(httpServer)
 
-httpServer.listen({ port: config.get('port') }, () => {
-  Logger.info('Server Started', { message: `Listening On ${config.get('port')}` })
-})
+// Test database connection before starting server
+const testDatabaseConnection = async () => {
+  try {
+    await db.sequelize.authenticate()
+    Logger.info('Database Connected')
+    return true
+  } catch (error) {
+    Logger.error('Database Connection Failed', { error: error.message })
+    return false
+  }
+}
+
+// Start server only after database connection is established
+const startServer = async () => {
+  const dbConnected = await testDatabaseConnection()
+  
+  if (!dbConnected) {
+    process.exit(1)
+  }
+
+  httpServer.listen({ port: config.get('port') }, () => {
+    Logger.info('Server Connected')
+  })
+}
+
+startServer()
 
 process.on('SIGTERM', gracefulShutDown)
 process.on('SIGINT', gracefulShutDown)

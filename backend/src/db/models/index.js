@@ -14,7 +14,8 @@ const db = {}
 let sequelize
 if (databaseOptions) {
   sequelize = new Sequelize({
-    ...databaseOptions, logging: (sql) => Logger.info(`Database Query Executed - ${sql}`)
+    ...databaseOptions, 
+    logging: false
   })
 } else {
   sequelize = new Sequelize(
@@ -25,14 +26,16 @@ if (databaseOptions) {
   )
 }
 
-readdirSync(__dirname)
+const modelFiles = readdirSync(__dirname)
   .filter((file) => (
     file.indexOf('.') !== 0 && file !== basename && file.slice(-3) === '.js'
   ))
-  .forEach((file) => {
-    const model = require(path.join(__dirname, file))(sequelize, Sequelize.DataTypes)
-    db[model.name] = model
-  })
+
+modelFiles.forEach((file) => {
+  const model = require(path.join(__dirname, file))(sequelize, Sequelize.DataTypes)
+  db[model.name] = model
+})
+
 Object.keys(db).forEach((modelName) => {
   if (db[modelName].associate) {
     db[modelName].associate(db)
@@ -41,4 +44,5 @@ Object.keys(db).forEach((modelName) => {
 
 db.sequelize = sequelize
 db.Sequelize = Sequelize
+
 export default db

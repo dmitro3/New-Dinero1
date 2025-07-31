@@ -1,0 +1,18 @@
+{
+    "sourceFile": "frontend/src/pixi-js-scripts/settings.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1753936850110,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1753936850110,
+            "name": "Commit-0",
+            "content": "\n/* eslint-disable no-undef */\nconst basePath = '/assets/pixi-assets/';\n\n\nexport const path = {\n  imagePath: basePath + 'images/',\n  spriteSheetsPath: basePath + 'spriteSheets/'\n};\n\nexport const settings = {\n  originalWidth: 1000,\n  originalHeight: 1000,\n  backgroundColor: 0x00000,\n  backgroundAlpha: 0,\n  div: () => typeof document !== 'undefined' ? document.getElementById('pixi-spin-wheel') : null\n};\n\nexport const spinWheelGCSettings = {\n  fontFamily: 'Arial',\n  fontSize: 48,\n  fill: 0x201010,\n  align: 'center',\n  fontWeight: 'bolder'\n};\n\nexport const spinWheelSCSettings = {\n  fontFamily: 'Arial',\n  fontSize: 36,\n  fill: 0x201010,\n  align: 'center',\n  fontWeight: 'bolder'\n};\n\nexport const aspectRatio = settings.originalWidth / 1550;\n"
+        }
+    ]
+}

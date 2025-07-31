@@ -20,6 +20,7 @@ const useBottom = (gamePlayRef, isFavourite) => {
     state: { user },
   } = useStateContext();
   const toggleFullscreen = () => {
+    if (typeof window === 'undefined') return;
     if (!gamePlayRef.current) return;
     const element = gamePlayRef.current;
 
@@ -40,27 +41,31 @@ const useBottom = (gamePlayRef, isFavourite) => {
         element.style.left = '0';
         element.style.zIndex = '9999';
         element.style.backgroundColor = '#000';
-        document.body.style.overflow = 'hidden';
+        if (typeof document !== 'undefined') {
+          document.body.style.overflow = 'hidden';
+        }
       }
       setIsFullscreen(true);
     };
 
     const exitFullscreen = () => {
-      if (document.exitFullscreen) {
-        document.exitFullscreen();
-      } else if (document.webkitExitFullscreen) {
-        document.webkitExitFullscreen();
-      } else {
-        // Remove fallback fullscreen styles
-        element.style.transform = '';
-        element.style.width = '';
-        element.style.height = '';
-        element.style.position = '';
-        element.style.top = '';
-        element.style.left = '';
-        element.style.zIndex = '';
-        element.style.backgroundColor = '';
-        document.body.style.overflow = '';
+      if (typeof document !== 'undefined') {
+        if (document.exitFullscreen) {
+          document.exitFullscreen();
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen();
+        } else {
+          // Remove fallback fullscreen styles
+          element.style.transform = '';
+          element.style.width = '';
+          element.style.height = '';
+          element.style.position = '';
+          element.style.top = '';
+          element.style.left = '';
+          element.style.zIndex = '';
+          element.style.backgroundColor = '';
+          document.body.style.overflow = '';
+        }
       }
       setIsFullscreen(false);
     };
@@ -71,6 +76,8 @@ const useBottom = (gamePlayRef, isFavourite) => {
     }
   };
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const handleFullscreenChange = () => {
       setIsFullscreen(
         !!(

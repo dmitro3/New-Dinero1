@@ -1,0 +1,22 @@
+{
+    "sourceFile": "frontend/src/components/affiliate/hook/useStart.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 1,
+            "patches": [
+                {
+                    "date": 1753936940989,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1753936950328,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -38,8 +38,10 @@\n     }\n   };\n \n   const handleCopy = async () => {\n+    if (typeof window === 'undefined') return;\n+    \n     /* eslint-disable */\n     if (window && window.isSecureContext && navigator.clipboard) {\n       try {\n         await navigator.clipboard.writeText(refLink);\n"
+                }
+            ],
+            "date": 1753936940989,
+            "name": "Commit-0",
+            "content": "import { getBannerDownload } from '@/services/getRequests';\nimport { useStateContext } from '@/store';\nimport { useState } from 'react';\nimport { REF_LINK } from '../constant';\n\nconst useStart = () => {\n  const {\n    state: { user },\n  } = useStateContext();\n\n  const [toastState, setToastState] = useState({\n    showToast: false,\n    message: '',\n    status: '', // success or error\n  });\n\n  const { showToast, message, status } = toastState;\n\n  const refLink = user ? REF_LINK + user.username : 'Getting your link...';\n  const handleClick = async () => {\n    if (typeof window === 'undefined') return;\n    \n    try {\n      const response = await getBannerDownload(); \n      const s3_url = response?.data?.bannerLinks;\n      const res = await fetch(s3_url);\n      const blob = await res.blob();\n      const link = document.createElement('a');\n      const url = window.URL.createObjectURL(blob);\n      link.href = url;\n      link.download = 'banners.zip';\n      document.body.appendChild(link);\n      link.click();\n      document.body.removeChild(link);\n      window.URL.revokeObjectURL(url);\n    } catch (error) {\n      console.error('Error downloading the file:', error);\n    }\n  };\n\n  const handleCopy = async () => {\n    /* eslint-disable */\n    if (window && window.isSecureContext && navigator.clipboard) {\n      try {\n        await navigator.clipboard.writeText(refLink);\n        setToastState({\n          showToast: true,\n          message: 'Referral link copied successfully!',\n          status: 'success',\n        });\n      } catch (err) {\n        setToastState({\n          showToast: true,\n          message: err.message,\n          status: 'error',\n        });\n      }\n    } else {\n      // Fallback for non-secure contexts or unsupported Clipboard API\n      const textarea = document.createElement('textarea');\n      textarea.value = refLink;\n      document.body.appendChild(textarea);\n      textarea.select();\n      document.execCommand('copy');\n      document.body.removeChild(textarea);\n      setToastState({\n        showToast: true,\n        message: 'Referral link copied successfully!',\n        status: 'success',\n      });\n    }\n    /* eslint-enable */\n  };\n  return {\n    handleClick,\n    handleCopy,\n    showToast,\n    message,\n    status,\n    refLink,\n    setToastState,\n  };\n};\n\nexport default useStart;\n"
+        }
+    ]
+}

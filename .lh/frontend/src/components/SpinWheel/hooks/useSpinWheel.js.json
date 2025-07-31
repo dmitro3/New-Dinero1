@@ -1,0 +1,22 @@
+{
+    "sourceFile": "frontend/src/components/SpinWheel/hooks/useSpinWheel.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 1,
+            "patches": [
+                {
+                    "date": 1753937042212,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1753937051042,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -37,13 +37,21 @@\n     }\n   }, [token]);\n   // Initialize Pixi when wheelConfig is available\n   useEffect(() => {\n+    if (typeof window === 'undefined') return;\n+    \n     if (wheelConfig?.gc?.length && isOpen) {\n-      enableAssetsPixi();\n+      // Dynamically import pixi functions only on client side\n+      import('@/pixi-js-scripts/bridge').then(({ enableAssetsPixi }) => {\n+        enableAssetsPixi();\n+      });\n     }\n     return () => {\n-      pixiApplicationDestroy(); // Cleanup Pixi when the dialog is closed\n+      // Dynamically import pixi functions only on client side\n+      import('@/pixi-js-scripts/bridge').then(({ pixiApplicationDestroy }) => {\n+        pixiApplicationDestroy(); // Cleanup Pixi when the dialog is closed\n+      });\n       dispatch({\n         type: 'SET_SPIN_WHEEL_RESULT',\n         payload: {\n           showResult: false,\n"
+                }
+            ],
+            "date": 1753937042212,
+            "name": "Commit-0",
+            "content": "import { getAllGCValues, getAllSCValues } from '@/lib/spinWheel.utils';\nimport { getSpinWheelData } from '@/services/getRequests';\nimport { getAccessToken } from '@/services/storageUtils';\nimport { useStateContext } from '@/store';\nimport { useEffect, useRef, useState } from 'react';\n\nfunction useSpinWheel({ isOpen }) {\n  const {\n    dispatch,\n    state: { wheelConfig, spinWheelResult, user },\n  } = useStateContext();\n\n  const [spinWheelData, setSpinWheelData] = useState(null);\n  const pixiContainerRef = useRef(null);\n  const token = getAccessToken();\n\n  const getSpinWheel = async () => {\n    try {\n      let res = await getSpinWheelData();\n      setSpinWheelData(res.data);\n      dispatch({ type: 'SET_SPIN_LIST', payload: res.data });\n      res = res?.data?.wheelConfiguration;\n      const convertedData = {\n        sc: getAllSCValues(res),\n        gc: getAllGCValues(res),\n      };\n      dispatch({ type: 'SET_SPIN_WHEEL_DATA', payload: convertedData });\n    } catch (error) {\n      console.error('Error fetching spin wheel data:', error);\n    }\n  };\n\n  useEffect(() => {\n    if (token) {\n      // Fetch data when component mounts\n      getSpinWheel();\n    }\n  }, [token]);\n  // Initialize Pixi when wheelConfig is available\n  useEffect(() => {\n    if (wheelConfig?.gc?.length && isOpen) {\n      enableAssetsPixi();\n    }\n    return () => {\n      pixiApplicationDestroy(); // Cleanup Pixi when the dialog is closed\n      dispatch({\n        type: 'SET_SPIN_WHEEL_RESULT',\n        payload: {\n          showResult: false,\n          gc: '',\n          sc: '',\n          index: '',\n          bonusActivated: false,\n        },\n      });\n    };\n  }, [wheelConfig]);\n\n  return {\n    pixiContainerRef,\n    spinWheelResult,\n    spinWheelData,\n    user,\n  };\n}\n\nexport default useSpinWheel;\n"
+        }
+    ]
+}
