@@ -9,7 +9,7 @@ import useForgotPassword from '../hooks/useForgotPassword';
 import CustomDialog from '../TermsPrivacy';
 import useTermsPrivacy from '../TermsPrivacy/hooks/useTermsPrivacy';
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+// import { useRouter } from 'next/navigation'; // Removed unused import
 // import { googlei } from '@/assets/png';
 // import googleIcon from '@/assets/svg/google.svg'; // Adjust path to your Google icon
 
@@ -47,7 +47,7 @@ const UserForm = ({
     isOpen: false,
     type: null,
   });
-  const router = useRouter();
+  // const router = useRouter(); // Removed unused variable
 
   return (
     <form

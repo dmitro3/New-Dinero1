@@ -72,7 +72,7 @@ const useWebSocket = (url, eventArray, token, payload) => {
 
       // eslint-disable-next-line no-undef
       window.privateSocket = newSocket; // If need to use at other places of project
-    } catch (er) {
+    } catch {
       // openErrorToaster({
       // message: `Unable to connect ${url}, ${er?.message}`,
       // });

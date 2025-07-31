@@ -3,11 +3,19 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 0,
+            "activePatchIndex": 2,
             "patches": [
                 {
                     "date": 1753423552066,
                     "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1753953989704,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -46,9 +46,9 @@\n   const [dialogConfig, setDialogConfig] = useState({\n     isOpen: false,\n     type: null,\n   });\n-  const router = useRouter();\n+  // const router = useRouter(); // Removed unused variable\n \n   return (\n     <form\n       onSubmit={handleSubmit(onSubmit)}\n"
+                },
+                {
+                    "date": 1753954055169,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -8,9 +8,9 @@\n import useForgotPassword from '../hooks/useForgotPassword';\n import CustomDialog from '../TermsPrivacy';\n import useTermsPrivacy from '../TermsPrivacy/hooks/useTermsPrivacy';\n import { useState } from 'react';\n-import { useRouter } from 'next/navigation';\n+// import { useRouter } from 'next/navigation'; // Removed unused import\n // import { googlei } from '@/assets/png';\n // import googleIcon from '@/assets/svg/google.svg'; // Adjust path to your Google icon\n \n const UserForm = ({\n"
                 }
             ],
             "date": 1753423552066,
