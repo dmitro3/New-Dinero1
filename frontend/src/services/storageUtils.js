@@ -19,7 +19,7 @@ export const decryptCredentials = (data) => {
     if (!decryptedData) throw new Error('Decryption failed');
     return decryptedData;
   } catch (error) {
-    console.log('Error decrypting credentials:', error);
+    // Remove console.log to fix ESLint warning
     return '';
   }
 };

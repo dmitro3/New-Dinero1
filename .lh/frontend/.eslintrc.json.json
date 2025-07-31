@@ -1,0 +1,18 @@
+{
+    "sourceFile": "frontend/.eslintrc.json",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1753951852600,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1753951852600,
+            "name": "Commit-0",
+            "content": "{\n  \"env\": {\n    \"node\": true,\n    \"es2020\": true,\n    \"browser\": true\n  },\n  \"extends\": [\"eslint:recommended\", \"plugin:@typescript-eslint/recommended\"],\n  \"parser\": \"@typescript-eslint/parser\",\n  \"plugins\": [\"@typescript-eslint\"],\n  \"parserOptions\": {\n    \"ecmaVersion\": 12,\n    \"sourceType\": \"module\"\n  },\n  \"rules\": {\n    // Custom ESLint rules go here\n    \"react/react-in-jsx-scope\": \"off\", // Next.js doesn\"t require React to be imported in each file\n    \"no-console\": \"off\", // Allow console statements for debugging\n    \"semi\": [\"error\", \"always\"], // Enforce semicolons\n    \"quotes\": [\"error\", \"single\"], // Enforce single quotes\n    \"jsx-quotes\": [\"error\", \"prefer-double\"], // Enforce double quotes in JSX\n    \"eqeqeq\": \"error\", // Require strict equality operators\n    \"react/jsx-props-no-spreading\": \"off\", // Allow props spreading\n    \"react/prop-types\": \"off\",\n    \"no-undef\": \"error\",\n    \"@typescript-eslint/explicit-module-boundary-types\": \"off\",\n    \"no-unused-vars\": \"error\",\n    \"@typescript-eslint/no-require-imports\": \"off\"\n  }\n}\n"
+        }
+    ]
+}

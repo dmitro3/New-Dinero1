@@ -27,7 +27,7 @@ const useWebSocket = (url, eventArray, token, payload) => {
   const disconnectSocket = () => {
     if (socket.current) {
       socket.current.close();
-      console.log('Socket  disconnected', socket);
+      // Remove console.log to fix ESLint warning
     }
   };
 
@@ -40,7 +40,7 @@ const useWebSocket = (url, eventArray, token, payload) => {
 
   // Event handler for socket closure
   const handleDisconnect = (reason) => {
-    console.log('socket disconnected');
+    // Remove console.log to fix ESLint warning
     setIsConnected(false);
     if (reason === 'io server disconnect') {
       // the disconnection was initiated by the server, you need to reconnect manually
@@ -76,7 +76,7 @@ const useWebSocket = (url, eventArray, token, payload) => {
       // openErrorToaster({
       // message: `Unable to connect ${url}, ${er?.message}`,
       // });
-      console.log('Error socket connection: ', er);
+      // Remove console.log to fix ESLint warning
     }
   };
 
@@ -95,9 +95,9 @@ const useWebSocket = (url, eventArray, token, payload) => {
     if (isConnected) {
       socket.current.emit(eventType, payload, (response) => {
         if (response.status === 'success') {
-          console.log('Message delivered successfully:', response.message);
+          // Remove console.log to fix ESLint warning
         } else {
-          console.error('Error delivering message:', response.message);
+          // Remove console.error to fix ESLint warning
         }
 
         if (callback) {

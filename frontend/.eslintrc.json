@@ -14,7 +14,7 @@
   "rules": {
     // Custom ESLint rules go here
     "react/react-in-jsx-scope": "off", // Next.js doesn"t require React to be imported in each file
-    "no-console": "warn", // Warn on console.log statements
+    "no-console": "off", // Allow console statements for debugging
     "semi": ["error", "always"], // Enforce semicolons
     "quotes": ["error", "single"], // Enforce single quotes
     "jsx-quotes": ["error", "prefer-double"], // Enforce double quotes in JSX

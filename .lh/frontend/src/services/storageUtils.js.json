@@ -1,0 +1,18 @@
+{
+    "sourceFile": "frontend/src/services/storageUtils.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1753951852599,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1753951852599,
+            "name": "Commit-0",
+            "content": "/* eslint-disable no-undef */\n// /* eslint-disable no-undef */\nimport CryptoJS from 'crypto-js';\n\nconst FE_ENCRYPTION_KEY =\n  process.env.NEXT_PUBLIC_APP_FE_ENCRYPTION_KEY || 'rb27cry2xn2ysh7823bqxry233x9rn3682323888888q8z66';\n\nexport const encryptCredentials = (data) =>\n  CryptoJS.AES.encrypt(data, FE_ENCRYPTION_KEY).toString();\n\n// export const decryptCredentials = (data) =>\n//   CryptoJS.AES.decrypt(data, FE_ENCRYPTION_KEY).toString(CryptoJS.enc.Utf8)\n\nexport const decryptCredentials = (data) => {\n  try {\n    const decryptedBytes = CryptoJS.AES.decrypt(data, FE_ENCRYPTION_KEY);\n    const decryptedData = decryptedBytes.toString(CryptoJS.enc.Utf8);\n\n    if (!decryptedData) throw new Error('Decryption failed');\n    return decryptedData;\n  } catch (error) {\n    // Remove console.log to fix ESLint warning\n    return '';\n  }\n};\n\nexport const getAccessToken = () => {\n  if (typeof window !== 'undefined' && localStorage.getItem('access-token')) { return decryptCredentials(localStorage.getItem('access-token')); }\n  // if (localStorage.getItem('access-token')) { return (localStorage.getItem('access-token')); }\n  return '';\n};\n\nexport const removeLoginToken = () => {\n  localStorage.removeItem('access-token');\n  window.location.reload();\n  window.location.replace('/');\n};\n\nexport const addLoginToken = (value) => {\n  if (typeof window !== 'undefined') {\n    window.localStorage.setItem('access-token', encryptCredentials(value));\n  }\n};\n"
+        }
+    ]
+}
