@@ -21,7 +21,8 @@
           ],
           "alias": {
             "@src": "./src"
-          }
+          },
+          "transformFunctions": ["require", "import"]
         }
       ]
     ],
