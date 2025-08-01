@@ -6,6 +6,7 @@ import axios from 'axios'
 import validator from 'validator'
 
 const restrictedStates = ['US-MI', 'US-ID', 'US-WA', 'US-LA', 'US-NV', 'US-MT', 'US-CT', 'US-HI', 'US-DE']
+const restrictedCountries = ['MX'] // Mexico
 
 
 export const getClientIp = (req) => {
@@ -79,7 +80,15 @@ export function geoBlock () {
       const geoApiUrl = `${geoApiBaseUrl}?apiKey=${geoApiKey}&ip=${ip}`
       const response = await axios.get(geoApiUrl)
       const state = response.data.state_code
+      const country = response.data.country_code2
+      
+      // Check if state is restricted
       if (restrictedStates.includes(state)) {
+        return next(new AppError(Errors.GEO_BLOCKED_LOCATION))
+      }
+      
+      // Check if country is restricted (Mexico)
+      if (restrictedCountries.includes(country)) {
         return next(new AppError(Errors.GEO_BLOCKED_LOCATION))
       }
 

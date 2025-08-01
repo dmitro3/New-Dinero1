@@ -116,7 +116,16 @@ const testDatabaseConnection = async () => {
 
 // Start server only after database connection is established
 const startServer = async () => {
-  Logger.info('Starting server initialization...')
+  const port = config.get('port') || process.env.PORT || 5000
+  const env = config.get('env') || process.env.NODE_ENV || 'development'
+  const dbName = config.get('sequelize.name') || process.env.DB_NAME || 'unknown'
+  
+  Logger.info('🚀 Starting server initialization...')
+  Logger.info('⚙️  Server Configuration:')
+  Logger.info('   - Port:', port)
+  Logger.info('   - Environment:', env)
+  Logger.info('   - Database:', dbName)
+  
   const dbConnected = await testDatabaseConnection()
   
   if (!dbConnected) {
@@ -124,8 +133,10 @@ const startServer = async () => {
     process.exit(1)
   }
 
-  httpServer.listen({ port: config.get('port') }, () => {
-    Logger.info('Server Connected on port:', config.get('port'))
+  httpServer.listen({ port: port }, () => {
+    Logger.info('🚀 Backend Server is running on port:', port)
+    Logger.info('📡 API Base URL: http://localhost:' + port)
+    Logger.info('🌐 Environment:', env)
   })
 }
 

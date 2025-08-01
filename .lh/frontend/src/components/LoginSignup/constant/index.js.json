@@ -1,0 +1,18 @@
+{
+    "sourceFile": "frontend/src/components/LoginSignup/constant/index.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1754048566348,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1754048566348,
+            "name": "Commit-0",
+            "content": "export const SIGNUP = [\r\n  {\r\n    name: 'username',\r\n    label: 'Username',\r\n    type: 'input',\r\n    placeholder: 'Username',\r\n    required: 'Username is required!',\r\n    pattern: {\r\n      value: /^[A-Za-z0-9]{3,}$/,\r\n      message:\r\n        'Username must be at least 3 characters long and contain only letters and numbers without spaces.',\r\n    },\r\n  },\r\n  {\r\n    name: 'password',\r\n    label: 'Password',\r\n    type: 'input',\r\n    placeholder: 'Password',\r\n    required: 'Password is required!',\r\n    pattern: {\r\n      value:\r\n        /^(?!.*\\s)(?=.*[A-Z])(?=.*[a-z])(?=.*\\d)(?=.*[!@#$%^&*])[A-Za-z\\d!@#$%^&*]{6,}$/,\r\n      message:\r\n        'Password must be at least 6 characters with one uppercase, one lowercase, one number, and one special character. Spaces are not allowed.',\r\n    },\r\n  },\r\n  {\r\n    name: 'isAge',\r\n    label:\r\n      'I am at least 18 years old and not a resident of the restricted states.',\r\n    type: 'checkbox',\r\n    required: 'Age must be 18+ required!',\r\n  },\r\n  {\r\n    name: 'terms',\r\n    label: 'I accept the Orion stars Terms of Use and Privacy Policy',\r\n    type: 'checkbox',\r\n    required: 'Terms and Condition is required!',\r\n    isLink : true,\r\n  },\r\n];\r\n\r\nexport const SIGNIN = [\r\n  {\r\n    name: 'username',\r\n    label: 'Username',\r\n    type: 'input',\r\n    placeholder: 'Username',\r\n  },\r\n  {\r\n    name: 'password',\r\n    label: 'Password',\r\n    type: 'input',\r\n    placeholder: 'Password',\r\n  },\r\n];\r\n\r\nexport const FORGOT_PASSWORD = [\r\n  {\r\n    name: 'email',\r\n    label: 'Email',\r\n    type: 'input',\r\n    placeholder: 'Enter your email address',\r\n    required: 'Email is required!',\r\n    pattern: {\r\n      value: /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/,\r\n      message: 'Please enter a valid email address',\r\n    },\r\n  },\r\n];\r\n"
+        }
+    ]
+}

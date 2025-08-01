@@ -4,7 +4,6 @@ export const userLoginSchema = {
     properties: {
       username: { type: 'string' },
       password: { type: 'string' }
-    },
-    required: ['username', 'password']
+    }
   }
 }

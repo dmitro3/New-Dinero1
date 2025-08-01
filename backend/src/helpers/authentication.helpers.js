@@ -10,8 +10,8 @@ export const createAccessToken = async (user) => {
         type: JWT_TOKEN_TYPES.LOGIN
     },
         config.get('jwt.tokenSecret'), {
-        expiresIn: +config.get('jwt.tokenExpiry') * 100
+        expiresIn: config.get('jwt.tokenExpiry')
     })
-    await setCache(`${user.userId}:ACCESS_TOKEN`, accessToken, +config.get('jwt.tokenExpiry') * 100)
+    await setCache(`${user.userId}:ACCESS_TOKEN`, accessToken, config.get('jwt.tokenExpiry'))
     return accessToken
 }

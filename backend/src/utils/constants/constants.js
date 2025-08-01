@@ -1784,7 +1784,7 @@ export const HACKSAW_CONST = {
 }
 
 export const VIP_TIER = {
-  DEFAULT_TIER: 0
+  DEFAULT_TIER: 1
 }
 
 export const TRANSACTION_PROVIDER = {

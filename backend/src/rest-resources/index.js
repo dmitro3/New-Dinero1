@@ -28,11 +28,19 @@ app.use(morgan('tiny'))
 
 app.use(i18n.init)
 
-// CORS Configuration
+// CORS Configuration - Allow all origins for development
 const corsOptions = {
   credentials: true,
-  origin: config.get('app.origin').split(','),
-  methods: ['GET, POST, PUT, PATCH, DELETE']
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    // Allow all origins for development
+    return callback(null, true);
+  },
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'ngrok-skip-browser-warning'],
+  optionsSuccessStatus: 200
 }
 
 app.use(cors(corsOptions))

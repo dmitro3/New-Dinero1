@@ -1,0 +1,22 @@
+{
+    "sourceFile": "backend/src/rest-resources/index.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 1,
+            "patches": [
+                {
+                    "date": 1754043121502,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1754043454010,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -30,9 +30,15 @@\n \r\n // CORS Configuration - Allow all origins for development\r\n const corsOptions = {\r\n   credentials: true,\r\n-  origin: '*', // Allow all origins\r\n+  origin: function (origin, callback) {\r\n+    // Allow requests with no origin (like mobile apps or curl requests)\r\n+    if (!origin) return callback(null, true);\r\n+    \r\n+    // Allow all origins for development\r\n+    return callback(null, true);\r\n+  },\r\n   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],\r\n   allowedHeaders: ['Content-Type', 'Authorization', 'ngrok-skip-browser-warning'],\r\n   optionsSuccessStatus: 200\r\n }\r\n"
+                }
+            ],
+            "date": 1754043121502,
+            "name": "Commit-0",
+            "content": "import bodyParser from 'body-parser'\r\nimport cors from 'cors'\r\nimport express from 'express'\r\nimport helmet from 'helmet'\r\nimport morgan from 'morgan'\r\n\r\nimport config from '@src/configs/app.config'\r\nimport i18n from '@src/libs/i18n'\r\nimport routes from '@src/rest-resources/routes'\r\nimport { errorHandlerMiddleware } from './middlewares/errorHandler.middleware'\r\n\r\nconst app = express()\r\n\r\napp.use(helmet())\r\n\r\n// app.use(bodyParser.json())\r\napp.use(\r\n  bodyParser.json({\r\n    verify: (req, res, buf) => {\r\n      req.rawBody = buf.toString(); // Save raw body as string\r\n    },\r\n  })\r\n)\r\n\r\napp.use(bodyParser.json())\r\n\r\napp.use(morgan('tiny'))\r\n\r\napp.use(i18n.init)\r\n\r\n// CORS Configuration - Allow all origins for development\r\nconst corsOptions = {\r\n  credentials: true,\r\n  origin: '*', // Allow all origins\r\n  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],\r\n  allowedHeaders: ['Content-Type', 'Authorization', 'ngrok-skip-browser-warning'],\r\n  optionsSuccessStatus: 200\r\n}\r\n\r\napp.use(cors(corsOptions))\r\n\r\n\r\napp.use(routes)\r\n\r\napp.use(async (req, res) => {\r\n  res.status(404).json({ message: 'Welcome to player backend' })\r\n})\r\n\r\napp.use(errorHandlerMiddleware)\r\n\r\nexport default app\r\n"
+        }
+    ]
+}

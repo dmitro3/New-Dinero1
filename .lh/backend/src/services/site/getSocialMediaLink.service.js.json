@@ -1,0 +1,18 @@
+{
+    "sourceFile": "backend/src/services/site/getSocialMediaLink.service.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1754043679815,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1754043679815,
+            "name": "Commit-0",
+            "content": "import db from \"@src/db/models\";\r\nimport { AppError } from \"@src/errors/app.error\";\r\nimport { Errors } from \"@src/errors/errorCodes\";\r\nimport { BaseHandler } from \"@src/libs/logicBase\";\r\nimport { GLOBAL_SETTING } from \"@src/utils/constant\";\r\n\r\nexport class GetSocialMediaLinksService extends BaseHandler {\r\n  async run () {\r\n    try {\r\n      const socialMediaLinks = await db.SocialMediaLink.findAndCountAll({\r\n        where: { isActive: true },\r\n        order: [['createdAt', 'DESC']]\r\n      });\r\n\r\n      if (!socialMediaLinks || socialMediaLinks.count === 0) {\r\n        // Return empty array instead of throwing error for development\r\n        return { socialMediaLinks: { rows: [], count: 0 }, message: 'Success' };\r\n      }\r\n\r\n      return { socialMediaLinks, message: 'Success' };\r\n    } catch (error) {\r\n      // Handle case when table doesn't exist\r\n      console.log('Social media links table not found, returning empty result');\r\n      return { socialMediaLinks: { rows: [], count: 0 }, message: 'Success' };\r\n    }\r\n  }\r\n}\r\n"
+        }
+    ]
+}

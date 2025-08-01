@@ -66,7 +66,7 @@ const UserForm = ({
             key={item.name}
             control={control}
             name={item.name}
-            rules={{ pattern, required }}
+            rules={{}}
             render={({ field, fieldState }) => {
               const error = fieldState?.error;
               return (

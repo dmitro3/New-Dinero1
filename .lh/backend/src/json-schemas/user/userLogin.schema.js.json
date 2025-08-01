@@ -1,0 +1,18 @@
+{
+    "sourceFile": "backend/src/json-schemas/user/userLogin.schema.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1754048566339,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1754048566339,
+            "name": "Commit-0",
+            "content": "export const userLoginSchema = {\r\n  body: {\r\n    type: 'object',\r\n    properties: {\r\n      username: { type: 'string' },\r\n      password: { type: 'string' }\r\n    }\r\n  }\r\n}\r\n"
+        }
+    ]
+}

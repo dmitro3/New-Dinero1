@@ -1,0 +1,18 @@
+{
+    "sourceFile": "backend/src/helpers/authentication.helpers.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1754049112199,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1754049112199,
+            "name": "Commit-0",
+            "content": "import config from '@src/configs/app.config'\r\nimport { setCache } from '@src/libs/redis'\r\nimport { JWT_TOKEN_TYPES } from '@src/utils/constant'\r\nimport jwt from 'jsonwebtoken'\r\n\r\nexport const createAccessToken = async (user) => {\r\n    const accessToken = jwt.sign({\r\n        userId: user.userId,\r\n        username: user.username,\r\n        type: JWT_TOKEN_TYPES.LOGIN\r\n    },\r\n        config.get('jwt.tokenSecret'), {\r\n        expiresIn: config.get('jwt.tokenExpiry')\r\n    })\r\n    await setCache(`${user.userId}:ACCESS_TOKEN`, accessToken, config.get('jwt.tokenExpiry'))\r\n    return accessToken\r\n}"
+        }
+    ]
+}

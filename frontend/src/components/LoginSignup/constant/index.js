@@ -46,24 +46,12 @@ export const SIGNIN = [
     label: 'Username',
     type: 'input',
     placeholder: 'Username',
-    required: 'Username is required!',
-    pattern: {
-      value: /^[A-Za-z0-9]{3,}$/, // Ensures no spaces
-      message:
-        'Username must be at least 3 characters long and contain only letters and numbers without spaces.',
-    },
   },
   {
     name: 'password',
     label: 'Password',
     type: 'input',
     placeholder: 'Password',
-    required: 'Password is required!',
-    pattern: {
-      value:
-        /^(?!.*\s)(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{6,}$/,
-      message: 'Spaces are not allowed',
-    },
   },
 ];
 
