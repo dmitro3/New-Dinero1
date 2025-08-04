@@ -36,8 +36,8 @@ npm run build
 echo "🔄 Restarting applications..."
 pm2 stop all 2>/dev/null || true
 pm2 delete all 2>/dev/null || true
-pm2 start npm --name "api-backend" -- run start:dev
-pm2 start npm --name "frontend" -- run start
+pm2 start npm --name "api-backend" --cwd backend -- run start:dev
+pm2 start npm --name "frontend" --cwd frontend -- run start
 
 # Wait for applications to start
 echo "⏳ Waiting for applications to start..."
