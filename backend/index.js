@@ -18,19 +18,40 @@ passport.use(new GoogleStrategy({
   try {
     let user = await db.User.findOne({ where: { googleId: profile.id } });
     if (!user) {
-      user = await db.User.create({
-        googleId: profile.id,
-        email: profile.emails[0].value,
-        firstName: profile.name.givenName,
-        lastName: profile.name.familyName,
-        signInType: 'google',
-        isEmailVerified: true
-      });
+      // Check if user exists with same email
+      if (profile.emails && profile.emails[0]) {
+        user = await db.User.findOne({ where: { email: profile.emails[0].value } });
+        if (user) {
+          // Update existing user with Google ID
+          await user.update({
+            googleId: profile.id,
+            signInType: 'google',
+            isEmailVerified: true
+          });
+        }
+      }
+      
+      if (!user) {
+        user = await db.User.create({
+          googleId: profile.id,
+          email: profile.emails ? profile.emails[0].value : null,
+          firstName: profile.name.givenName,
+          lastName: profile.name.familyName,
+          signInType: 'google',
+          isEmailVerified: true,
+          username: profile.emails ? profile.emails[0].value.split('@')[0] : `user_${Date.now()}`
+        });
+      }
     }
+    
+    // Update last login date
+    await user.update({ lastLoginDate: new Date() });
+    
     const token = jwt.sign({ userId: user.userId }, process.env.JWT_LOGIN_SECRET, { expiresIn: '1d' });
     user.token = token;
     return done(null, user);
   } catch (err) {
+    console.error('Google SSO error:', err);
     return done(err, null);
   }
 }));
@@ -44,19 +65,40 @@ passport.use(new FacebookStrategy({
   try {
     let user = await db.User.findOne({ where: { facebookId: profile.id } });
     if (!user) {
-      user = await db.User.create({
-        facebookId: profile.id,
-        email: profile.emails ? profile.emails[0].value : null,
-        firstName: profile.name.givenName,
-        lastName: profile.name.familyName,
-        signInType: 'facebook',
-        isEmailVerified: true
-      });
+      // Check if user exists with same email
+      if (profile.emails && profile.emails[0]) {
+        user = await db.User.findOne({ where: { email: profile.emails[0].value } });
+        if (user) {
+          // Update existing user with Facebook ID
+          await user.update({
+            facebookId: profile.id,
+            signInType: 'facebook',
+            isEmailVerified: true
+          });
+        }
+      }
+      
+      if (!user) {
+        user = await db.User.create({
+          facebookId: profile.id,
+          email: profile.emails ? profile.emails[0].value : null,
+          firstName: profile.name.givenName,
+          lastName: profile.name.familyName,
+          signInType: 'facebook',
+          isEmailVerified: true,
+          username: profile.emails ? profile.emails[0].value.split('@')[0] : `user_${Date.now()}`
+        });
+      }
     }
+    
+    // Update last login date
+    await user.update({ lastLoginDate: new Date() });
+    
     const token = jwt.sign({ userId: user.userId }, process.env.JWT_LOGIN_SECRET, { expiresIn: '1d' });
     user.token = token;
     return done(null, user);
   } catch (err) {
+    console.error('Facebook SSO error:', err);
     return done(err, null);
   }
 }));
