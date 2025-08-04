@@ -59,7 +59,7 @@ const UserForm = ({
         const isCheckbox = item.type === 'checkbox';
         const isPassword = item.name === 'password';
 
-        const { pattern, required } = item || {};
+        // Removed unused variables pattern and required
 
         return (
           <Controller
