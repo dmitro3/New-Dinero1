@@ -18,7 +18,6 @@ jobs:
       uses: actions/setup-node@v4
       with:
         node-version: '18'
-        cache: 'npm'
         
     - name: Install dependencies
       run: |
@@ -26,8 +25,6 @@ jobs:
         npm ci
         cd ../frontend
         npm ci
-        # Install nodemon globally for backend
-        npm install -g nodemon
         
     - name: Build frontend
       run: |
