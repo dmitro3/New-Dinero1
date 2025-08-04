@@ -17,7 +17,9 @@ git pull origin main
 # Install backend dependencies
 echo "📦 Installing backend dependencies..."
 cd backend
-npm ci --omit=dev --ignore-scripts
+npm ci --ignore-scripts
+# Install nodemon locally if not present
+npm install nodemon --save-dev
 
 # Install frontend dependencies
 echo "📦 Installing frontend dependencies..."

@@ -11,7 +11,7 @@
     "babel-node": "babel-node --inspect=0.0.0.0:9229",
     "build": "babel . -d dist",
     "start": "node ./dist/index",
-    "start:dev": "nodemon --exec npm run babel-node -- ./index.js",
+    "start:dev": "npx nodemon --exec npm run babel-node -- ./index.js",
     "prod": "NODE_ENV=production  node ./dist/bin",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "standard --fix"

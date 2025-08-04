@@ -26,6 +26,8 @@ jobs:
         npm ci
         cd ../frontend
         npm ci
+        # Install nodemon globally for backend
+        npm install -g nodemon
         
     - name: Build frontend
       run: |
