@@ -17,12 +17,12 @@ git pull origin main
 # Install backend dependencies
 echo "📦 Installing backend dependencies..."
 cd backend
-npm ci --production
+npm ci --omit=dev --ignore-scripts
 
 # Install frontend dependencies
 echo "📦 Installing frontend dependencies..."
 cd ../frontend
-npm ci
+npm ci --ignore-scripts
 
 # Build frontend
 echo "🔨 Building frontend..."

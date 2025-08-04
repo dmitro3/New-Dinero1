@@ -4,11 +4,10 @@
   "description": "Backend structure for the app",
   "main": "index.js",
   "engines": {
-    "node": ">=16.13.0 <16.16.2",
-    "npm": ">=8.1.0 <12.1.2"
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
   },
   "scripts": {
-    "prepare": "husky install",
     "babel-node": "babel-node --inspect=0.0.0.0:9229",
     "build": "babel . -d dist",
     "start": "node ./dist/index",
