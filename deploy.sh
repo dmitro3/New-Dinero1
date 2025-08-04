@@ -17,22 +17,27 @@ git pull origin main
 # Install backend dependencies
 echo "📦 Installing backend dependencies..."
 cd backend
-npm ci --ignore-scripts
-# Install nodemon locally if not present
-npm install nodemon --save-dev
+# Clean install to ensure all dependencies are properly installed
+rm -rf node_modules package-lock.json
+npm install
 
 # Install frontend dependencies
 echo "📦 Installing frontend dependencies..."
 cd ../frontend
-npm ci --ignore-scripts
+# Clean install to ensure all dependencies are properly installed
+rm -rf node_modules package-lock.json
+npm install
 
 # Build frontend
 echo "🔨 Building frontend..."
 npm run build
 
-# Restart PM2 processes
+# Clean up and restart PM2 processes
 echo "🔄 Restarting applications..."
-pm2 restart all
+pm2 stop all
+pm2 delete all
+pm2 start npm --name "api-backend" -- run start:dev
+pm2 start npm --name "frontend" -- run start
 
 # Wait for applications to start
 echo "⏳ Waiting for applications to start..."

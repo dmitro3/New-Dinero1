@@ -9,9 +9,10 @@
   },
   "scripts": {
     "babel-node": "babel-node --inspect=0.0.0.0:9229",
+    "babel-node-no-debug": "babel-node",
     "build": "babel . -d dist",
     "start": "node ./dist/index",
-    "start:dev": "npx nodemon --exec npm run babel-node -- ./index.js",
+    "start:dev": "npx nodemon --exec npm run babel-node-no-debug -- ./index.js",
     "prod": "NODE_ENV=production  node ./dist/bin",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "standard --fix"
