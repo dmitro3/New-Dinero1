@@ -127,13 +127,13 @@ export class UserLoginHandler extends BaseHandler {
     const response = {
       user: {
         ...user.dataValues,
-        currentVipTier: {
+        currentVipTier: currentVipTier ? {
           vipTierId: currentVipTier.vipTierId,
           name: currentVipTier.name,
           icon: currentVipTier.icon,
           level: currentVipTier.level,
           rewards: currentVipTier.rewards || []
-        },
+        } : null,
         nextVipTier: nextVipTier || null,
         userTierProgress: userTierProgress || []
 
