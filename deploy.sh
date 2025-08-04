@@ -34,8 +34,8 @@ npm run build
 
 # Clean up and restart PM2 processes
 echo "🔄 Restarting applications..."
-pm2 stop all
-pm2 delete all
+pm2 stop all 2>/dev/null || true
+pm2 delete all 2>/dev/null || true
 pm2 start npm --name "api-backend" -- run start:dev
 pm2 start npm --name "frontend" -- run start
 
