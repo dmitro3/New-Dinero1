@@ -1,0 +1,18 @@
+{
+    "sourceFile": "frontend/src/app/[locale]/auth/callback/page.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1754364325516,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1754364325516,
+            "name": "Commit-0",
+            "content": "'use client';\r\n\r\nimport { useEffect } from 'react';\r\nimport { useRouter, useSearchParams } from 'next/navigation';\r\nimport { useStateContext } from '@/store';\r\nimport { addLoginToken } from '@/services/storageUtils';\r\n\r\nconst SSOCallback = () => {\r\n  const router = useRouter();\r\n  const searchParams = useSearchParams();\r\n  const { dispatch } = useStateContext();\r\n\r\n  useEffect(() => {\r\n    const token = searchParams.get('token');\r\n    const error = searchParams.get('error');\r\n\r\n    if (error) {\r\n      console.error('SSO Error:', error);\r\n      router.push('/?error=sso_failed');\r\n      return;\r\n    }\r\n\r\n    if (token) {\r\n      try {\r\n        // Store the token\r\n        addLoginToken(token);\r\n        \r\n        // You can also decode the token to get user info if needed\r\n        // const decodedToken = jwt_decode(token);\r\n        \r\n        // Redirect to home page or dashboard\r\n        router.push('/');\r\n      } catch (error) {\r\n        console.error('Token processing error:', error);\r\n        router.push('/?error=token_invalid');\r\n      }\r\n    } else {\r\n      // No token received, redirect to login\r\n      router.push('/?error=no_token');\r\n    }\r\n  }, [searchParams, router, dispatch]);\r\n\r\n  return (\r\n    <div className=\"min-h-screen flex items-center justify-center bg-gray-900\">\r\n      <div className=\"text-center\">\r\n        <div className=\"animate-spin rounded-full h-12 w-12 border-b-2 border-green-500 mx-auto\"></div>\r\n        <p className=\"text-white mt-4\">Processing your login...</p>\r\n      </div>\r\n    </div>\r\n  );\r\n};\r\n\r\nexport default SSOCallback; "
+        }
+    ]
+}

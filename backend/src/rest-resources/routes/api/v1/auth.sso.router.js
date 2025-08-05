@@ -16,7 +16,7 @@ router.get('/google/callback', passport.authenticate('google', { session: false 
 });
 
 // Facebook SSO
-router.get('/facebook', passport.authenticate('facebook', { scope: ['email'] }));
+router.get('/facebook', passport.authenticate('facebook', { scope: ['public_profile'] }));
 router.get('/facebook/callback', passport.authenticate('facebook', { session: false }), (req, res) => {
   try {
     // On success, redirect to frontend with JWT token

@@ -21,7 +21,7 @@ const useTermsPrivacy = () => {
       } else {
         setPrivacyData(content);
       }
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        // eslint-disable-next-line no-unused-vars
         } catch (err) {
             // console.log(err);
       if (type === 'terms') {

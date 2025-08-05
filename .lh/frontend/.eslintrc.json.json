@@ -3,11 +3,19 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 0,
+            "activePatchIndex": 2,
             "patches": [
                 {
                     "date": 1753951852600,
                     "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1754364630548,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -1,29 +1,24 @@\n-{\n-  \"env\": {\n-    \"node\": true,\n-    \"es2020\": true,\n-    \"browser\": true\n-  },\n-  \"extends\": [\"eslint:recommended\", \"plugin:@typescript-eslint/recommended\"],\n-  \"parser\": \"@typescript-eslint/parser\",\n-  \"plugins\": [\"@typescript-eslint\"],\n-  \"parserOptions\": {\n-    \"ecmaVersion\": 12,\n-    \"sourceType\": \"module\"\n-  },\n-  \"rules\": {\n-    // Custom ESLint rules go here\n-    \"react/react-in-jsx-scope\": \"off\", // Next.js doesn\"t require React to be imported in each file\n-    \"no-console\": \"off\", // Allow console statements for debugging\n-    \"semi\": [\"error\", \"always\"], // Enforce semicolons\n-    \"quotes\": [\"error\", \"single\"], // Enforce single quotes\n-    \"jsx-quotes\": [\"error\", \"prefer-double\"], // Enforce double quotes in JSX\n-    \"eqeqeq\": \"error\", // Require strict equality operators\n-    \"react/jsx-props-no-spreading\": \"off\", // Allow props spreading\n-    \"react/prop-types\": \"off\",\n-    \"no-undef\": \"error\",\n-    \"@typescript-eslint/explicit-module-boundary-types\": \"off\",\n-    \"no-unused-vars\": \"error\",\n-    \"@typescript-eslint/no-require-imports\": \"off\"\n-  }\n-}\n+{\r\n+  \"env\": {\r\n+    \"node\": true,\r\n+    \"es2020\": true,\r\n+    \"browser\": true\r\n+  },\r\n+  \"extends\": [\r\n+    \"eslint:recommended\",\r\n+    \"next/core-web-vitals\"\r\n+  ],\r\n+  \"parserOptions\": {\r\n+    \"ecmaVersion\": 12,\r\n+    \"sourceType\": \"module\"\r\n+  },\r\n+  \"rules\": {\r\n+    \"no-console\": \"off\",\r\n+    \"semi\": [\"error\", \"always\"],\r\n+    \"quotes\": [\"error\", \"single\"],\r\n+    \"jsx-quotes\": [\"error\", \"prefer-double\"],\r\n+    \"eqeqeq\": \"error\",\r\n+    \"no-undef\": \"error\",\r\n+    \"no-unused-vars\": \"error\"\r\n+  }\r\n+}\r\n"
+                },
+                {
+                    "date": 1754364715394,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -18,7 +18,11 @@\n     \"quotes\": [\"error\", \"single\"],\r\n     \"jsx-quotes\": [\"error\", \"prefer-double\"],\r\n     \"eqeqeq\": \"error\",\r\n     \"no-undef\": \"error\",\r\n-    \"no-unused-vars\": \"error\"\r\n+    \"no-unused-vars\": \"warn\",\r\n+    \"react-hooks/exhaustive-deps\": \"warn\",\r\n+    \"react/no-unescaped-entities\": \"warn\",\r\n+    \"@next/next/no-img-element\": \"warn\",\r\n+    \"jsx-a11y/alt-text\": \"warn\"\r\n   }\r\n }\r\n"
                 }
             ],
             "date": 1753951852600,

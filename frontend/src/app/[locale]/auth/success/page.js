@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { addLoginToken } from '@/services/storageUtils';
 
 const SSOSuccess = () => {
   const router = useRouter();
@@ -9,48 +10,58 @@ const SSOSuccess = () => {
   const [status, setStatus] = useState('processing');
 
   useEffect(() => {
-    const token = searchParams.get('token');
-    const error = searchParams.get('error');
+    const handleToken = async () => {
+      const token = searchParams.get('token');
+      const error = searchParams.get('error');
 
-    if (error) {
-      console.error('SSO Error:', error);
-      setStatus('error');
-      setTimeout(() => {
-        window.location.href = '/?error=sso_failed';
-      }, 2000);
-      return;
-    }
-
-    if (token) {
-      try {
-        // Store the token in localStorage
-        if (typeof window !== 'undefined') {
-          localStorage.setItem('access-token', token);
-          console.log('Token stored successfully');
-        }
-        
-        setStatus('success');
-        
-        // Use setTimeout to show success state briefly before redirect
-        setTimeout(() => {
-          // Use window.location.href for a more reliable redirect
-          window.location.href = '/';
-        }, 1500);
-        
-      } catch (error) {
-        console.error('Token processing error:', error);
+      if (error) {
+        console.error('SSO Error:', error);
         setStatus('error');
         setTimeout(() => {
-          window.location.href = '/?error=token_invalid';
+          window.location.href = '/?error=sso_failed';
+        }, 2000);
+        return;
+      }
+
+      if (token) {
+        try {
+          // Store the token in localStorage using the proper function
+          if (typeof window !== 'undefined') {
+            addLoginToken(token);
+            console.log('Token stored successfully');
+            
+            // Dispatch a custom event to notify other components about the token change
+            window.dispatchEvent(new Event('storage'));
+            
+            // Add a small delay to ensure token is properly stored before any API calls
+            await new Promise(resolve => setTimeout(resolve, 100));
+          }
+          
+          setStatus('success');
+          
+          // Use setTimeout to show success state briefly before redirect
+          setTimeout(() => {
+            // Use Next.js router for a smoother redirect without hard refresh
+            router.push('/');
+          }, 1500);
+          
+        } catch (error) {
+          console.error('Token processing error:', error);
+          setStatus('error');
+          setTimeout(() => {
+            window.location.href = '/?error=token_invalid';
+          }, 2000);
+        }
+      } else {
+        // No token received, redirect to login
+        setStatus('error');
+        setTimeout(() => {
+          window.location.href = '/?error=no_token';
         }, 2000);
       }
-    } else {
-      // No token received, redirect to login
-      setStatus('error');
-      setTimeout(() => {
-        window.location.href = '/?error=no_token';
-      }, 2000);
-    }
+    };
+
+    handleToken();
   }, [searchParams, router]);
 
   const getStatusMessage = () => {

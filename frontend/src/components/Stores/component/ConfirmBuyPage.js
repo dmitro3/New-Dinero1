@@ -428,7 +428,7 @@ const ConfirmBuyPage = ({
             <div className="mt-4">
               <p className="font-semibold text-white/80">
                 When creating new account please select Account type as
-                "checking" or "savings"
+                &quot;checking&quot; or &quot;savings&quot;
               </p>
               <button
                 value="new"

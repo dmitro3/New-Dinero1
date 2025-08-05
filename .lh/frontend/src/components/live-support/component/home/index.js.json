@@ -1,0 +1,18 @@
+{
+    "sourceFile": "frontend/src/components/live-support/component/home/index.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1754364715389,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1754364715389,
+            "name": "Commit-0",
+            "content": "import { search } from '@/assets/svg';\r\nimport Image from 'next/image';\r\nimport React from 'react';\r\nimport { HELP_DATA } from '../../constant';\r\n\r\nconst Home = () => {\r\n  return (\r\n    <div className=\"h-full bg-slate-100 text-black flex gap-5 flex-col items-center\">\r\n      {/* <Image src={logoImage} alt='logo' height={200} width={300} className=''/> */}\r\n\r\n      <p className=\"text-2xl font-bold text-center\">\r\n        Hi User 👋 How can we help?\r\n      </p>\r\n      <div className=\"w-[85%]  border bg-white shadow-black shadow-sm rounded-lg\">\r\n        <p className=\"font-bold p-2\">Ask a question</p>\r\n        <p className=\"px-2 pb-2\">We typically reply in a few hours</p>\r\n      </div>\r\n      <div className=\"w-[85%] border bg-white shadow-black shadow-sm rounded-lg\">\r\n        <div className=\"relative border p-2\">\r\n          <input\r\n            type=\"text\"\r\n            placeholder=\"serch for help\"\r\n            className=\"w-full rounded-md p-2 border-none text-black bg-gray-200\"\r\n          />\r\n          <Image\r\n            src={search}\r\n            alt=\"search\"\r\n            className=\"right-3 absolute top-1/2 -translate-y-1/2\"\r\n          />\r\n        </div>\r\n        {HELP_DATA.map((data, index) => (\r\n          <div\r\n            key={index}\r\n            className=\"hover:bg-slate-200 p-1 hover:cursor-pointer\"\r\n          >\r\n            <p className=\"text-sm\">{data.heading}</p>\r\n            {/* <p>{data.text}</p> */}\r\n            {/* <p>{data.article}</p> */}\r\n          </div>\r\n        ))}\r\n      </div>\r\n\r\n      <div className=\"w-[85%]  border bg-white shadow-black shadow-sm rounded-lg\">\r\n        <p className=\"font-bold p-2\">What&apos;s new on Luckybird</p>\r\n        <div className=\"hover:bg-slate-200 p-1 hover:cursor-pointer border-y\">\r\n          Now Supports SQL currency for purchase and Readdemption!\r\n        </div>\r\n      </div>\r\n    </div>\r\n  );\r\n};\r\n\r\nexport default Home;\r\n"
+        }
+    ]
+}

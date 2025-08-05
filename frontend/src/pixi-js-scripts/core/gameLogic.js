@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-/* eslint-disable @typescript-eslint/no-unused-expressions */
+/* eslint-disable no-unused-expressions */
 'use client';
 import * as UI from './gameUI.js';
 import { pixiApp } from './initializePixi.js';

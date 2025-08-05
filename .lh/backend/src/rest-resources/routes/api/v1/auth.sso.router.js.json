@@ -3,7 +3,7 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 2,
+            "activePatchIndex": 5,
             "patches": [
                 {
                     "date": 1753423507823,
@@ -16,6 +16,18 @@
                 {
                     "date": 1754046264432,
                     "content": "Index: \n===================================================================\n--- \n+++ \n@@ -1,1 +1,21 @@\n- \n\\ No newline at end of file\n+const express = require('express');\r\n+const passport = require('passport');\r\n+const router = express.Router();\r\n+\r\n+// Google SSO\r\n+router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));\r\n+router.get('/google/callback', passport.authenticate('google', { session: false }), (req, res) => {\r\n+  // On success, redirect to frontend with JWT token\r\n+  const token = req.user.token;\r\n+  res.redirect(`${process.env.SSO_SUCCESS_REDIRECT}?token=${token}`);\r\n+});\r\n+\r\n+// Facebook SSO\r\n+router.get('/facebook', passport.authenticate('facebook', { scope: ['email'] }));\r\n+router.get('/facebook/callback', passport.authenticate('facebook', { session: false }), (req, res) => {\r\n+  // On success, redirect to frontend with JWT token\r\n+  const token = req.user.token;\r\n+  res.redirect(`${process.env.SSO_SUCCESS_REDIRECT}?token=${token}`);\r\n+});\r\n+\r\n+module.exports = router; \n\\ No newline at end of file\n"
+                },
+                {
+                    "date": 1754367659592,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -4,18 +4,28 @@\n \r\n // Google SSO\r\n router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'] }));\r\n router.get('/google/callback', passport.authenticate('google', { session: false }), (req, res) => {\r\n-  // On success, redirect to frontend with JWT token\r\n-  const token = req.user.token;\r\n-  res.redirect(`${process.env.SSO_SUCCESS_REDIRECT}?token=${token}`);\r\n+  try {\r\n+    // On success, redirect to frontend with JWT token\r\n+    const token = req.user.token;\r\n+    res.redirect(`${process.env.SSO_SUCCESS_REDIRECT}?token=${token}`);\r\n+  } catch (error) {\r\n+    console.error('Google SSO callback error:', error);\r\n+    res.redirect(`${process.env.SSO_SUCCESS_REDIRECT}?error=sso_failed`);\r\n+  }\r\n });\r\n \r\n // Facebook SSO\r\n-router.get('/facebook', passport.authenticate('facebook', { scope: ['email'] }));\r\n+router.get('/facebook', passport.authenticate('facebook', { scope: ['public_profile', 'email'] }));\r\n router.get('/facebook/callback', passport.authenticate('facebook', { session: false }), (req, res) => {\r\n-  // On success, redirect to frontend with JWT token\r\n-  const token = req.user.token;\r\n-  res.redirect(`${process.env.SSO_SUCCESS_REDIRECT}?token=${token}`);\r\n+  try {\r\n+    // On success, redirect to frontend with JWT token\r\n+    const token = req.user.token;\r\n+    res.redirect(`${process.env.SSO_SUCCESS_REDIRECT}?token=${token}`);\r\n+  } catch (error) {\r\n+    console.error('Facebook SSO callback error:', error);\r\n+    res.redirect(`${process.env.SSO_SUCCESS_REDIRECT}?error=sso_failed`);\r\n+  }\r\n });\r\n \r\n module.exports = router; \n\\ No newline at end of file\n"
+                },
+                {
+                    "date": 1754368358843,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -15,9 +15,9 @@\n   }\r\n });\r\n \r\n // Facebook SSO\r\n-router.get('/facebook', passport.authenticate('facebook', { scope: ['public_profile', 'email'] }));\r\n+router.get('/facebook', passport.authenticate('facebook', { scope: 'public_profile,email' }));\r\n router.get('/facebook/callback', passport.authenticate('facebook', { session: false }), (req, res) => {\r\n   try {\r\n     // On success, redirect to frontend with JWT token\r\n     const token = req.user.token;\r\n"
+                },
+                {
+                    "date": 1754368521109,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -15,9 +15,9 @@\n   }\r\n });\r\n \r\n // Facebook SSO\r\n-router.get('/facebook', passport.authenticate('facebook', { scope: 'public_profile,email' }));\r\n+router.get('/facebook', passport.authenticate('facebook', { scope: ['public_profile'] }));\r\n router.get('/facebook/callback', passport.authenticate('facebook', { session: false }), (req, res) => {\r\n   try {\r\n     // On success, redirect to frontend with JWT token\r\n     const token = req.user.token;\r\n"
                 }
             ],
             "date": 1753423507823,

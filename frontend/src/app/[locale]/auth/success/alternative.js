@@ -16,7 +16,7 @@ const SSOSuccessAlternative = () => {
       // Try Next.js router first, fallback to window.location
       try {
         router.push(url);
-      } catch (err) {
+      } catch {
         console.log('Router failed, using window.location');
         window.location.href = url;
       }

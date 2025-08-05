@@ -41,7 +41,7 @@ const Home = () => {
       </div>
 
       <div className="w-[85%]  border bg-white shadow-black shadow-sm rounded-lg">
-        <p className="font-bold p-2">What's new on Luckybird</p>
+        <p className="font-bold p-2">What&apos;s new on Luckybird</p>
         <div className="hover:bg-slate-200 p-1 hover:cursor-pointer border-y">
           Now Supports SQL currency for purchase and Readdemption!
         </div>

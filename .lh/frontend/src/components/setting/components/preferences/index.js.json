@@ -1,0 +1,18 @@
+{
+    "sourceFile": "frontend/src/components/setting/components/preferences/index.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1754364715390,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1754364715390,
+            "name": "Commit-0",
+            "content": "const Preferences = () => {\r\n    return <section className=\"border border-[rgb(var(--lb-blue-300))] rounded\">\r\n        <form>\r\n            <div className=\"p-4 border-b border-[rgb(var(--lb-blue-300))]\">\r\n                <div className=\"mb-2\">\r\n                    <div className=\"text-white text-[14px] font-bold\">Username</div>\r\n                    <div className=\"text-[rgb(var(--lb-blue-250))] text-[13px] mb-2\">(The username and email are the only credentials for login)</div>\r\n                </div>\r\n            </div>\r\n            <div className=\"mt-0 p-4 text-center\">\r\n                <div className=\"text-[rgb(var(--lb-blue-250))] text-[13px] mb-2\">* You can see your hidden info, but others can&apos;t *</div>\r\n            </div>\r\n\r\n        </form>\r\n    </section>;\r\n};\r\nexport default Preferences;"
+        }
+    ]
+}

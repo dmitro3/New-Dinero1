@@ -24,7 +24,7 @@ const BonusDrop = () => {
               Redeem Bonus Drop
             </div>
             <div className="text-[rgb(var(--lb-blue-250))] text-[14px] mb-2 border-b border-[rgb(var(--lb-blue-300))] pb-3">
-              Find bonus drop codes on our social media's such as Twitter &
+              Find bonus drop codes on our social media&apos;s such as Twitter &
               Telegram
             </div>
             <div className="text-white text-[14px] font-bold">

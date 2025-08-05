@@ -3,11 +3,15 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 0,
+            "activePatchIndex": 1,
             "patches": [
                 {
                     "date": 1753936856504,
                     "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1754364715393,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -1,35 +1,35 @@\n-/* eslint-disable no-undef */\n-/* eslint-disable @typescript-eslint/no-unused-expressions */\n-import { settings } from '../settings.js';\n-\n-const createPixiApp = () => {\n-  const app = new PIXI.Application({\n-    width: settings.originalWidth,\n-    height: settings.originalHeight,\n-    backgroundColor: settings.backgroundColor,\n-    antialias: true,\n-    // resolution: window.devicePixelRatio,\n-    backgroundAlpha: settings.backgroundAlpha\n-  });\n-  globalThis.__PIXI_APP__ = app;\n-\n-  const div = settings.div();\n-  if (div) {\n-    div.appendChild(app.view);\n-  }\n-\n-  const destroyPixiApp = () => app.destroy(true);\n-\n-  const appTransform = (x, y) => {\n-    app.renderer.resize(x, y);\n-  };\n-\n-  // appTransform(700, 500)\n-  return {\n-    app: app,\n-    destroyPixi: destroyPixiApp,\n-    resizePixiApp: appTransform\n-  };\n-};\n-\n-export default createPixiApp;\n+/* eslint-disable no-undef */\r\n+/* eslint-disable no-unused-expressions */\r\n+import { settings } from '../settings.js';\r\n+\r\n+const createPixiApp = () => {\r\n+  const app = new PIXI.Application({\r\n+    width: settings.originalWidth,\r\n+    height: settings.originalHeight,\r\n+    backgroundColor: settings.backgroundColor,\r\n+    antialias: true,\r\n+    // resolution: window.devicePixelRatio,\r\n+    backgroundAlpha: settings.backgroundAlpha\r\n+  });\r\n+  globalThis.__PIXI_APP__ = app;\r\n+\r\n+  const div = settings.div();\r\n+  if (div) {\r\n+    div.appendChild(app.view);\r\n+  }\r\n+\r\n+  const destroyPixiApp = () => app.destroy(true);\r\n+\r\n+  const appTransform = (x, y) => {\r\n+    app.renderer.resize(x, y);\r\n+  };\r\n+\r\n+  // appTransform(700, 500)\r\n+  return {\r\n+    app: app,\r\n+    destroyPixi: destroyPixiApp,\r\n+    resizePixiApp: appTransform\r\n+  };\r\n+};\r\n+\r\n+export default createPixiApp;\r\n"
                 }
             ],
             "date": 1753936856504,

@@ -1,0 +1,18 @@
+{
+    "sourceFile": "frontend/src/common/hook/useGetUserDeatil.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1754367369093,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1754367369093,
+            "name": "Commit-0",
+            "content": "'use client';\r\nimport { getUserDetails } from '@/services/getRequests';\r\nimport { getAccessToken } from '@/services/storageUtils';\r\nimport { useStateContext } from '@/store';\r\nimport { useEffect, useState } from 'react';\r\n\r\nconst useGetUserDeatil = () => {\r\n  const [userData, setUserData] = useState([]);\r\n  const [userLoading, setUserLoading] = useState(false);\r\n  const [userError, setUserError] = useState(null);\r\n  const { dispatch } = useStateContext();\r\n  const token = getAccessToken();\r\n\r\n  const getUser = async (selectedCoin) => {\r\n    // console.log(selectedCoin, 'coin');\r\n    setUserLoading(true);\r\n    dispatch({ type: 'SET_USER_LOADING', payload: userLoading });\r\n    setUserError(null);\r\n\r\n    const payload = {\r\n      currencyCode: selectedCoin === 'gold' ? 'GC' : 'SC',\r\n    };\r\n\r\n    try {\r\n      const response = await getUserDetails(payload);\r\n      dispatch({ type: 'SET_USER', payload: response.data });\r\n      setUserData(response.data);\r\n    } catch (err) {\r\n      setUserError(err.message);\r\n      dispatch({ type: 'SET_USER_ERROR', payload: userError });\r\n    } finally {\r\n      setUserLoading(false);\r\n      dispatch({ type: 'SET_USER_LOADING', payload: userLoading });\r\n    }\r\n  };\r\n\r\n  useEffect(() => {\r\n    if (token) {\r\n      // Add a small delay to ensure token is properly set up before making API calls\r\n      const timeoutId = setTimeout(() => {\r\n        getUser();\r\n      }, 200);\r\n\r\n      return () => clearTimeout(timeoutId);\r\n    }\r\n  }, [token]);\r\n\r\n  return {\r\n    userData,\r\n    userLoading,\r\n    userError,\r\n    getUser,\r\n  };\r\n};\r\n\r\nexport default useGetUserDeatil;\r\n"
+        }
+    ]
+}

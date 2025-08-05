@@ -36,7 +36,12 @@ const useGetUserDeatil = () => {
 
   useEffect(() => {
     if (token) {
-      getUser();
+      // Add a small delay to ensure token is properly set up before making API calls
+      const timeoutId = setTimeout(() => {
+        getUser();
+      }, 200);
+
+      return () => clearTimeout(timeoutId);
     }
   }, [token]);
 

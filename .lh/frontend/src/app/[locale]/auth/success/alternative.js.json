@@ -1,0 +1,18 @@
+{
+    "sourceFile": "frontend/src/app/[locale]/auth/success/alternative.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1754364393941,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1754364393941,
+            "name": "Commit-0",
+            "content": "'use client';\r\n\r\nimport { useEffect, useState } from 'react';\r\nimport { useRouter, useSearchParams } from 'next/navigation';\r\n\r\nconst SSOSuccessAlternative = () => {\r\n  const router = useRouter();\r\n  const searchParams = useSearchParams();\r\n  const [status, setStatus] = useState('processing');\r\n\r\n  useEffect(() => {\r\n    const token = searchParams.get('token');\r\n    const error = searchParams.get('error');\r\n\r\n    const handleRedirect = (url) => {\r\n      // Try Next.js router first, fallback to window.location\r\n      try {\r\n        router.push(url);\r\n      } catch {\r\n        console.log('Router failed, using window.location');\r\n        window.location.href = url;\r\n      }\r\n    };\r\n\r\n    if (error) {\r\n      console.error('SSO Error:', error);\r\n      setStatus('error');\r\n      setTimeout(() => {\r\n        handleRedirect('/?error=sso_failed');\r\n      }, 2000);\r\n      return;\r\n    }\r\n\r\n    if (token) {\r\n      try {\r\n        // Store the token in localStorage\r\n        if (typeof window !== 'undefined') {\r\n          localStorage.setItem('access-token', token);\r\n          console.log('Token stored successfully');\r\n        }\r\n        \r\n        setStatus('success');\r\n        \r\n        // Use setTimeout to show success state briefly before redirect\r\n        setTimeout(() => {\r\n          handleRedirect('/');\r\n        }, 1500);\r\n        \r\n      } catch (error) {\r\n        console.error('Token processing error:', error);\r\n        setStatus('error');\r\n        setTimeout(() => {\r\n          handleRedirect('/?error=token_invalid');\r\n        }, 2000);\r\n      }\r\n    } else {\r\n      // No token received, redirect to login\r\n      setStatus('error');\r\n      setTimeout(() => {\r\n        handleRedirect('/?error=no_token');\r\n      }, 2000);\r\n    }\r\n  }, [searchParams, router]);\r\n\r\n  const getStatusMessage = () => {\r\n    switch (status) {\r\n      case 'success':\r\n        return 'Login successful! Redirecting...';\r\n      case 'error':\r\n        return 'An error occurred. Redirecting...';\r\n      default:\r\n        return 'Processing your login...';\r\n    }\r\n  };\r\n\r\n  const getSpinnerColor = () => {\r\n    switch (status) {\r\n      case 'success':\r\n        return 'border-green-500';\r\n      case 'error':\r\n        return 'border-red-500';\r\n      default:\r\n        return 'border-blue-500';\r\n    }\r\n  };\r\n\r\n  return (\r\n    <div className=\"min-h-screen flex items-center justify-center bg-gray-900\">\r\n      <div className=\"text-center\">\r\n        <div className={`animate-spin rounded-full h-12 w-12 border-b-2 ${getSpinnerColor()} mx-auto`}></div>\r\n        <p className=\"text-white mt-4\">{getStatusMessage()}</p>\r\n        {status === 'success' && (\r\n          <p className=\"text-green-400 text-sm mt-2\">Token stored successfully</p>\r\n        )}\r\n        {status === 'error' && (\r\n          <p className=\"text-red-400 text-sm mt-2\">Please wait while we redirect you...</p>\r\n        )}\r\n      </div>\r\n    </div>\r\n  );\r\n};\r\n\r\nexport default SSOSuccessAlternative; "
+        }
+    ]
+}

@@ -28,6 +28,7 @@ const LoginSignup = () => {
   const newPasswordKey = searchParams.get('newPasswordKey');
 
   const [open, setOpen] = useState(isEmpty(isToken));
+  const [isAuthenticated, setIsAuthenticated] = useState(!isEmpty(isToken));
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [toastState, setToastState] = useState({
     showToast: false,
@@ -41,10 +42,55 @@ const LoginSignup = () => {
   const location = useGeoLocation();
 
   useEffect(() => {
-    if (isEmpty(getAccessToken())) {
-      setOpen(true);
-    }
+    const checkToken = () => {
+      const token = getAccessToken();
+      const hasToken = !isEmpty(token);
+      
+      setIsAuthenticated(hasToken);
+      setOpen(!hasToken);
+    };
+
+    // Check immediately
+    checkToken();
+
+    // Also check after a small delay to handle SSO redirects
+    const timeoutId = setTimeout(checkToken, 100);
+
+    return () => clearTimeout(timeoutId);
   }, [router]);
+
+  // Listen for storage changes (when token is added/removed)
+  useEffect(() => {
+    const handleStorageChange = () => {
+      const token = getAccessToken();
+      const hasToken = !isEmpty(token);
+      
+      setIsAuthenticated(hasToken);
+      setOpen(!hasToken);
+    };
+
+    // Listen for storage events
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Listen for custom storage events (for same-tab updates)
+    window.addEventListener('storage', handleStorageChange);
+    
+    // Also check when the component mounts and when window gains focus
+    const handleFocus = () => {
+      handleStorageChange();
+    };
+
+    window.addEventListener('focus', handleFocus);
+
+    // Check periodically for token changes (for SSO redirects)
+    const intervalId = setInterval(handleStorageChange, 500);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('focus', handleFocus);
+      clearInterval(intervalId);
+    };
+  }, []);
 
   useEffect(() => {
     if (location.loaded && !location.error) {
@@ -61,7 +107,7 @@ const LoginSignup = () => {
       <Dialog
         open={open}
         onOpenChange={(isOpen) =>
-          isOpen && !isEmpty(getAccessToken()) && setOpen(isOpen)
+          isOpen && isAuthenticated && setOpen(isOpen)
         }
         modal
         className="w-full"

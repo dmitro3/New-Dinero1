@@ -8,7 +8,7 @@ const Preferences = () => {
                 </div>
             </div>
             <div className="mt-0 p-4 text-center">
-                <div className="text-[rgb(var(--lb-blue-250))] text-[13px] mb-2">* You can see your hidden info, but others can't *</div>
+                <div className="text-[rgb(var(--lb-blue-250))] text-[13px] mb-2">* You can see your hidden info, but others can&apos;t *</div>
             </div>
 
         </form>

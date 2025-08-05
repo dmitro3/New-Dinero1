@@ -1,0 +1,18 @@
+{
+    "sourceFile": "frontend/src/components/LoginSignup/TermsPrivacy/hooks/useTermsPrivacy.js",
+    "activeCommit": 0,
+    "commits": [
+        {
+            "activePatchIndex": 0,
+            "patches": [
+                {
+                    "date": 1754364715389,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n"
+                }
+            ],
+            "date": 1754364715389,
+            "name": "Commit-0",
+            "content": "'use client';\r\nimport { getCmsPageDetail } from '@/services/getRequests';\r\nimport { useState } from 'react';\r\n\r\nconst useTermsPrivacy = () => {\r\n  const [termsPrivacyLoading, setTermsPrivacyLoading] = useState(false);\r\n  const [termsData, setTermsData] = useState([]);\r\n  const [privacyData, setPrivacyData] = useState([]);\r\n\r\n  const fetchContent = async (type) => {\r\n    setTermsPrivacyLoading(true);\r\n    try {\r\n      const payload = {\r\n        cmsSlug: type === 'terms' ? 'general-terms' : 'privacy-policy',\r\n      };\r\n      const response = await getCmsPageDetail(payload);\r\n      const content = response?.data?.cmsDetails?.content;\r\n      \r\n      if (type === 'terms') {\r\n        setTermsData(content);\r\n      } else {\r\n        setPrivacyData(content);\r\n      }\r\n        // eslint-disable-next-line no-unused-vars\r\n        } catch (err) {\r\n            // console.log(err);\r\n      if (type === 'terms') {\r\n        setTermsData('');\r\n      } else {\r\n        setPrivacyData('');\r\n      }\r\n    } finally {\r\n      setTermsPrivacyLoading(false);\r\n    }\r\n  };\r\n\r\n  return {\r\n    termsPrivacyLoading,\r\n    termsData,\r\n    privacyData,\r\n    fetchTerms: () => fetchContent('terms'),\r\n    fetchPrivacyPolicy: () => fetchContent('privacy'),\r\n  };\r\n};\r\n\r\nexport default useTermsPrivacy;\r\n"
+        }
+    ]
+}

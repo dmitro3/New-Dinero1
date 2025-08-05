@@ -32,7 +32,7 @@ const Email = () => {
               Current Email
             </div>
             <div className="text-[rgb(var(--lb-blue-250))] text-[13px] mb-2">
-              (Please check weekly airdrop email every weekend. Don't miss your
+              (Please check weekly airdrop email every weekend. Don&apos;t miss your
               bonus.)
             </div>
 
@@ -50,7 +50,7 @@ const Email = () => {
               <div className="mb-2">
                 <div className="text-white text-[14px] font-bold">Email</div>
                 <div className="text-[rgb(var(--lb-blue-250))] text-[13px] mb-2">
-                  (Gear up, because every week you'll unlock an epic bonus
+                  (Gear up, because every week you&apos;ll unlock an epic bonus
                   email)
                 </div>
                 <Controller
@@ -114,7 +114,7 @@ const Email = () => {
                   Verification Code <span className="text-red-500">*</span>
                 </div>
                 <div className="text-[rgb(var(--lb-blue-250))] text-[13px] mb-2">
-                  (haven't receive? please check junk email)
+                  (haven&apos;t receive? please check junk email)
                 </div>
                 <Controller
                   control={control}
@@ -175,7 +175,7 @@ const Email = () => {
 
             <div className="mt-0 p-4 flex justify-between">
               <div className="text-[rgb(var(--lb-blue-250))] text-[13px]">
-                If you don't receive the email, you can check it in spam
+                If you don&apos;t receive the email, you can check it in spam
               </div>
               <Button
                 loading={isOtpLoading}

@@ -33,7 +33,7 @@ const Tickets = () => {
         {(createTicket || isTicketMessageOpen) && (
           <button
             onClick={() => {
-              // eslint-disable-next-line @typescript-eslint/no-unused-expressions
+              // eslint-disable-next-line no-unused-expressions
               isTicketMessageOpen ? handleTicketMessage(null) : handleClick();
             }}
             className="text-white  flex items-center mx-3 hover:bg-transparent"

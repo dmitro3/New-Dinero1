@@ -47,7 +47,7 @@ passport.use(new GoogleStrategy({
     // Update last login date
     await user.update({ lastLoginDate: new Date() });
     
-    const token = jwt.sign({ userId: user.userId }, process.env.JWT_LOGIN_SECRET, { expiresIn: '1d' });
+    const token = jwt.sign({ userId: user.userId, type: 'login' }, process.env.JWT_LOGIN_SECRET, { expiresIn: '1d' });
     user.token = token;
     return done(null, user);
   } catch (err) {
@@ -63,6 +63,9 @@ passport.use(new FacebookStrategy({
   profileFields: ['id', 'emails', 'name']
 }, async (accessToken, refreshToken, profile, done) => {
   try {
+    console.log('Facebook SSO Profile:', JSON.stringify(profile, null, 2));
+    console.log('Facebook SSO Access Token:', accessToken);
+    
     let user = await db.User.findOne({ where: { facebookId: profile.id } });
     if (!user) {
       // Check if user exists with same email
@@ -94,7 +97,7 @@ passport.use(new FacebookStrategy({
     // Update last login date
     await user.update({ lastLoginDate: new Date() });
     
-    const token = jwt.sign({ userId: user.userId }, process.env.JWT_LOGIN_SECRET, { expiresIn: '1d' });
+    const token = jwt.sign({ userId: user.userId, type: 'login' }, process.env.JWT_LOGIN_SECRET, { expiresIn: '1d' });
     user.token = token;
     return done(null, user);
   } catch (err) {
