@@ -3,11 +3,15 @@
     "activeCommit": 0,
     "commits": [
         {
-            "activePatchIndex": 0,
+            "activePatchIndex": 1,
             "patches": [
                 {
                     "date": 1754371678509,
                     "content": "Index: \n===================================================================\n--- \n+++ \n"
+                },
+                {
+                    "date": 1754380814751,
+                    "content": "Index: \n===================================================================\n--- \n+++ \n@@ -11,11 +11,16 @@\n cd ~/New-Dinero1\r\n \r\n # Pull latest changes\r\n echo \"📥 Pulling latest changes...\"\r\n-# Force clean pull (discard all local changes)\r\n+# Completely reset to remote state\r\n git fetch origin\r\n git reset --hard origin/main\r\n+git clean -fd\r\n+# Force checkout to ensure clean state\r\n+git checkout -f main\r\n+# Remove any remaining untracked files\r\n+git clean -fdx\r\n \r\n # Install backend dependencies\r\n echo \"📦 Installing backend dependencies...\"\r\n cd backend\r\n@@ -32,8 +37,10 @@\n \r\n # Build frontend\r\n echo \"🔨 Building frontend...\"\r\n npm run build\r\n+# Copy production environment file\r\n+cp .env.production .env.local\r\n \r\n # Clean up and restart PM2 processes\r\n echo \"🔄 Restarting applications...\"\r\n pm2 stop all 2>/dev/null || true\r\n"
                 }
             ],
             "date": 1754371678509,
