@@ -19,6 +19,34 @@ import useGeoLocation from '@/common/hook/useGeoLocation';
 // import { jungle } from '@/assets/png';
 // import { mobileiImage } from '@/assets/png';
 
+const BLOCKED_REGIONS = [
+  { country: 'US', state: 'MI' },
+  { country: 'US', state: 'ID' },
+  { country: 'US', state: 'WA' },
+  { country: 'US', state: 'LA' },
+  { country: 'US', state: 'NV' },
+  { country: 'US', state: 'MT' },
+  { country: 'US', state: 'CT' },
+  { country: 'US', state: 'HI' },
+  { country: 'US', state: 'DE' },
+  // { country: 'IN', state: 'GJ' } // Gujarat for testing 
+];
+const BLOCKED_COUNTRIES = ['MX'];
+
+function isBlockedRegion(geo) {
+  if (!geo) return false;
+  if (BLOCKED_COUNTRIES.includes(geo.country_code)) return true;
+  // Block by US state
+  if (geo.country_code === 'US' && BLOCKED_REGIONS.some(r => r.state === geo.state_code)) return true;
+  // Block by India state (Gujarat) (commented out for now)
+  // if (
+  //   geo.country_code === 'IN' && (
+  //     geo.state_code === 'GJ' || geo.state_name === 'Gujarat' || BLOCKED_REGIONS.some(r => r.country === 'IN' && (r.state === geo.state_code || r.state === geo.state_name))
+  //   )
+  // ) return true;
+  return false;
+}
+
 const LoginSignup = () => {
   const router = useRouter();
   const isToken = getAccessToken();
@@ -40,6 +68,9 @@ const LoginSignup = () => {
 
   const { signupData, signupLoading } = useSignup();
   const location = useGeoLocation();
+
+  const [geoInfo, setGeoInfo] = useState(null);
+  const [geoBlock, setGeoBlock] = useState(false);
 
   useEffect(() => {
     const checkToken = () => {
@@ -96,6 +127,27 @@ const LoginSignup = () => {
     if (location.loaded && !location.error) {
       console.log('User geolocation:', location.coordinates);
     }
+  }, [location]);
+
+  useEffect(() => {
+    async function fetchGeo() {
+      if (location.loaded && !location.error && location.coordinates.lat && location.coordinates.lng) {
+        try {
+          const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${location.coordinates.lat}&longitude=${location.coordinates.lng}&localityLanguage=en`);
+          const data = await res.json();
+          const geo = {
+            country_code: data.countryCode,
+            state_code: data.principalSubdivisionCode ? data.principalSubdivisionCode.split('-')[1] : undefined,
+            state_name: data.principalSubdivision,
+          };
+          setGeoInfo(geo);
+          if (isBlockedRegion(geo)) setGeoBlock(true);
+        } catch (e) {
+          // fallback: do not block
+        }
+      }
+    }
+    fetchGeo();
   }, [location]);
 
   if (pathname === '/reset-password' && newPasswordKey) {
@@ -157,6 +209,8 @@ const LoginSignup = () => {
                       isSignUp={true}
                       setOpen={setOpen}
                       setToastState={setToastState}
+                      geoInfo={geoInfo}
+                      isBlocked={isBlockedRegion(geoInfo)}
                     />
                   </div>
                 </TabsContent>
@@ -174,6 +228,8 @@ const LoginSignup = () => {
                           setIsForgotPassword={setIsForgotPassword}
                           isForgotPassword={isForgotPassword}
                           setToastState={setToastState}
+                          geoInfo={geoInfo}
+                          isBlocked={isBlockedRegion(geoInfo)}
                         />
                       </>
                     ) : (
@@ -182,6 +238,8 @@ const LoginSignup = () => {
                         setOpen={setOpen}
                         setIsForgotPassword={setIsForgotPassword}
                         setToastState={setToastState}
+                        geoInfo={geoInfo}
+                        isBlocked={isBlockedRegion(geoInfo)}
                       />
                     )}
                   </div>

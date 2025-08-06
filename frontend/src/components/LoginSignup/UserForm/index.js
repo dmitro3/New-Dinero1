@@ -20,6 +20,8 @@ const UserForm = ({
   setIsForgotPassword,
   isForgotPassword = false,
   setToastState,
+  geoInfo,
+  isBlocked = false,
 }) => {
   const authHook = useUserAuth({ setOpen, isSignUp, setToastState });
   const forgotPasswordHook = useForgotPassword({
@@ -30,11 +32,24 @@ const UserForm = ({
   const {
     control,
     handleSubmit,
-    onSubmit,
+    onSubmit: originalOnSubmit,
     loading = false,
     showPassword = false,
     togglePasswordVisibility = () => {},
   } = isForgotPassword ? forgotPasswordHook : authHook;
+
+  // Intercept submit to block if region is blocked
+  const onSubmit = (data) => {
+    if (isBlocked) {
+      setToastState && setToastState({
+        showToast: true,
+        message: 'Access from your region is not allowed.',
+        status: 'error',
+      });
+      return;
+    }
+    originalOnSubmit(data);
+  };
 
   const {
     termsData,

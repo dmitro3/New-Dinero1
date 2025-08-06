@@ -33,8 +33,8 @@ const args = { mergeParams: true }
 const userRouter = express.Router(args)
 
 // Public Routes
-userRouter.route('/sign-up').post(requestValidationMiddleware(userSignUpSchema), contextMiddleware(true), UserController.userSignUp)
-userRouter.route('/login').post(requestValidationMiddleware(userLoginSchema), contextMiddleware(false), UserController.userLogin)
+userRouter.route('/sign-up').post(geoVpnBlockMiddleware, requestValidationMiddleware(userSignUpSchema), contextMiddleware(true), UserController.userSignUp)
+userRouter.route('/login').post(geoVpnBlockMiddleware, requestValidationMiddleware(userLoginSchema), contextMiddleware(false), UserController.userLogin)
 
 userRouter.route('/verify-email').get(requestValidationMiddleware(verifyEmailSchema), contextMiddleware(true), UserController.verifyEmail)
 
