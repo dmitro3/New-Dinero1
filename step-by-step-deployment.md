@@ -38,7 +38,7 @@
 
 ```bash
 # Connect via SSH (replace with your details)
-ssh -i your-key.pem ubuntu@your-ec2-public-ip
+ssh -i Dinero-sweeps.pem ubuntu@3.82.45.138
 
 # Example:
 ssh -i dinerosweeps-key.pem ubuntu@3.250.123.45
@@ -124,7 +124,7 @@ You'll need the following information from your AWS RDS console:
 ### 4.2 Test RDS Connection
 ```bash
 # Test connection to your RDS instance
-psql -h your-rds-endpoint.region.rds.amazonaws.com -U your_username -d your_database_name
+psql -h dinero-db1.capk26ewitle.us-east-1.rds.amazonaws.com -U postgres -d readme_to_recover
 
 # Example:
 # psql -h dinerosweeps-db.us-east-1.rds.amazonaws.com -U dinerosweeps_user -d dinerosweeps
