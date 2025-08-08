@@ -69,6 +69,7 @@ const LoginSignup = () => {
   const { signupData, signupLoading } = useSignup();
   const location = useGeoLocation();
 
+  console.log(signupData)
   const [geoInfo, setGeoInfo] = useState(null);
   const [geoBlock, setGeoBlock] = useState(false);
 

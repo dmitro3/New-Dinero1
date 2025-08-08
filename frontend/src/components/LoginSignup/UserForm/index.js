@@ -40,6 +40,20 @@ const UserForm = ({
 
   // Intercept submit to block if region is blocked
   const onSubmit = (data) => {
+
+
+    if(isSignUp){
+   if(!data.isAge || !data.terms){
+       setToastState && setToastState({
+        showToast: true,
+        message: 'Please Allowed The Terms of Use,Privacy Policy and Age,States Restriction',
+        status: 'error',
+      });
+       return;
+    }
+
+    }
+ 
     if (isBlocked) {
       setToastState && setToastState({
         showToast: true,

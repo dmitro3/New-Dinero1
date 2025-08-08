@@ -11,6 +11,7 @@ function useSignup() {
     setSignupLoading(true);
     setSignupError(null);
     try {
+      console.log("hello signup here")
       const response = await getBannersService({ key: 'other' });
       setSignupData(response?.data?.banners?.rows || []);
     } catch (err) {
@@ -23,7 +24,7 @@ function useSignup() {
   useEffect(() => {
     getSignupAssets();
   }, []);
-
+console.log(signupData)
   return {
     signupData,
     signupError,
