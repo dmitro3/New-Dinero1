@@ -47,7 +47,11 @@ export class GetOtpHandler extends BaseHandler {
     if (!emailSent)
       throw new AppError(Errors.INTERNAL_SERVER_ERROR)
     await setCache(`${userObj.userId}:${otp}`, userObj.email, 300)
-    return { message: 'success', emailSent }
+    return { 
+      message: 'success', 
+      emailSent: emailSent.success || true,
+      userId: userObj.userId 
+    }
 
   }
 }
