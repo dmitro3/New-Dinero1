@@ -67,30 +67,88 @@ export class OneGameHubGameLaunchHandler extends BaseHandler {
     // Cache session data for 30 minutes
     await setCache(sessionId, JSON.stringify({ userId, coin, gameId, providerCasinoGameId }), 18000);
 
-    // Construct base URL
+    // Construct base URL and secret token
     const baseUrl = config.get('gameHub1.baseUrl');
     const secretToken = config.get('gameHub1.secretToken');
     const defaultIp = ipAddress || '127.0.0.1';
     const currency = coin === 'SC' ? 'SSC' : 'GOC';
 
-    // Construct game request URL
-    const url = isDemo === 'true'
-      ? `${baseUrl}?action=${actionType}&secret=${secretToken}&game_id=${providerCasinoGameId}&currency=USD&ip_address=${defaultIp}`
-      : `${baseUrl}?action=${actionType}&secret=${secretToken}&player_id=${sessionId}&game_id=${providerCasinoGameId}&currency=${currency}&ip_address=${defaultIp}`;
-    console.log(" url  ", url)
-    try {
-      const response = await axios.get(url);
-      console.log(" response  ", response)
+    // Validate configuration
+    if (!baseUrl) {
+      throw new AppError(Errors.INTERNAL_SERVER_ERROR, '1GameHub base URL not configured');
+    }
+    if (!secretToken) {
+      throw new AppError(Errors.INTERNAL_SERVER_ERROR, '1GameHub secret token not configured');
+    }
 
-      if (!response || !response.data?.response?.game_url) {
-        throw new AppError(Errors.INTERNAL_SERVER_ERROR);
+    // Construct game request URL based on your API structure
+    let url;
+    if (isDemo === 'true') {
+      // Demo play: https://site-ire1.1gamehub.com/integrations/bradenvend/rpc?action=demo_play&game_id={game_id}&secret=9fbdf6b8-c367-4cfb-9095-72f0d36dc1c3
+      url = `${baseUrl}?action=${actionType}&game_id=${providerCasinoGameId}&secret=${secretToken}`;
+    } else {
+      // Real play: https://site-ire1.1gamehub.com/integrations/bradenvend/rpc?action=real_play&game_id={game_id}&currency={currency}&player_id={player_id}&secret=9fbdf6b8-c367-4cfb-9095-72f0d36dc1c3
+      url = `${baseUrl}?action=${actionType}&game_id=${providerCasinoGameId}&currency=${currency}&player_id=${sessionId}&secret=${secretToken}`;
+    }
+
+    console.log("1GameHub URL:", url);
+    
+    try {
+      const response = await axios.get(url, {
+        timeout: 15000,
+        headers: {
+          'User-Agent': 'DineroSweeps/1.0',
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      console.log("1GameHub Response Status:", response.status);
+      console.log("1GameHub Response Data:", JSON.stringify(response.data, null, 2));
+
+      // Check for error response first
+      if (response.data && response.data.code && response.data.code !== 'SUCCESS') {
+        console.error('1GameHub API Error:', response.data);
+        throw new AppError(Errors.INTERNAL_SERVER_ERROR, `1GameHub API error: ${response.data.message || 'Unknown error'}`);
       }
 
-      return response.data.response.game_url;
+      // Handle different response structures
+      let gameUrl = null;
+      if (response.data?.response?.game_url) {
+        gameUrl = response.data.response.game_url;
+      } else if (response.data?.game_url) {
+        gameUrl = response.data.game_url;
+      } else if (response.data?.url) {
+        gameUrl = response.data.url;
+      } else if (typeof response.data === 'string' && response.data.startsWith('http')) {
+        gameUrl = response.data;
+      } else {
+        console.error('Invalid response structure from 1GameHub:', response.data);
+        throw new AppError(Errors.INTERNAL_SERVER_ERROR, 'Invalid response structure from 1GameHub');
+      }
+
+      return gameUrl;
     } catch (error) {
-      console.error('Error fetching game URL:', error);
-      throw new AppError(Errors.INTERNAL_SERVER_ERROR);
+      console.error('Error fetching game URL from 1GameHub:', error.message);
+      if (error.response) {
+        console.error('1GameHub Error Response Status:', error.response.status);
+        console.error('1GameHub Error Response Data:', JSON.stringify(error.response.data, null, 2));
+        
+        // Handle specific error codes
+        if (error.response.data?.code === 'ERR001') {
+          throw new AppError(Errors.INTERNAL_SERVER_ERROR, '1GameHub connection error - please check your configuration and network connectivity');
+        } else if (error.response.data?.code === 'ERR002') {
+          throw new AppError(Errors.INTERNAL_SERVER_ERROR, '1GameHub authentication error - please check your secret token');
+        } else if (error.response.data?.code === 'ERR003') {
+          throw new AppError(Errors.INTERNAL_SERVER_ERROR, '1GameHub game not found - please check the game ID');
+        } else {
+          throw new AppError(Errors.INTERNAL_SERVER_ERROR, `1GameHub API error: ${error.response.data?.message || error.message}`);
+        }
+      } else if (error.code === 'ECONNABORTED') {
+        throw new AppError(Errors.INTERNAL_SERVER_ERROR, '1GameHub API timeout - please try again');
+      } else {
+        throw new AppError(Errors.INTERNAL_SERVER_ERROR, `1GameHub API error: ${error.message}`);
+      }
     }
   }
-
 }
