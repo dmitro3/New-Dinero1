@@ -84,7 +84,7 @@ const TicketMessage = ({ ticketId }) => {
               </AvatarIcon>
               <div className="text-[rgb(var(--lb-blue-200))] text-sm">
                 <p className="text-white font-semibold">
-                  {msg?.isAdminResponse ? 'Orion stars' : username}
+                  {msg?.isAdminResponse ? 'Dinero Sweeps' : username}
                 </p>
                 <p>{formatDate(msg?.createdAt)}</p>
               </div>

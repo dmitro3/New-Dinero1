@@ -10,28 +10,30 @@ import db from '@src/db/models'
 
 export class GetOtpHandler extends BaseHandler {
   async run() {
-    const userObj = {};
-    const { userId, userEmail, username } = this.args
-    userObj.userId = userId
-    userObj.email = userEmail
-    userObj.username = username
+    const { userId, userEmail, username } = this.args;
 
-    const user = await db.User.findOne({
-      where: { userId },
-      attributes: ['isEmailVerified'],
-    })
+    if (!userId || !userEmail) {
+      throw new AppError(Errors.MISSING_REQUIRED_FIELDS);
+    }
+
+    const userObj = { userId, email: userEmail, username };
+
+    // Check DB connection + existing user
+    const user = await db.User.findOne({ where: { userId }, attributes: ['isEmailVerified'] });
+    if (!user) {
+      throw new AppError(Errors.USER_NOT_FOUND);
+    }
 
     if (user.isEmailVerified) {
-      throw new AppError(Errors.EMAIL_ALREADY_VERIFIED)
+      throw new AppError(Errors.EMAIL_ALREADY_VERIFIED);
     }
-    const userWithEmail = await db.User.findOne({
-      where: { email: userEmail },
-      attributes: ['isEmailVerified', 'userId'],
-    })
-    if (userWithEmail) {
-      throw new AppError(Errors.USER_ALREADY_EXIST_WITH_EMAIL)
-    }
+
     const otp = generateOtp();
+
+    // Ensure mail service env vars are loaded
+    if (!process.env.MAILJET_API_KEY || !process.env.MAILJET_SECRET_KEY) {
+      throw new AppError(Errors.MAIL_SERVICE_NOT_CONFIGURED);
+    }
 
     const emailSent = await sendMailjetEmail({
       user: userObj,
@@ -42,16 +44,19 @@ export class GetOtpHandler extends BaseHandler {
         body: `${EMAIL_TEMPLATE_TYPES.OTP_VERIFICATION}: ${otp}`
       },
       message: SUCCESS_MSG.EMAIL_SENT
-    })
+    });
 
-    if (!emailSent)
-      throw new AppError(Errors.INTERNAL_SERVER_ERROR)
-    await setCache(`${userObj.userId}:${otp}`, userObj.email, 300)
-    return { 
-      message: 'success', 
-      emailSent: emailSent.success || true,
-      userId: userObj.userId 
+    if (!emailSent) {
+      throw new AppError(Errors.INTERNAL_SERVER_ERROR);
     }
 
+    await setCache(`${userObj.userId}:${otp}`, userObj.email, 300);
+
+    return {
+      message: 'success',
+      emailSent: emailSent.success || true,
+      userId: userObj.userId
+    };
   }
 }
+

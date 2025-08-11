@@ -2,7 +2,7 @@
 
 ## 🏆 Project Overview
 
-[Orion stars] is a cutting-edge web application built with **Next.js**.
+[Dinero Sweeps] is a cutting-edge web application built with **Next.js**.
 
 ### 🎯 **Key Features**
 

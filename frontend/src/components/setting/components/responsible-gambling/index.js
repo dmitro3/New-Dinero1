@@ -47,7 +47,7 @@ const ResponsibleGambling = () => {
         <div className="mb-2">
           <div className="text-white text-[14px] font-bold">Self Exclusion</div>
           <div className="text-[rgb(var(--lb-blue-250))] text-[13px] mb-2">
-            Need a break from Orion stars? To start the automated self exclusion
+            Need a break from Dinero Sweeps? To start the automated self exclusion
             process, please click the button below to receive confirmation
             instructions via email.
           </div>

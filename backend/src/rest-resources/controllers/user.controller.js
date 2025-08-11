@@ -176,14 +176,26 @@ export default class UserController {
     }
   }
 
-  static async getOtp (req, res, next) {
-    try {
-      const data = await GetOtpHandler.execute({ ...req.body, ...req.query })
-      sendResponse({ req, res, next }, data)
-    } catch (error) {
-      next(error)
+ static async getOtp (req, res, next) {
+  try {
+    const { userId, userEmail, username } = { ...req.body, ...req.query };
+
+    if (!userId || !userEmail) {
+      throw new AppError(Errors.MISSING_REQUIRED_FIELDS);
     }
+
+    const data = await GetOtpHandler.execute({ userId, userEmail, username });
+    sendResponse({ req, res, next }, data);
+
+  } catch (error) {
+    console.error('❌ OTP Error:', error); // shows stack trace in console
+    next(error);
   }
+}
+
+
+
+
   static async verifyOtp (req, res, next) {
     try {
       const data = await VerifyOtpHandler.execute({ ...req.body, ...req.query })

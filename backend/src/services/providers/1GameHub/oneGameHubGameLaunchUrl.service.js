@@ -75,19 +75,30 @@ export class OneGameHubGameLaunchHandler extends BaseHandler {
 
     // Validate configuration
     if (!baseUrl) {
-      throw new AppError(Errors.INTERNAL_SERVER_ERROR, '1GameHub base URL not configured');
+      console.error('1GameHub Configuration Error: baseUrl is missing');
+      throw new AppError(Errors.INTERNAL_SERVER_ERROR, '1GameHub base URL not configured. Please check GAMEHUB1_BASE_URL in your .env file');
     }
     if (!secretToken) {
-      throw new AppError(Errors.INTERNAL_SERVER_ERROR, '1GameHub secret token not configured');
+      console.error('1GameHub Configuration Error: secretToken is missing');
+      throw new AppError(Errors.INTERNAL_SERVER_ERROR, '1GameHub secret token not configured. Please check GAMEHUB1_SECRET_TOKEN in your .env file');
     }
+    
+    // Log configuration for debugging
+    console.log('1GameHub Configuration:', {
+      baseUrl: baseUrl,
+      secretTokenConfigured: !!secretToken,
+      currency: currency,
+      isDemo: isDemo,
+      actionType: actionType
+    });
 
-    // Construct game request URL based on your API structure
+    // Construct game request URL based on 1GameHub API structure
     let url;
     if (isDemo === 'true') {
-      // Demo play: https://site-ire1.1gamehub.com/integrations/bradenvend/rpc?action=demo_play&game_id={game_id}&secret=9fbdf6b8-c367-4cfb-9095-72f0d36dc1c3
+      // Demo play: https://site-ire1.1gamehub.com/integrations/dinerosweeps/rpc?action=demo_play&game_id={game_id}&secret={secret_token}
       url = `${baseUrl}?action=${actionType}&game_id=${providerCasinoGameId}&secret=${secretToken}`;
     } else {
-      // Real play: https://site-ire1.1gamehub.com/integrations/bradenvend/rpc?action=real_play&game_id={game_id}&currency={currency}&player_id={player_id}&secret=9fbdf6b8-c367-4cfb-9095-72f0d36dc1c3
+      // Real play: https://site-ire1.1gamehub.com/integrations/dinerosweeps/rpc?action=real_play&game_id={game_id}&currency={currency}&player_id={player_id}&secret={secret_token}
       url = `${baseUrl}?action=${actionType}&game_id=${providerCasinoGameId}&currency=${currency}&player_id=${sessionId}&secret=${secretToken}`;
     }
 
@@ -109,7 +120,19 @@ export class OneGameHubGameLaunchHandler extends BaseHandler {
       // Check for error response first
       if (response.data && response.data.code && response.data.code !== 'SUCCESS') {
         console.error('1GameHub API Error:', response.data);
-        throw new AppError(Errors.INTERNAL_SERVER_ERROR, `1GameHub API error: ${response.data.message || 'Unknown error'}`);
+        console.error('1GameHub Request URL:', url);
+        console.error('1GameHub Request Params:', { actionType, providerCasinoGameId, currency, sessionId, isDemo });
+        
+        // Handle specific error codes
+        if (response.data.code === 'ERR001') {
+          throw new AppError(Errors.INTERNAL_SERVER_ERROR, '1GameHub connection error - please check your configuration and network connectivity');
+        } else if (response.data.code === 'ERR002') {
+          throw new AppError(Errors.INTERNAL_SERVER_ERROR, '1GameHub authentication error - please check your secret token');
+        } else if (response.data.code === 'ERR003') {
+          throw new AppError(Errors.INTERNAL_SERVER_ERROR, '1GameHub game not found - please check the game ID');
+        } else {
+          throw new AppError(Errors.INTERNAL_SERVER_ERROR, `1GameHub API error: ${response.data.message || 'Unknown error'}`);
+        }
       }
 
       // Handle different response structures

@@ -243,7 +243,7 @@ const config = convict({
       env: 'EMAIL_SENDER_NAME'
     },
     senderEmail: {
-      default: 'GS Casino',
+      default: 'parthiv@pervadorit.com',
       env: 'EMAIL_SENDER_EMAIL'
     }
   },

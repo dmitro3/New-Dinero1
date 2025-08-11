@@ -24,7 +24,7 @@ export const ResponsibleGaming_MAPPING = {
     smartGaming: {
       title: 'Smart Gaming',
       description:
-        'Orion stars is dedicated to providing a secure and enjoyable gaming environment for all players. Online gaming should remain an entertaining activity without negatively impacting other aspects of your life.',
+        'Dinero Sweeps is dedicated to providing a secure and enjoyable gaming environment for all players. Online gaming should remain an entertaining activity without negatively impacting other aspects of your life.',
       questions: [
         {
           question: 'Tips for Managing Your Gaming Habits',
@@ -34,7 +34,7 @@ export const ResponsibleGaming_MAPPING = {
         {
           question: 'House Advantage/House Edge',
           answer:
-            'Games typically have a house edge, which ensures that a percentage of the total amount played is returned to the house (in this case, Orion stars).',
+            'Games typically have a house edge, which ensures that a percentage of the total amount played is returned to the house (in this case, Dinero Sweeps).',
         },
         {
           question: 'Independent Outcomes',
@@ -53,7 +53,7 @@ export const ResponsibleGaming_MAPPING = {
         {
           question: 'Responsible Gaming Tools',
           answer:
-            'Orion stars provides several tools to help you manage your gaming activities effectively.',
+            'Dinero Sweeps provides several tools to help you manage your gaming activities effectively.',
         },
         {
           question: 'Self-Exclusion',
@@ -227,14 +227,14 @@ export const ResponsibleGaming_MAPPING = {
             'All of our spins are completely random and all results are based on provably fair model. We have no control over the wins and losses and you can check the spins result any time through the algorithm.',
         },
         {
-          question: 'Can I have some Orion starsSweepstake Cash or Game Coins?',
+          question: 'Can I have some Dinero SweepsSweepstake Cash or Game Coins?',
           answer:
             'We occasionally have freeplay or no purchase bonuses available. When we will send you an email letting you know all of the details. Be sure to check us out on social media as we may have special promotions there as well!',
         },
         {
           question: 'Are there any special rewards I can receive?',
           answer:
-            'After creating your account the team at Orion stars wants you to enjoy your time as much as possible. We believe in continuous rewards through promotional deals including match play, freeplay, and other giveaways.',
+            'After creating your account the team at Dinero Sweeps wants you to enjoy your time as much as possible. We believe in continuous rewards through promotional deals including match play, freeplay, and other giveaways.',
         },
         {
           question: 'Where can I get promotions/giveaways?',
@@ -250,7 +250,7 @@ export const ResponsibleGaming_MAPPING = {
         {
           question: 'Can I use more than one account?',
           answer:
-            'It is against our terms and conditions for an individual to have more than one account. If you do happen to have more than one please reach out to us via the online chat so we can resolve this. You will be unable to redeem your Orion stars if you have more than one account.',
+            'It is against our terms and conditions for an individual to have more than one account. If you do happen to have more than one please reach out to us via the online chat so we can resolve this. You will be unable to redeem your Dinero Sweeps if you have more than one account.',
         },
         {
           question: 'Can I delete/temporarily disable my account?',

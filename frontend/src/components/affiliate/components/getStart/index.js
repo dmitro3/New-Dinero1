@@ -22,7 +22,7 @@ const Start = () => {
       <div className="p-4 border-b border-[rgb(var(--lb-blue-300))]">
         <div className="mb-2">
           <div className="text-[rgb(var(--lb-blue-250))] text-[13px] mb-2">
-            Orion stars offers state-of-the-art affiliate system. You will
+            Dinero Sweeps offers state-of-the-art affiliate system. You will
             forever receive commission from every user you refer. You can derive
             your commission using the following formula:
           </div>

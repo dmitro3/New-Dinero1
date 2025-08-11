@@ -33,7 +33,7 @@ export const SIGNUP = [
   },
   {
     name: 'terms',
-    label: 'I accept the Orion stars Terms of Use and Privacy Policy',
+    label: 'I accept the Dinero Sweeps Terms of Use and Privacy Policy',
     type: 'checkbox',
     required: 'Terms and Condition is required!',
     isLink : true,

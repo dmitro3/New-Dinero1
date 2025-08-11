@@ -60,7 +60,7 @@ const Calculator = () => {
     <div className="calculator-container border border-[rgb(var(--lb-blue-300))] bg-[rgb(var(--lb-blue-800))] rounded p-4">
       <h2>Monthly Budget Calculator</h2>
       <p className="text-[rgb(var(--lb-blue-250))] text-[14px] mt-2">
-        Your information is confidential and is not visible to Orion stars. We
+        Your information is confidential and is not visible to Dinero Sweeps. We
         take privacy seriously and ensure that any data you enter remains secure
         and used only for its intended purpose.
       </p>

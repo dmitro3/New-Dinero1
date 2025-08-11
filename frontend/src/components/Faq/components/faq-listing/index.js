@@ -8,7 +8,7 @@ const FaqListing = ({ faqData }) => {
       <div className="p-4 ">
         <div className="mb-2">
           <div className="text-white text-[14px] font-bold">
-            The Orion starsis a FREE-TO-PLAY online platform that operates in 2
+            The Dinero Sweeps is a FREE-TO-PLAY online platform that operates in 2
             different modes: game coins mode & Sweepstake Cash mode.
           </div>
           <div className="text-green-400 text-[14px] font-bold mt-2">
