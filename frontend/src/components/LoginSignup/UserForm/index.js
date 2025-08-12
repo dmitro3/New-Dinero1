@@ -3,7 +3,7 @@ import { eye, eyeOff } from '@/assets/svg';
 import { ELEMENT } from '@/common/form-control';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
-import { Controller } from 'react-hook-form';
+import { Controller,useForm,useWatch } from 'react-hook-form';
 import useUserAuth from '../hooks/useUserAuth';
 import useForgotPassword from '../hooks/useForgotPassword';
 import CustomDialog from '../TermsPrivacy';
@@ -34,13 +34,21 @@ const UserForm = ({
     handleSubmit,
     onSubmit: originalOnSubmit,
     loading = false,
+    
     showPassword = false,
     togglePasswordVisibility = () => {},
   } = isForgotPassword ? forgotPasswordHook : authHook;
 
+
+
+
+  const [isMarckTick,setIsMarkTick] = useState(false)
+
   // Intercept submit to block if region is blocked
   const onSubmit = (data) => {
 
+    console.log(data)
+    console.log("hello signin")
 
     if(isSignUp){
    if(!data.isAge || !data.terms){
@@ -52,7 +60,9 @@ const UserForm = ({
        return;
     }
 
-    }
+  
+
+}
  
     if (isBlocked) {
       setToastState && setToastState({
@@ -136,6 +146,7 @@ const UserForm = ({
                             placeholder={item.placeholder}
                             checked={field.value}
                             onCheckedChange={field.onChange}
+                            name={item.name}
                             {...field}
                             className={`mt-0.5 ${error && 'border-red-500'}`}
                           />
@@ -253,8 +264,10 @@ const UserForm = ({
           {/* Google Sign-In Button */}
           <Button
             type="button"
+            disabled
             className="w-full border border-gray-300 bg-white text-black flex items-center justify-center gap-1 mt-4 hover:bg-gray-100"
             onClick={() => {
+ 
               window.location.href = process.env.NEXT_PUBLIC_BACKEND_URL + '/api/v1/auth/sso/google';
             }}
           >
@@ -264,8 +277,10 @@ const UserForm = ({
           {/* Facebook Sign-In Button */}
           <Button
             type="button"
+            disabled
             className="w-full border border-blue-600 bg-white text-black flex items-center justify-center gap-1 mt-2 hover:bg-blue-50"
             onClick={() => {
+ 
               window.location.href = process.env.NEXT_PUBLIC_BACKEND_URL + '/api/v1/auth/sso/facebook';
             }}
           >
