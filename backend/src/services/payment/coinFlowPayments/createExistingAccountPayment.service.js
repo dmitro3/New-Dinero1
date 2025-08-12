@@ -62,7 +62,7 @@ export class CreateCoinFlowExistingAccountPaymentService extends BaseHandler {
       }
 
       const token = paymentRecord.token;
-      const orderId = `ORION-${userId}-${packageDetails.id}-${dayjs().valueOf()}-${Math.random().toString().substring(2, 8)}`;
+      const orderId = `DINERO-${userId}-${packageDetails.id}-${dayjs().valueOf()}-${Math.random().toString().substring(2, 8)}`;
 
       // Step 4: Get CoinFlow session key
       const sessionKeyRes = await axios.get(`${config.get('coinFlow.baseUrl')}/api/auth/session-key`, {

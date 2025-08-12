@@ -52,7 +52,7 @@ export const chatData = [
   {
     id: 1,
     level: 1,
-    username: 'orionStars bot',
+    username: 'dinerosweeps bot',
     time: '03:27 PM',
     avatar: avatar1,
     isBot: true,

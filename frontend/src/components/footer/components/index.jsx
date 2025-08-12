@@ -36,7 +36,7 @@ const Footer = () => {
 
           <div className="container mx-auto px-4 my-4 text-gray-400 text-sm text-center border-t border-neutral-600">
             <h1 className="text-center font-extrabold text-3xl py-3">
-              {t('orionStars')}
+              {t('Dinero Sweeps')}
             </h1>
             <p className="p-2">
               NO PURCHASE REQUIRED to participate in the Sweepstakes.
@@ -51,18 +51,18 @@ const Footer = () => {
                 terms of service
               </span>
             </p>
-            <p className="p-2">{t('orionStarsRights')}.</p>
+            <p className="p-2">{t('dinerosweepsrights')}.</p>
 
             {/* this things are not required at that time  */}
 
             <p className="pt-2">
               {t('support')}:
               <span className="text-white hover:underline cursor-pointer">
-              support@orionstarsweeps.com
+              support@dinerosweeps.com
               </span>{' '}
               | {t('business')}:{' '}
               <span className="text-white hover:underline cursor-pointer">
-              support@orionstarsweeps.com{' '}
+              support@dinerosweeps.com{' '}
               </span>
             </p>
             {/* <p>{t('cooperationWelcome')}</p>

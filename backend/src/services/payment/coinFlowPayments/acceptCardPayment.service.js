@@ -53,7 +53,7 @@ export class CreateCoinFlowCardPaymentService extends BaseHandler {
 
       if (!packageDetails) throw new AppError(Errors.PACKAGE_NOT_FOUND);
 
-      const orderId = `ORION-${userId}-${packageDetails.id}-${dayjs().valueOf()}-${Math.random().toString().substring(2, 8)}`;
+      const orderId = `DINERO-${userId}-${packageDetails.id}-${dayjs().valueOf()}-${Math.random().toString().substring(2, 8)}`;
 
       const sessionKeyRes = await axios.get(`${config.get('coinFlow.baseUrl')}/api/auth/session-key`, {
         headers: {

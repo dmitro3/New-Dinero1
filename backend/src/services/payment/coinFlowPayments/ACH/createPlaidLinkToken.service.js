@@ -29,7 +29,7 @@ export class CreatePlaidLinkTokenService extends BaseHandler {
         user: {
           client_user_id: `${userId}`,
         },
-        client_name: 'OrionStar',
+        client_name: 'Dinero Sweeps',
         products: ['auth'],
         language: 'en',
         webhook: config.get('app.userFrontendUrl'),

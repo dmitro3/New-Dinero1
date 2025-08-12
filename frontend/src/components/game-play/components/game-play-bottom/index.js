@@ -49,7 +49,7 @@ const GamePlayBottom = ({ gamePlayRef, handleIsDemo, isDemo, isFavourite }) => {
           onClick={() => setModalOpen(!isModalOpen)}
         /> */}
       </div>
-      <div className="flex items-center gap-2">
+      {/* <div className="flex items-center gap-2">
         <span
           className={`text-sm font-bold ${
             isDemo ? 'text-green-400' : 'text-[rgb(var(--lb-blue-200))]'
@@ -76,7 +76,7 @@ const GamePlayBottom = ({ gamePlayRef, handleIsDemo, isDemo, isFavourite }) => {
         >
           Real Play
         </span>
-      </div>
+      </div> */}
       {/* <LiveStatusModal open={isModalOpen} onOpenChange={setModalOpen} /> */}
     </div>
   );

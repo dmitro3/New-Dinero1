@@ -160,7 +160,7 @@ export const FAQ_MAPPING = {
         {
           question: `Why can't I log in?`,
           answer:
-            'First make sure you are on https://orionStars.io and using the correct email and password, try closing the tab or tabs that you are playing on and clearing your cache. Also make sure you’re on the latest version of the web browser you are using (Chrome, Edge, Safari, etc.). If the issue persists, then contact us and provide as much information as possible so that we can help quickly and efficiently',
+            'First make sure you are on https://dinerosweeps.io and using the correct email and password, try closing the tab or tabs that you are playing on and clearing your cache. Also make sure you’re on the latest version of the web browser you are using (Chrome, Edge, Safari, etc.). If the issue persists, then contact us and provide as much information as possible so that we can help quickly and efficiently',
         },
         {
           question: 'The games keep freezing.',

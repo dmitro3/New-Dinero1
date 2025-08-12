@@ -57,7 +57,7 @@ export const activeTaskList = [
     scValue: 0.02,
     missionTarget: [
       {
-        text: 'Follow orionStarsofficial twitter, get the latest news and grab the bonus drop in time',
+        text: 'Follow dinerosweepsofficial twitter, get the latest news and grab the bonus drop in time',
       },
       {
         list: [],
@@ -74,7 +74,7 @@ export const claimedTaskList = [
     scValue: 0.02,
     missionTarget: [
       {
-        text: 'Join the orionStarstelegram channel, and get the bonus drop just in time!',
+        text: 'Join the dinerosweepstelegram channel, and get the bonus drop just in time!',
       },
       {
         list: [],

@@ -32,7 +32,7 @@ export class CreateCoinFlowApplePayService extends BaseHandler {
         const packageDetails = await db.Package.findOne({ where: { id: packageId, isActive: true } });
         if (!packageDetails) throw new AppError(Errors.PACKAGE_NOT_FOUND);
 
-        const orderId = `ORION-${userId}-${packageId}-${Date.now()}-${Math.random().toString().slice(2, 6)}`;
+        const orderId = `DINERO-${userId}-${packageId}-${Date.now()}-${Math.random().toString().slice(2, 6)}`;
 
         // 3. Get Coinflow session key
         const sessionRes = await axios.get('https://api-sandbox.coinflow.cash/api/auth/session-key', {

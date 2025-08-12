@@ -26,7 +26,7 @@ export class CreateWebhookDataService extends BaseHandler {
 
       if (!packageDetails) throw new AppError(Errors.PACKAGE_NOT_FOUND);
 
-      const orderId = `ORION-${userId}-${packageDetails.id}-${dayjs().valueOf()}-${Math.random().toString().substring(2, 8)}`;
+      const orderId = `DINERO-${userId}-${packageDetails.id}-${dayjs().valueOf()}-${Math.random().toString().substring(2, 8)}`;
 
       await db.ApprovelyPaymentOrder.create({
         userId,
