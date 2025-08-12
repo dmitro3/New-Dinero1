@@ -1,99 +1,119 @@
-const axios = require('axios');
+const axios = require("axios");
 
-// Configuration from environment variables
-const GEO_BLOCKING_ENABLED = process.env.GEO_BLOCKING_ENABLED !== 'false';
-const VPN_DETECTION_ENABLED = process.env.VPN_DETECTION_ENABLED !== 'false';
-const GEO_BLOCKING_FALLBACK = process.env.GEO_BLOCKING_FALLBACK || 'allow';
+const GEO_BLOCKING_ENABLED = process.env.GEO_BLOCKING_ENABLED !== "false";
+const VPN_DETECTION_ENABLED = process.env.VPN_DETECTION_ENABLED !== "false";
+const GEO_BLOCKING_FALLBACK = process.env.GEO_BLOCKING_FALLBACK || "allow";
 const GEO_API_TIMEOUT = parseInt(process.env.GEO_API_TIMEOUT) || 5000;
 
-// Proton VPN Free supports US, NL (Netherlands), JP (Japan)
-// For testing, block all US states and NL, JP countries
 const blockedRegions = [
-  { country: 'US', state: 'MI' },
-  { country: 'US', state: 'ID' },
-  { country: 'US', state: 'WA' },
-  { country: 'US', state: 'LA' },
-  { country: 'US', state: 'NV' },
-  { country: 'US', state: 'MT' },
-  { country: 'US', state: 'CT' },
-  { country: 'US', state: 'HI' },
-  { country: 'US', state: 'DE' },
-  // { country: 'IN', state: 'GJ' } // Gujarat for testing 
+  { country: "US", state: "MI" }, // Michigan
+  { country: "US", state: "ID" }, // Idaho
+  { country: "US", state: "WA" }, // Washington
+  { country: "US", state: "LA" }, // Louisiana
+  { country: "US", state: "NV" }, // Nevada
+  { country: "US", state: "MT" }, // Montana
+  { country: "US", state: "CT" }, // Connecticut
+  { country: "US", state: "HI" }, // Hawaii
+  { country: "US", state: "DE" }, // Delaware
+  { country: "US", state: "VA" }, // Virginia
+  { country: "US", state: "OR" }, // Oregon
 ];
-const blockedCountries = ['MX']; // Block Mexico
+const blockedCountries = ["MX"];
+
+const US_STATE_NAME_TO_CODE = {
+  "Alabama": "AL", "Alaska": "AK", "Arizona": "AZ", "Arkansas": "AR",
+  "California": "CA", "Colorado": "CO", "Connecticut": "CT", "Delaware": "DE",
+  "Florida": "FL", "Georgia": "GA", "Hawaii": "HI", "Idaho": "ID",
+  "Illinois": "IL", "Indiana": "IN", "Iowa": "IA", "Kansas": "KS",
+  "Kentucky": "KY", "Louisiana": "LA", "Maine": "ME", "Maryland": "MD",
+  "Massachusetts": "MA", "Michigan": "MI", "Minnesota": "MN", "Mississippi": "MS",
+  "Missouri": "MO", "Montana": "MT", "Nebraska": "NE", "Nevada": "NV",
+  "New Hampshire": "NH", "New Jersey": "NJ", "New Mexico": "NM", "New York": "NY",
+  "North Carolina": "NC", "North Dakota": "ND", "Ohio": "OH", "Oklahoma": "OK",
+  "Oregon": "OR", "Pennsylvania": "PA", "Rhode Island": "RI", "South Carolina": "SC",
+  "South Dakota": "SD", "Tennessee": "TN", "Texas": "TX", "Utah": "UT",
+  "Vermont": "VT", "Virginia": "VA", "Washington": "WA", "West Virginia": "WV",
+  "Wisconsin": "WI", "Wyoming": "WY"
+};
+
+function normalizeStateCode(stateCode, stateName) {
+  if (stateCode) {
+    let code = stateCode.toUpperCase();
+    if (code.includes("-")) code = code.split("-").pop();
+    return code;
+  }
+  if (stateName) {
+    return US_STATE_NAME_TO_CODE[stateName.trim()] || stateName.toUpperCase();
+  }
+  return null;
+}
 
 async function geoVpnBlockMiddleware(req, res, next) {
-  // Skip if geolocation blocking is disabled
   if (!GEO_BLOCKING_ENABLED) {
     return next();
   }
 
-  const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-  const geoApiKey = process.env.IPGEO_API_KEY;
+  const ip =
+    (req.headers["x-forwarded-for"] || "").split(",")[0].trim() ||
+    req.connection?.remoteAddress?.replace(/^.*:/, "");
 
-  // Skip if no API key is configured
+  console.log(`[Geo/VPN Middleware] Detected IP: ${ip}`);
+
+  const geoApiKey = process.env.IPGEO_API_KEY;
   if (!geoApiKey) {
-    console.warn('IPGEO_API_KEY not configured, skipping geolocation check');
+    console.warn("IPGEO_API_KEY not configured, skipping geolocation check");
     return next();
   }
 
   try {
-    // Get geo info with timeout
-    const geoRes = await axios.get(`https://api.ipgeolocation.io/ipgeo?apiKey=${geoApiKey}&ip=${ip}`, {
-      timeout: GEO_API_TIMEOUT
-    });
-    const { country_code2, state_prov, state_code } = geoRes.data;
+    const geoRes = await axios.get(
+      `https://api.ipgeolocation.io/ipgeo?apiKey=${geoApiKey}&ip=${ip}`,
+      { timeout: GEO_API_TIMEOUT }
+    );
 
-    // Block by country
+    let { country_code2, state_prov, state_code, city } = geoRes.data;
+    let normalizedStateCode = normalizeStateCode(state_code, state_prov);
+
+    console.log(
+      `[Geo] IP: ${ip} | Country: ${country_code2} | State: ${normalizedStateCode} | City: ${city}`
+    );
+
     if (blockedCountries.includes(country_code2)) {
-      return res.status(403).json({ error: 'Access from your region is not allowed.' });
+      return res.status(403).json({ error: "Access from your country is not allowed." });
     }
 
-    // Block by US state
-    if (country_code2 === 'US' && blockedRegions.some(r => r.state === state_prov)) {
-      return res.status(403).json({ error: 'Access from your region is not allowed.' });
+    if (
+      country_code2 === "US" &&
+      blockedRegions.some((r) => r.state === normalizedStateCode)
+    ) {
+      return res.status(403).json({ error: "Access from your state is not allowed." });
     }
 
-    // Add special Gujarat block logic:
-    // Block by India state (Gujarat) (commented out for now)
-    // if (
-    //   country_code2 === 'IN' && (
-    //     state_prov === 'Gujarat' ||
-    //     state_code === 'GJ' ||
-    //     blockedRegions.some(r => r.country === 'IN' && (r.state === state_prov || r.state === state_code))
-    //   )
-    // ) {
-    //   return res.status(403).json({ error: 'Access from your region is not allowed.' });
-    // }
-
-    // VPN/Proxy check
     if (VPN_DETECTION_ENABLED) {
       const vpnApiKey = process.env.IPQUALITYSCORE_API_KEY;
       if (vpnApiKey) {
-        const vpnUrl = `https://ipqualityscore.com/api/json/ip/${vpnApiKey}/${ip}`;
-        const { data } = await axios.get(vpnUrl, { timeout: GEO_API_TIMEOUT });
-        if (data.vpn || data.proxy || data.tor) {
-          return res.status(403).json({ error: 'VPN/Proxy detected. Please disable it to access the service.' });
+        const vpnRes = await axios.get(
+          `https://ipqualityscore.com/api/json/ip/${vpnApiKey}/${ip}`,
+          { timeout: GEO_API_TIMEOUT }
+        );
+        const { vpn, proxy, tor } = vpnRes.data;
+        console.log(`[VPN Check] VPN: ${vpn} | Proxy: ${proxy} | Tor: ${tor}`);
+        if (vpn || proxy || tor) {
+          return res.status(403).json({ error: "VPN/Proxy detected. Please disable it to access." });
         }
       }
     }
 
     next();
   } catch (err) {
-    console.error('Geo/VPN check failed:', err.message);
-    
-    // Handle fallback based on configuration
-    if (GEO_BLOCKING_FALLBACK === 'block') {
-      return res.status(403).json({ error: 'Geolocation check failed. Access denied.' });
-    } else if (GEO_BLOCKING_FALLBACK === 'allow_on_error') {
-      console.warn('Geolocation check failed, allowing access as fallback');
-      return next();
+    console.error("Geo/VPN check failed:", err.message);
+    if (GEO_BLOCKING_FALLBACK === "block") {
+      return res.status(403).json({ error: "Geolocation check failed. Access denied." });
     } else {
-      // Default: allow on error
-      console.warn('Geolocation check failed, allowing access as fallback');
+      console.warn("Geolocation check failed, allowing access as fallback");
       return next();
     }
   }
 }
 
-module.exports = geoVpnBlockMiddleware; 
+module.exports = geoVpnBlockMiddleware;

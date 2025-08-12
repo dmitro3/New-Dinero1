@@ -7,7 +7,6 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-
     "lint:js": "eslint . --ext .js,.jsx",
     "lint:css": "stylelint \"**/*.{css,scss}\"",
     "lint-style": "npm run lint:js && npm run lint:css",
@@ -72,6 +71,7 @@
     "react-hook-form": "^7.53.2",
     "react-i18next": "^15.1.1",
     "react-qr-code": "^2.0.15",
+    "react-toastify": "^11.0.5",
     "sass": "^1.83.1",
     "socket.io-client": "^4.8.1",
     "tailwind-merge": "^2.5.4",

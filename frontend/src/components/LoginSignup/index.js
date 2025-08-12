@@ -8,16 +8,33 @@ import {
 } from '@/components/ui/dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../ui/tabs';
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname, useSearchParams } from 'next/navigation';
 import { FORGOT_PASSWORD, SIGNIN, SIGNUP } from './constant';
 import { getAccessToken } from '@/services/storageUtils';
 import { isEmpty } from '@/lib/utils';
-import { usePathname, useSearchParams } from 'next/navigation';
 import CustomToast from '@/common/components/custom-toaster';
 import useSignup from './hooks/useSignup';
 import useGeoLocation from '@/common/hook/useGeoLocation';
-// import { jungle } from '@/assets/png';
-// import { mobileiImage } from '@/assets/png';
+
+// ✅ US State name → code mapping
+const US_STATE_NAME_TO_CODE = {
+  "Alabama": "AL", "Alaska": "AK", "Arizona": "AZ", "Arkansas": "AR",
+  "California": "CA", "Colorado": "CO", "Connecticut": "CT", "Delaware": "DE",
+  "Florida": "FL", "Georgia": "GA", "Hawaii": "HI", "Idaho": "ID",
+  "Illinois": "IL", "Indiana": "IN", "Iowa": "IA", "Kansas": "KS",
+  "Kentucky": "KY", "Louisiana": "LA", "Maine": "ME", "Maryland": "MD",
+  "Massachusetts": "MA", "Michigan": "MI", "Minnesota": "MN", "Mississippi": "MS",
+  "Missouri": "MO", "Montana": "MT", "Nebraska": "NE", "Nevada": "NV",
+  "New Hampshire": "NH", "New Jersey": "NJ", "New Mexico": "NM", "New York": "NY",
+  "North Carolina": "NC", "North Dakota": "ND", "Ohio": "OH", "Oklahoma": "OK",
+  "Oregon": "OR", "Pennsylvania": "PA", "Rhode Island": "RI", "South Carolina": "SC",
+  "South Dakota": "SD", "Tennessee": "TN", "Texas": "TX", "Utah": "UT",
+  "Vermont": "VT", "Virginia": "VA", "Washington": "WA", "West Virginia": "WV",
+  "Wisconsin": "WI", "Wyoming": "WY"
+};
+
+// ✅ Test mode toggle
+const DEBUG_FORCE_BLOCK = false;
 
 const BLOCKED_REGIONS = [
   { country: 'US', state: 'MI' },
@@ -29,34 +46,46 @@ const BLOCKED_REGIONS = [
   { country: 'US', state: 'CT' },
   { country: 'US', state: 'HI' },
   { country: 'US', state: 'DE' },
-  // { country: 'IN', state: 'GJ' } // Gujarat for testing 
+  { country: 'US', state: 'VA' },
+  { country: 'US', state: 'OR' },
 ];
 const BLOCKED_COUNTRIES = ['MX'];
 
+// ✅ Normalize & check
+function normalizeState(stateCode, stateName) {
+  if (stateCode) {
+    let code = stateCode.toUpperCase();
+    if (code.includes('-')) code = code.split('-').pop();
+    return code;
+  }
+  if (stateName) {
+    return US_STATE_NAME_TO_CODE[stateName.trim()] || stateName.toUpperCase();
+  }
+  return null;
+}
+
 function isBlockedRegion(geo) {
   if (!geo) return false;
+
+  const stateCode = normalizeState(geo.state_code, geo.state_name);
+
   if (BLOCKED_COUNTRIES.includes(geo.country_code)) return true;
-  // Block by US state
-  if (geo.country_code === 'US' && BLOCKED_REGIONS.some(r => r.state === geo.state_code)) return true;
-  // Block by India state (Gujarat) (commented out for now)
-  // if (
-  //   geo.country_code === 'IN' && (
-  //     geo.state_code === 'GJ' || geo.state_name === 'Gujarat' || BLOCKED_REGIONS.some(r => r.country === 'IN' && (r.state === geo.state_code || r.state === geo.state_name))
-  //   )
-  // ) return true;
+  if (geo.country_code === 'US' &&
+      BLOCKED_REGIONS.some(r => r.state.toUpperCase() === stateCode)) {
+    return true;
+  }
   return false;
 }
 
 const LoginSignup = () => {
   const router = useRouter();
-  const isToken = getAccessToken();
-
-  const searchParams = useSearchParams();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
   const newPasswordKey = searchParams.get('newPasswordKey');
 
-  const [open, setOpen] = useState(isEmpty(isToken));
-  const [isAuthenticated, setIsAuthenticated] = useState(!isEmpty(isToken));
+  const token = getAccessToken();
+  const [open, setOpen] = useState(isEmpty(token));
+  const [isAuthenticated, setIsAuthenticated] = useState(!isEmpty(token));
   const [isForgotPassword, setIsForgotPassword] = useState(false);
   const [toastState, setToastState] = useState({
     showToast: false,
@@ -64,88 +93,67 @@ const LoginSignup = () => {
     status: '',
   });
 
-  const { showToast, message, status } = toastState;
-
   const { signupData, signupLoading } = useSignup();
   const location = useGeoLocation();
-
-  console.log(signupData)
   const [geoInfo, setGeoInfo] = useState(null);
   const [geoBlock, setGeoBlock] = useState(false);
 
+  // Token listener
   useEffect(() => {
     const checkToken = () => {
-      const token = getAccessToken();
-      const hasToken = !isEmpty(token);
-      
+      const hasToken = !isEmpty(getAccessToken());
       setIsAuthenticated(hasToken);
       setOpen(!hasToken);
     };
-
-    // Check immediately
     checkToken();
-
-    // Also check after a small delay to handle SSO redirects
     const timeoutId = setTimeout(checkToken, 100);
-
-    return () => clearTimeout(timeoutId);
+    window.addEventListener('storage', checkToken);
+    window.addEventListener('focus', checkToken);
+    const intervalId = setInterval(checkToken, 500);
+    return () => {
+      clearTimeout(timeoutId);
+      clearInterval(intervalId);
+      window.removeEventListener('storage', checkToken);
+      window.removeEventListener('focus', checkToken);
+    };
   }, [router]);
 
-  // Listen for storage changes (when token is added/removed)
-  useEffect(() => {
-    const handleStorageChange = () => {
-      const token = getAccessToken();
-      const hasToken = !isEmpty(token);
-      
-      setIsAuthenticated(hasToken);
-      setOpen(!hasToken);
-    };
-
-    // Listen for storage events
-    window.addEventListener('storage', handleStorageChange);
-    
-    // Listen for custom storage events (for same-tab updates)
-    window.addEventListener('storage', handleStorageChange);
-    
-    // Also check when the component mounts and when window gains focus
-    const handleFocus = () => {
-      handleStorageChange();
-    };
-
-    window.addEventListener('focus', handleFocus);
-
-    // Check periodically for token changes (for SSO redirects)
-    const intervalId = setInterval(handleStorageChange, 500);
-
-    return () => {
-      window.removeEventListener('storage', handleStorageChange);
-      window.removeEventListener('focus', handleFocus);
-      clearInterval(intervalId);
-    };
-  }, []);
-
-  useEffect(() => {
-    if (location.loaded && !location.error) {
-      console.log('User geolocation:', location.coordinates);
-    }
-  }, [location]);
-
+  // Geo info fetch / debug override
   useEffect(() => {
     async function fetchGeo() {
+      if (DEBUG_FORCE_BLOCK) {
+        const fakeGeo = { country_code: 'US', state_code: 'MI', state_name: 'Michigan' };
+        setGeoInfo(fakeGeo);
+        setGeoBlock(true);
+        setToastState({
+          showToast: true,
+          message: '[TEST MODE] Access from your region is restricted.',
+          status: 'error',
+        });
+        return;
+      }
+
       if (location.loaded && !location.error && location.coordinates.lat && location.coordinates.lng) {
         try {
-          const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${location.coordinates.lat}&longitude=${location.coordinates.lng}&localityLanguage=en`);
+          const res = await fetch(
+            `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${location.coordinates.lat}&longitude=${location.coordinates.lng}&localityLanguage=en`
+          );
           const data = await res.json();
           const geo = {
             country_code: data.countryCode,
-            state_code: data.principalSubdivisionCode ? data.principalSubdivisionCode.split('-')[1] : undefined,
+            state_code: data.principalSubdivisionCode?.split('-')[1],
             state_name: data.principalSubdivision,
           };
           setGeoInfo(geo);
-          if (isBlockedRegion(geo)) setGeoBlock(true);
-        } catch (e) {
-          // fallback: do not block
-        }
+          if (isBlockedRegion(geo)) {
+            setGeoBlock(true);
+            setToastState({
+              showToast: true,
+              message: 'Access from your region is restricted.',
+              status: 'error',
+            });
+          }
+        } catch {}
       }
     }
     fetchGeo();
@@ -159,9 +167,7 @@ const LoginSignup = () => {
     <>
       <Dialog
         open={open}
-        onOpenChange={(isOpen) =>
-          isOpen && isAuthenticated && setOpen(isOpen)
-        }
+        onOpenChange={(isOpen) => isOpen && isAuthenticated && setOpen(isOpen)}
         modal
         className="w-full"
       >
@@ -172,21 +178,11 @@ const LoginSignup = () => {
           <DialogTitle />
           <DialogHeader className="w-full">
             <div className="flex w-full h-full flex-col sm:flex-row">
-
-              {/* ✅ Mobilei Banner Image (only shown on mobilei) */}
-              {/* <div className="w-full h-[200px] mb-4 sm:hidden flex justify-center items-center">
-  <img
-    // src={jungle.src}
-    alt="Mobile Banner"
-    className="w-full h-full object-cover"
-  />
-</div> */}
-
-              {/* Left Side: Tabs for Sign Up / Sign In */}
+              {/* Left: Tabs */}
               <Tabs defaultValue="signIn" className="w-full sm:w-1/2 p-2 flex flex-col">
                 <TabsList className="bg-dark-blue w-full text-gray-400">
                   <TabsTrigger
-                    className="w-1/2 py-2 text-center font-semibold focus:outline-none aria-selected:text-white aria-selected:text-[22px] aria-selected:border-b-2 aria-selected:border-green-500"
+                    className="w-1/2 py-2 text-center font-semibold aria-selected:text-white aria-selected:text-[22px] aria-selected:border-b-2 aria-selected:border-green-500"
                     value="signUp"
                     style={{ color: '#fff' }}
                     onClick={() => setIsForgotPassword(false)}
@@ -194,7 +190,7 @@ const LoginSignup = () => {
                     Sign Up
                   </TabsTrigger>
                   <TabsTrigger
-                    className="w-1/2 py-2 text-center font-semibold focus:outline-none aria-selected:text-white aria-selected:text-[22px] aria-selected:border-b-2 aria-selected:border-green-500"
+                    className="w-1/2 py-2 text-center font-semibold aria-selected:text-white aria-selected:text-[22px] aria-selected:border-b-2 aria-selected:border-green-500"
                     value="signIn"
                     style={{ color: '#fff' }}
                     onClick={() => setIsForgotPassword(false)}
@@ -204,50 +200,46 @@ const LoginSignup = () => {
                 </TabsList>
 
                 <TabsContent value="signUp" className="flex-grow p-4">
-                  <div className="h-full flex flex-col">
-                    <UserForm
-                      controls={SIGNUP}
-                      isSignUp={true}
-                      setOpen={setOpen}
-                      setToastState={setToastState}
-                      geoInfo={geoInfo}
-                      isBlocked={isBlockedRegion(geoInfo)}
-                    />
-                  </div>
+                  <UserForm
+                    controls={SIGNUP}
+                    isSignUp
+                    setOpen={setOpen}
+                    setToastState={setToastState}
+                    geoInfo={geoInfo}
+                    isBlocked={geoBlock}
+                  />
                 </TabsContent>
 
                 <TabsContent value="signIn" className="flex-grow p-4">
-                  <div className="h-full flex flex-col">
-                    {isForgotPassword ? (
-                      <>
-                        <p className="text-[rgb(var(--lb-blue-250))] text-[14px] mb-2">
-                          Please enter your email. We will send you a reset link for new password.
-                        </p>
-                        <UserForm
-                          controls={FORGOT_PASSWORD}
-                          setOpen={setOpen}
-                          setIsForgotPassword={setIsForgotPassword}
-                          isForgotPassword={isForgotPassword}
-                          setToastState={setToastState}
-                          geoInfo={geoInfo}
-                          isBlocked={isBlockedRegion(geoInfo)}
-                        />
-                      </>
-                    ) : (
+                  {isForgotPassword ? (
+                    <>
+                      <p className="text-[rgb(var(--lb-blue-250))] text-[14px] mb-2">
+                        Please enter your email. We will send you a reset link.
+                      </p>
                       <UserForm
-                        controls={SIGNIN}
+                        controls={FORGOT_PASSWORD}
                         setOpen={setOpen}
                         setIsForgotPassword={setIsForgotPassword}
+                        isForgotPassword
                         setToastState={setToastState}
                         geoInfo={geoInfo}
-                        isBlocked={isBlockedRegion(geoInfo)}
+                        isBlocked={geoBlock}
                       />
-                    )}
-                  </div>
+                    </>
+                  ) : (
+                    <UserForm
+                      controls={SIGNIN}
+                      setOpen={setOpen}
+                      setIsForgotPassword={setIsForgotPassword}
+                      setToastState={setToastState}
+                      geoInfo={geoInfo}
+                      isBlocked={geoBlock}
+                    />
+                  )}
                 </TabsContent>
               </Tabs>
 
-              {/* Right Side: Desktop Banner Image (shown only on desktop) */}
+              {/* Right: Banner */}
               <div className="w-1/2 relative justify-center items-center max-[899px]:hidden sm:flex">
                 {signupLoading ? (
                   <p className="text-white text-center">Loading banner...</p>
@@ -280,14 +272,12 @@ const LoginSignup = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Toast Notification */}
+      {/* Toast */}
       <CustomToast
-        showToast={showToast}
-        setShowToast={(val) =>
-          setToastState((prev) => ({ ...prev, showToast: val }))
-        }
-        message={message}
-        status={status}
+        showToast={toastState.showToast}
+        setShowToast={(val) => setToastState((prev) => ({ ...prev, showToast: val }))}
+        message={toastState.message}
+        status={toastState.status}
         duration={2000}
       />
     </>
