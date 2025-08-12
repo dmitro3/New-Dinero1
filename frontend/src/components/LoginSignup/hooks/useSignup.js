@@ -11,7 +11,7 @@ function useSignup() {
     setSignupLoading(true);
     setSignupError(null);
     try {
-      console.log("hello signup here")
+     
       const response = await getBannersService({ key: 'other' });
       setSignupData(response?.data?.banners?.rows || []);
     } catch (err) {
