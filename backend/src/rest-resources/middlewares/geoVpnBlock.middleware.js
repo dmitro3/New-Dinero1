@@ -49,9 +49,7 @@ function normalizeStateCode(stateCode, stateName) {
 }
 
 async function geoVpnBlockMiddleware(req, res, next) {
-  if (!GEO_BLOCKING_ENABLED) {
-    return next();
-  }
+  if (!GEO_BLOCKING_ENABLED) return next();
 
   const ip =
     (req.headers["x-forwarded-for"] || "").split(",")[0].trim() ||
@@ -74,34 +72,28 @@ async function geoVpnBlockMiddleware(req, res, next) {
     let { country_code2, state_prov, state_code, city } = geoRes.data;
     let normalizedStateCode = normalizeStateCode(state_code, state_prov);
 
-    console.log(
-      `[Geo] IP: ${ip} | Country: ${country_code2} | State: ${normalizedStateCode} | City: ${city}`
-    );
+    console.log(`[Geo] IP: ${ip} | Country: ${country_code2} | State: ${normalizedStateCode} | City: ${city}`);
 
-    if (blockedCountries.includes(country_code2)) {
-      return res.status(403).json({ error: "Access from your country is not allowed." });
-    }
+    const inBlockedRegion =
+      blockedCountries.includes(country_code2) ||
+      (country_code2 === "US" && blockedRegions.some(r => r.state === normalizedStateCode));
 
-    if (
-      country_code2 === "US" &&
-      blockedRegions.some((r) => r.state === normalizedStateCode)
-    ) {
-      return res.status(403).json({ error: "Access from your state is not allowed." });
-    }
-
-    if (VPN_DETECTION_ENABLED) {
-      const vpnApiKey = process.env.IPQUALITYSCORE_API_KEY;
-      if (vpnApiKey) {
-        const vpnRes = await axios.get(
-          `https://ipqualityscore.com/api/json/ip/${vpnApiKey}/${ip}`,
-          { timeout: GEO_API_TIMEOUT }
-        );
-        const { vpn, proxy, tor } = vpnRes.data;
-        console.log(`[VPN Check] VPN: ${vpn} | Proxy: ${proxy} | Tor: ${tor}`);
-        if (vpn || proxy || tor) {
-          return res.status(403).json({ error: "VPN/Proxy detected. Please disable it to access." });
+    if (inBlockedRegion) {
+      if (VPN_DETECTION_ENABLED) {
+        const vpnApiKey = process.env.IPQUALITYSCORE_API_KEY;
+        if (vpnApiKey) {
+          const vpnRes = await axios.get(
+            `https://ipqualityscore.com/api/json/ip/${vpnApiKey}/${ip}`,
+            { timeout: GEO_API_TIMEOUT }
+          );
+          const { vpn, proxy, tor } = vpnRes.data;
+          console.log(`[VPN Check] VPN: ${vpn} | Proxy: ${proxy} | Tor: ${tor}`);
+          if (vpn || proxy || tor) {
+            return res.status(403).json({ error: "VPN/Proxy detected from a restricted region. Access denied." });
+          }
         }
       }
+      return res.status(403).json({ error: "Access from your region is not allowed." });
     }
 
     next();
@@ -109,10 +101,9 @@ async function geoVpnBlockMiddleware(req, res, next) {
     console.error("Geo/VPN check failed:", err.message);
     if (GEO_BLOCKING_FALLBACK === "block") {
       return res.status(403).json({ error: "Geolocation check failed. Access denied." });
-    } else {
-      console.warn("Geolocation check failed, allowing access as fallback");
-      return next();
     }
+    console.warn("Geolocation check failed, allowing access as fallback");
+    next();
   }
 }
 
