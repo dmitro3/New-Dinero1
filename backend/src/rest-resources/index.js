@@ -11,8 +11,6 @@ import { errorHandlerMiddleware } from './middlewares/errorHandler.middleware'
 
 const app = express()
 
-app.set('trust proxy', true)
-
 app.use(helmet())
 
 // app.use(bodyParser.json())
