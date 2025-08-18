@@ -16,7 +16,6 @@ import CustomToast from '@/common/components/custom-toaster';
 import useSignup from './hooks/useSignup';
 import useGeoLocation from '@/common/hook/useGeoLocation';
 
-// ✅ US State name → code mapping
 const US_STATE_NAME_TO_CODE = {
   "Alabama": "AL", "Alaska": "AK", "Arizona": "AZ", "Arkansas": "AR",
   "California": "CA", "Colorado": "CO", "Connecticut": "CT", "Delaware": "DE",
@@ -33,7 +32,6 @@ const US_STATE_NAME_TO_CODE = {
   "Wisconsin": "WI", "Wyoming": "WY"
 };
 
-// ✅ Test mode toggle
 const DEBUG_FORCE_BLOCK = false;
 
 const BLOCKED_REGIONS = [
@@ -51,7 +49,6 @@ const BLOCKED_REGIONS = [
 ];
 const BLOCKED_COUNTRIES = ['MX'];
 
-// ✅ Normalize & check
 function normalizeState(stateCode, stateName) {
   if (stateCode) {
     let code = stateCode.toUpperCase();
@@ -66,9 +63,7 @@ function normalizeState(stateCode, stateName) {
 
 function isBlockedRegion(geo) {
   if (!geo) return false;
-
   const stateCode = normalizeState(geo.state_code, geo.state_name);
-
   if (BLOCKED_COUNTRIES.includes(geo.country_code)) return true;
   if (geo.country_code === 'US' &&
       BLOCKED_REGIONS.some(r => r.state.toUpperCase() === stateCode)) {
@@ -98,7 +93,6 @@ const LoginSignup = () => {
   const [geoInfo, setGeoInfo] = useState(null);
   const [geoBlock, setGeoBlock] = useState(false);
 
-  // Token listener
   useEffect(() => {
     const checkToken = () => {
       const hasToken = !isEmpty(getAccessToken());
@@ -118,7 +112,6 @@ const LoginSignup = () => {
     };
   }, [router]);
 
-  // Geo info fetch / debug override
   useEffect(() => {
     async function fetchGeo() {
       if (DEBUG_FORCE_BLOCK) {
@@ -145,6 +138,7 @@ const LoginSignup = () => {
             state_name: data.principalSubdivision,
           };
           setGeoInfo(geo);
+
           if (isBlockedRegion(geo)) {
             setGeoBlock(true);
             setToastState({
@@ -178,7 +172,6 @@ const LoginSignup = () => {
           <DialogTitle />
           <DialogHeader className="w-full">
             <div className="flex w-full h-full flex-col sm:flex-row">
-              {/* Left: Tabs */}
               <Tabs defaultValue="signIn" className="w-full sm:w-1/2 p-2 flex flex-col">
                 <TabsList className="bg-dark-blue w-full text-gray-400">
                   <TabsTrigger
@@ -239,7 +232,6 @@ const LoginSignup = () => {
                 </TabsContent>
               </Tabs>
 
-              {/* Right: Banner */}
               <div className="w-1/2 relative justify-center items-center max-[899px]:hidden sm:flex">
                 {signupLoading ? (
                   <p className="text-white text-center">Loading banner...</p>
@@ -272,7 +264,6 @@ const LoginSignup = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Toast */}
       <CustomToast
         showToast={toastState.showToast}
         setShowToast={(val) => setToastState((prev) => ({ ...prev, showToast: val }))}
