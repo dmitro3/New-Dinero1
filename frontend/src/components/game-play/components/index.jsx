@@ -62,12 +62,15 @@ const GamePlay = () => {
         )}
       </div>
 
-      <GamePlayBottom
-        gamePlayRef={gamePlayRef}
-        handleIsDemo={handleIsDemo}
-        isDemo={isDemo}
-        isFavourite={isFavourite}
-      />
+    {isGameTypeSelected && (
+  <GamePlayBottom
+    gamePlayRef={gamePlayRef}
+    handleIsDemo={handleIsDemo}
+    isDemo={isDemo}
+    isFavourite={isFavourite}
+  />
+)}
+
     </div>
   );
 };
