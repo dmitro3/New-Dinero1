@@ -3,12 +3,15 @@ import { eye, eyeOff } from '@/assets/svg';
 import { ELEMENT } from '@/common/form-control';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
-import { Controller, useForm, useWatch } from 'react-hook-form';
+import { Controller,useForm,useWatch } from 'react-hook-form';
 import useUserAuth from '../hooks/useUserAuth';
 import useForgotPassword from '../hooks/useForgotPassword';
 import CustomDialog from '../TermsPrivacy';
 import useTermsPrivacy from '../TermsPrivacy/hooks/useTermsPrivacy';
 import { useState } from 'react';
+// import { useRouter } from 'next/navigation'; // Removed unused import
+// import { googlei } from '@/assets/png';
+// import googleIcon from '@/assets/svg/google.svg'; // Adjust path to your Google icon
 
 const UserForm = ({
   controls,
@@ -31,34 +34,42 @@ const UserForm = ({
     handleSubmit,
     onSubmit: originalOnSubmit,
     loading = false,
+    
     showPassword = false,
     togglePasswordVisibility = () => {},
   } = isForgotPassword ? forgotPasswordHook : authHook;
 
-  const [isMarckTick, setIsMarkTick] = useState(false);
+
+
+
+  const [isMarckTick,setIsMarkTick] = useState(false)
 
   // Intercept submit to block if region is blocked
   const onSubmit = (data) => {
-    if (isSignUp) {
-      if (!data.isAge || !data.terms) {
-        setToastState &&
-          setToastState({
-            showToast: true,
-            message:
-              'Please Allowed The Terms of Use, Privacy Policy and Age, States Restriction',
-            status: 'error',
-          });
-        return;
-      }
+
+    console.log(data)
+    console.log("hello signin")
+
+    if(isSignUp){
+   if(!data.isAge || !data.terms){
+       setToastState && setToastState({
+        showToast: true,
+        message: 'Please Allowed The Terms of Use,Privacy Policy and Age,States Restriction',
+        status: 'error',
+      });
+       return;
     }
 
+  
+
+}
+ 
     if (isBlocked) {
-      setToastState &&
-        setToastState({
-          showToast: true,
-          message: 'Access from your region is not allowed.',
-          status: 'error',
-        });
+      setToastState && setToastState({
+        showToast: true,
+        message: 'Access from your region is not allowed.',
+        status: 'error',
+      });
       return;
     }
     originalOnSubmit(data);
@@ -71,21 +82,23 @@ const UserForm = ({
     fetchPrivacyPolicy,
     termsPrivacyLoading,
   } = useTermsPrivacy();
-
   const [dialogConfig, setDialogConfig] = useState({
     isOpen: false,
     type: null,
   });
+  // const router = useRouter(); // Removed unused variable
 
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="flex flex-col justify-between flex-grow"
+      className=" flex flex-col justify-between flex-grow"
     >
       {controls?.map((item) => {
         const Component = ELEMENT[item.type];
         const isCheckbox = item.type === 'checkbox';
         const isPassword = item.name === 'password';
+
+        // Removed unused variables pattern and required
 
         return (
           <Controller
@@ -114,9 +127,7 @@ const UserForm = ({
                             type={showPassword ? 'text' : 'password'}
                             placeholder={item.placeholder}
                             {...field}
-                            className={`w-full ${
-                              error && 'border-red-500'
-                            } focus:bg-transparent`}
+                            className={`w-full ${error && 'border-red-500'} focus:bg-transparent`}
                           />
                           <div
                             onClick={togglePasswordVisibility}
@@ -139,45 +150,48 @@ const UserForm = ({
                             {...field}
                             className={`mt-0.5 ${error && 'border-red-500'}`}
                           />
+                          {/* <label className="font-size-6 sm:font-size-10 text-xs sm:text-sm text-blue-300 leading-4">
+                            {item.label}
+                          </label> */}
                           <label className="font-size-6 sm:font-size-10 text-xs sm:text-sm text-blue-300 leading-4">
                             {item.isLink ? (
-                              <>
-                                <span>I accept the </span>
-                                {item.label.includes('Terms of Use') && (
-                                  <span
-                                    className="cursor-pointer underline text-blue-500"
-                                    onClick={() => {
-                                      setDialogConfig({
-                                        isOpen: true,
-                                        type: 'terms',
-                                      });
-                                      fetchTerms();
-                                    }}
-                                  >
-                                    Terms of Use
-                                  </span>
-                                )}
-                                {item.label.includes('Terms of Use') &&
-                                  item.label.includes('Privacy Policy') &&
-                                  ' and '}
-                                {item.label.includes('Privacy Policy') && (
-                                  <span
-                                    className="cursor-pointer underline text-blue-500"
-                                    onClick={() => {
-                                      setDialogConfig({
-                                        isOpen: true,
-                                        type: 'privacy',
-                                      });
-                                      fetchPrivacyPolicy();
-                                    }}
-                                  >
-                                    Privacy Policy
-                                  </span>
-                                )}
-                              </>
-                            ) : (
-                              item.label
+                          <>
+                            <span>I accept the </span>
+                            {item.label.includes('Terms of Use') && (
+                              <span
+                                className="cursor-pointer underline text-blue-500"
+                                onClick={() => {
+                                  setDialogConfig({
+                                    isOpen: true,
+                                    type: 'terms',
+                                  });
+                                  fetchTerms();
+                                }}
+                              >
+                                Terms of Use
+                              </span>
                             )}
+                            {item.label.includes('Terms of Use') &&
+                              item.label.includes('Privacy Policy') &&
+                              ' and '}
+                            {item.label.includes('Privacy Policy') && (
+                              <span
+                                className="cursor-pointer underline text-blue-500"
+                                onClick={() => {
+                                  setDialogConfig({
+                                    isOpen: true,
+                                    type: 'privacy',
+                                  });
+                                  fetchPrivacyPolicy();
+                                }}
+                              >
+                                Privacy Policy
+                              </span>
+                            )}
+                          </>
+                        ) : (
+                          item.label
+                        )}
                           </label>
                         </div>
                       ) : (
@@ -231,7 +245,7 @@ const UserForm = ({
             type="submit"
             className="w-[50%] bg-green-500 text-white rounded hover:bg-green-600"
             loading={loading}
-            disabled={loading || isBlocked} // 🚫 disable if blocked
+            disabled={loading}
           >
             Reset Password
           </Button>
@@ -242,7 +256,7 @@ const UserForm = ({
             type="submit"
             className="w-full bg-green-500 py-2 !mt-10 text-white rounded hover:bg-green-600"
             loading={loading}
-            disabled={loading || isBlocked} // 🚫 disable if blocked
+            disabled={loading}
           >
             {isSignUp ? 'Sign Up' : 'Sign In'}
           </Button>
@@ -250,21 +264,11 @@ const UserForm = ({
           {/* Google Sign-In Button */}
           <Button
             type="button"
-            disabled={isBlocked} // 🚫 disable if blocked
+            disabled
             className="w-full border border-gray-300 bg-white text-black flex items-center justify-center gap-1 mt-4 hover:bg-gray-100"
             onClick={() => {
-              if (isBlocked) {
-                setToastState &&
-                  setToastState({
-                    showToast: true,
-                    message: 'Access from your region is not allowed.',
-                    status: 'error',
-                  });
-                return;
-              }
-              window.location.href =
-                process.env.NEXT_PUBLIC_BACKEND_URL +
-                '/api/v1/auth/sso/google';
+ 
+              window.location.href = process.env.NEXT_PUBLIC_BACKEND_URL + '/api/v1/auth/sso/google';
             }}
           >
             <span>Sign in with Google</span>
@@ -273,21 +277,11 @@ const UserForm = ({
           {/* Facebook Sign-In Button */}
           <Button
             type="button"
-            disabled={isBlocked} // 🚫 disable if blocked
+            disabled
             className="w-full border border-blue-600 bg-white text-black flex items-center justify-center gap-1 mt-2 hover:bg-blue-50"
             onClick={() => {
-              if (isBlocked) {
-                setToastState &&
-                  setToastState({
-                    showToast: true,
-                    message: 'Access from your region is not allowed.',
-                    status: 'error',
-                  });
-                return;
-              }
-              window.location.href =
-                process.env.NEXT_PUBLIC_BACKEND_URL +
-                '/api/v1/auth/sso/facebook';
+ 
+              window.location.href = process.env.NEXT_PUBLIC_BACKEND_URL + '/api/v1/auth/sso/facebook';
             }}
           >
             <span>Sign in with Facebook</span>
