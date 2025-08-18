@@ -63,7 +63,7 @@ const useBottom = (gamePlayRef, isFavourite) => {
           document.fullscreenElement ||
           document.webkitFullscreenElement ||
           document.msFullscreenElement
-        )
+         )
       );
     };
 
@@ -80,28 +80,57 @@ const useBottom = (gamePlayRef, isFavourite) => {
   }, []);
 
   // Hide URL bar on mobile rotate
-  useEffect(() => {
-    const handleOrientationChange = () => {
-      if (window.innerWidth > window.innerHeight) {
-        // Landscape mode => try to go fullscreen
-        enterFullscreen();
+  // useEffect(() => {
+  //   const handleOrientationChange = () => {
+  //     if (window.innerWidth > window.innerHeight) {
+  //       // Landscape mode => try to go fullscreen
+  //       enterFullscreen();
+           
+  //       // Small scroll to hide mobile browser UI
+  //       setTimeout(() => {
+  //         window.scrollTo(0, 1);
+  //       }, 300);
+  //     } else {
+  //       // Portrait mode => exit fullscreen
+  //       exitFullscreen();
+  //     }
+  //   };
 
-        // Small scroll to hide mobile browser UI
-        setTimeout(() => {
-          window.scrollTo(0, 1);
-        }, 300);
+  //   window.addEventListener('orientationchange', handleOrientationChange);
+
+  //   return () => {
+  //     window.removeEventListener('orientationchange', handleOrientationChange);
+  //   };
+  // }, []);
+
+  useEffect(() => {
+  const handleOrientationChange = () => {
+    setTimeout(() => {
+      const isLandscape = window.innerWidth > window.innerHeight;
+      console.log("Orientation detected:", isLandscape ? "Landscape" : "Portrait");
+
+      if (isLandscape) {
+        try {
+          enterFullscreen();
+        } catch (e) {
+          console.log("Fullscreen error:", e);
+        }
+        window.scrollTo(0, 1);
       } else {
-        // Portrait mode => exit fullscreen
         exitFullscreen();
       }
-    };
+    }, 300); // small delay for accurate width/height
+  };
 
-    window.addEventListener('orientationchange', handleOrientationChange);
+  window.addEventListener('resize', handleOrientationChange);
+  window.addEventListener('orientationchange', handleOrientationChange);
 
-    return () => {
-      window.removeEventListener('orientationchange', handleOrientationChange);
-    };
-  }, []);
+  return () => {
+    window.removeEventListener('resize', handleOrientationChange);
+    window.removeEventListener('orientationchange', handleOrientationChange);
+  };
+}, []);
+
 
   const handleFav = async ({ gameId, isFav }) => {
     if (isFav) {

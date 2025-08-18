@@ -82,14 +82,14 @@ const GameDialog = ({ isOpen, handleClick, gamePlayData = {} }) => {
                       Play Now
                     </Button>
                   </TooltipTrigger>
-                  {!user?.email && (
+                  {user?.email && !user?.isEmailVerified &&(
                     <TooltipContent
                       side="top"
                       className="z-[99999] text-white font-semibold border shadow-lg rounded-md p-4 mx-auto flex justify-center items-center "
                     >
                       <p>Hey, verify your email first to play!</p>
                     </TooltipContent>
-                  )}
+                  )}  
                 </Tooltip>
               </div>
               <div className="p-1 sm:p-4 bg-[rgb(var(--lb-blue-800))] rounded-md text-sm mr-1 sm:mr-0 ">
