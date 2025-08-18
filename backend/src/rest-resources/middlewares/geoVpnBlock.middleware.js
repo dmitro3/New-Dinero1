@@ -1,9 +1,9 @@
 const axios = require("axios");
 
-const GEO_BLOCKING_ENABLED = process.env.GEO_BLOCKING_ENABLED !== "false";
-const VPN_DETECTION_ENABLED = process.env.VPN_DETECTION_ENABLED !== "false";
-const GEO_BLOCKING_FALLBACK = process.env.GEO_BLOCKING_FALLBACK || "allow";
-const GEO_API_TIMEOUT = parseInt(process.env.GEO_API_TIMEOUT) || 5000;
+const GEO_BLOCKING_ENABLED = process.env.GEO_BLOCKING_ENABLED ;
+const VPN_DETECTION_ENABLED = process.env.VPN_DETECTION_ENABLED ;
+const GEO_BLOCKING_FALLBACK = process.env.GEO_BLOCKING_FALLBACK ;
+const GEO_API_TIMEOUT = parseInt(process.env.GEO_API_TIMEOUT);
 
 const blockedRegions = [
   { country: "US", state: "MI" }, // Michigan
