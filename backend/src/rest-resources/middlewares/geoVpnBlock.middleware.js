@@ -74,14 +74,11 @@ async function geoVpnBlockMiddleware(req, res, next) {
 
     console.log(`[Geo] IP: ${ip} | Country: ${country_code2} | State: ${normalizedStateCode} | City: ${city}`);
 
-    const inBlockedCountry = blockedCountries.includes(country_code2);
-    const inBlockedState =
-      country_code2 === "US" &&
-      blockedRegions.some(r => r.state === normalizedStateCode);
+    const inBlockedRegion =
+      blockedCountries.includes(country_code2) ||
+      (country_code2 === "US" && blockedRegions.some(r => r.state === normalizedStateCode));
 
-    if (inBlockedCountry || inBlockedState) {
-      console.warn(`❌ Blocked request from ${country_code2}-${normalizedStateCode || state_prov} (IP: ${ip})`);
-
+    if (inBlockedRegion) {
       if (VPN_DETECTION_ENABLED) {
         const vpnApiKey = process.env.IPQUALITYSCORE_API_KEY;
         if (vpnApiKey) {
