@@ -12,7 +12,7 @@ const GamePlay = () => {
     isDemo,
     isLoading,
     error,
-  } = useGamePlay(); 
+  } = useGamePlay();
 
   const { gameLauchUrl, isFavourite } = gamePlayData || {};
 
@@ -44,30 +44,29 @@ const GamePlay = () => {
           ></iframe>
         )}
 
+        {/* Single Play button overlay */}
         {!isGameTypeSelected && !isLoading && !error && (
           <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <div className="flex gap-4">
-              <button
-                className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded shadow-lg"
-                onClick={() => {
-                  handleIsDemo(false);
-                }}
-              >
-                Play
-              </button>
-
-              
-            </div>
+            <button
+              className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded shadow-lg"
+              onClick={() => {
+                handleIsDemo(false); // always goes to real play
+              }}
+            >
+              Play
+            </button>
           </div>
         )}
       </div>
 
-      <GamePlayBottom
-        gamePlayRef={gamePlayRef}
-        handleIsDemo={handleIsDemo}
-        isDemo={isDemo}
-        isFavourite={isFavourite}
-      />
+      {isGameTypeSelected && (
+        <GamePlayBottom
+          gamePlayRef={gamePlayRef}
+          handleIsDemo={handleIsDemo}
+          isDemo={isDemo}
+          isFavourite={isFavourite}
+        />
+      )}
     </div>
   );
 };
