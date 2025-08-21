@@ -18,13 +18,16 @@ import Logger from '../libs/logger'
 import WalletEmitter from '../socket-resources/emmitter/wallet.emmitter'
 import { ERROR_MSG } from './errors'
 
+export const encryptPassword = (password) => {
+  const salt = bcrypt.genSaltSync(10);
+  return bcrypt.hashSync(password, salt);
+};
+
+
 export const comparePassword = async (password, userPassword) => {
-  if (!password) return false
-
-  const result = await bcrypt.compare(Buffer.from(password, 'base64').toString('ascii'), userPassword)
-
-  return result
-}
+  if (!password) return false;
+  return await bcrypt.compare(password, userPassword);
+};
 
 export const signAccessToken = async ({ name, email, id, uuid, sessionTime }) => {
   const payload = { email, id, name, uuid }
@@ -44,11 +47,7 @@ export const signAccessToken = async ({ name, email, id, uuid, sessionTime }) =>
   return jwtToken
 }
 
-export const encryptPassword = (password) => {
-  const salt = bcrypt.genSaltSync(10)
 
-  return (bcrypt.hashSync(Buffer.from(password, 'base64').toString('ascii'), salt))
-}
 
 export const pageValidation = (pageNo, limit, maxSize = 200) => {
   const pageAsNumber = Number.parseInt(pageNo)
