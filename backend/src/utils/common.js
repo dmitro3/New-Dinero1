@@ -18,16 +18,22 @@ import Logger from '../libs/logger'
 import WalletEmitter from '../socket-resources/emmitter/wallet.emmitter'
 import { ERROR_MSG } from './errors'
 
-export const encryptPassword = (password) => {
+export const encryptPassword = (plainPassword) => {
+  if (!plainPassword) {
+    throw new Error("Password cannot be empty");
+  }
+
   const salt = bcrypt.genSaltSync(10);
-  return bcrypt.hashSync(password, salt);
+  return bcrypt.hashSync(plainPassword, salt);
 };
 
 
-export const comparePassword = async (password, userPassword) => {
-  if (!password) return false;
-  return await bcrypt.compare(password, userPassword);
+export const comparePassword = async (plainPassword, hashedPassword) => {
+  if (!plainPassword || !hashedPassword) return false;
+
+  return bcrypt.compare(plainPassword, hashedPassword);
 };
+;
 
 export const signAccessToken = async ({ name, email, id, uuid, sessionTime }) => {
   const payload = { email, id, name, uuid }
