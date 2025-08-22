@@ -10,7 +10,7 @@ import useGetUserDeatil from '@/common/hook/useGetUserDeatil';
 const useUserAuth = ({ setOpen = () => {}, isSignUp = false, setToastState }) => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const navigate = useRouter();
+  const router = useRouter();
   const { dispatch } = useStateContext();
   const { getUser } = useGetUserDeatil();
   const searchParams = useSearchParams();
@@ -47,7 +47,7 @@ const useUserAuth = ({ setOpen = () => {}, isSignUp = false, setToastState }) =>
         message: `${isSignUp ? 'Signed Up' : 'Logged In'} Successfully`,
         status: 'success',
       });
-      navigate('/');
+      router.push('/');
     } catch (error) {
       setLoading(false);
 

@@ -113,14 +113,19 @@ export default class UserController {
 
 
   static async verifyEmail (req, res, next) {
-    try {
-      const data = await VerifyEmailHandler.execute(req.query, req.context)
-      if (successful && result.link) return res.redirect(result.link)
-      sendResponse({ req, res, next }, data)
-    } catch (error) {
-      next(error)
+  try {
+    const result = await VerifyEmailHandler.execute(req.query, req.context);
+
+    if (result?.successful && result?.link) {
+      return res.redirect(result.link);
     }
+
+    sendResponse({ req, res, next }, result);
+  } catch (error) {
+    next(error);
   }
+}
+
 
   static async changePassword (req, res, next) {
     try {

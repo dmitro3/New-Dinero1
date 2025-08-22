@@ -3,7 +3,7 @@ import { eye, eyeOff } from '@/assets/svg';
 import { ELEMENT } from '@/common/form-control';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
-import { Controller, useForm, useWatch } from 'react-hook-form';
+import { Controller, useForm } from 'react-hook-form';
 import useUserAuth from '../hooks/useUserAuth';
 import useForgotPassword from '../hooks/useForgotPassword';
 import CustomDialog from '../TermsPrivacy';
@@ -35,7 +35,7 @@ const UserForm = ({
     togglePasswordVisibility = () => {},
   } = isForgotPassword ? forgotPasswordHook : authHook;
 
-  const [isMarckTick, setIsMarkTick] = useState(false);
+  const [isMarkTick, setIsMarkTick] = useState(false);
 
   // Intercept submit to block if region is blocked
   const onSubmit = (data) => {
@@ -45,7 +45,7 @@ const UserForm = ({
           setToastState({
             showToast: true,
             message:
-              'Please Allowed The Terms of Use, Privacy Policy and Age, States Restriction',
+              'Please allow the Terms of Use, Privacy Policy, and Age/State restriction.',
             status: 'error',
           });
         return;
@@ -64,13 +64,8 @@ const UserForm = ({
     originalOnSubmit(data);
   };
 
-  const {
-    termsData,
-    privacyData,
-    fetchTerms,
-    fetchPrivacyPolicy,
-    termsPrivacyLoading,
-  } = useTermsPrivacy();
+  const { termsData, privacyData, fetchTerms, fetchPrivacyPolicy, termsPrivacyLoading } =
+    useTermsPrivacy();
 
   const [dialogConfig, setDialogConfig] = useState({
     isOpen: false,
@@ -92,15 +87,20 @@ const UserForm = ({
             key={item.name}
             control={control}
             name={item.name}
-            rules={{}}
+            rules={
+              isSignUp && (item.name === 'username' || item.name === 'password')
+                ? {
+                    required: item.required,
+                    pattern: item.pattern,
+                  }
+                : {}
+            }
             render={({ field, fieldState }) => {
               const error = fieldState?.error;
               return (
                 <div className="text-left flex flex-col">
                   {!isCheckbox && (
-                    <label className="text-blue-100 tw-font-bold">
-                      {item.label}
-                    </label>
+                    <label className="text-blue-100 tw-font-bold">{item.label}</label>
                   )}
                   <div className="items-center space-x-2 mt-2 relative">
                     <div
@@ -114,19 +114,13 @@ const UserForm = ({
                             type={showPassword ? 'text' : 'password'}
                             placeholder={item.placeholder}
                             {...field}
-                            className={`w-full ${
-                              error && 'border-red-500'
-                            } focus:bg-transparent`}
+                            className={`w-full ${error && 'border-red-500'} focus:bg-transparent`}
                           />
                           <div
                             onClick={togglePasswordVisibility}
                             className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer"
                           >
-                            {showPassword ? (
-                              <Image src={eyeOff} alt="eye-off" />
-                            ) : (
-                              <Image src={eye} alt="eye" />
-                            )}
+                            {showPassword ? <Image src={eyeOff} alt="eye-off" /> : <Image src={eye} alt="eye" />}
                           </div>
                         </div>
                       ) : isCheckbox ? (
@@ -147,10 +141,7 @@ const UserForm = ({
                                   <span
                                     className="cursor-pointer underline text-blue-500"
                                     onClick={() => {
-                                      setDialogConfig({
-                                        isOpen: true,
-                                        type: 'terms',
-                                      });
+                                      setDialogConfig({ isOpen: true, type: 'terms' });
                                       fetchTerms();
                                     }}
                                   >
@@ -164,10 +155,7 @@ const UserForm = ({
                                   <span
                                     className="cursor-pointer underline text-blue-500"
                                     onClick={() => {
-                                      setDialogConfig({
-                                        isOpen: true,
-                                        type: 'privacy',
-                                      });
+                                      setDialogConfig({ isOpen: true, type: 'privacy' });
                                       fetchPrivacyPolicy();
                                     }}
                                   >
@@ -190,14 +178,8 @@ const UserForm = ({
                     </div>
                   </div>
                   {error && (
-                    <div
-                      className={`text-red-500 mt-0.5 text-xs sm:text-sm transition-opacity duration-300 ease-in-out ${
-                        error
-                          ? 'opacity-100 translate-y-0'
-                          : 'opacity-0 translate-y-2'
-                      }`}
-                    >
-                      {error?.message}
+                    <div className="text-red-500 mt-0.5 text-xs sm:text-sm transition-opacity duration-300 ease-in-out opacity-100 translate-y-0">
+                      {error.message}
                     </div>
                   )}
                 </div>
@@ -231,7 +213,7 @@ const UserForm = ({
             type="submit"
             className="w-[50%] bg-green-500 text-white rounded hover:bg-green-600"
             loading={loading}
-            disabled={loading || isBlocked} // 🚫 disable if blocked
+            disabled={loading || isBlocked}
           >
             Reset Password
           </Button>
@@ -242,52 +224,48 @@ const UserForm = ({
             type="submit"
             className="w-full bg-green-500 py-2 !mt-10 text-white rounded hover:bg-green-600"
             loading={loading}
-            disabled={loading || isBlocked} // 🚫 disable if blocked
+            disabled={loading || isBlocked}
           >
             {isSignUp ? 'Sign Up' : 'Sign In'}
           </Button>
 
-          {/* Google Sign-In Button */}
+          {/* Google Sign-In */}
           <Button
             type="button"
-            disabled={isBlocked} // 🚫 disable if blocked
+            disabled={isBlocked}
             className="w-full border border-gray-300 bg-white text-black flex items-center justify-center gap-1 mt-4 hover:bg-gray-100"
             onClick={() => {
               if (isBlocked) {
-                setToastState &&
-                  setToastState({
-                    showToast: true,
-                    message: 'Access from your region is not allowed.',
-                    status: 'error',
-                  });
+                setToastState?.({
+                  showToast: true,
+                  message: 'Access from your region is not allowed.',
+                  status: 'error',
+                });
                 return;
               }
               window.location.href =
-                process.env.NEXT_PUBLIC_BACKEND_URL +
-                '/api/v1/auth/sso/google';
+                process.env.NEXT_PUBLIC_BACKEND_URL + '/api/v1/auth/sso/google';
             }}
           >
             <span>Sign in with Google</span>
           </Button>
 
-          {/* Facebook Sign-In Button */}
+          {/* Facebook Sign-In */}
           <Button
             type="button"
-            disabled={isBlocked} // 🚫 disable if blocked
+            disabled={isBlocked}
             className="w-full border border-blue-600 bg-white text-black flex items-center justify-center gap-1 mt-2 hover:bg-blue-50"
             onClick={() => {
               if (isBlocked) {
-                setToastState &&
-                  setToastState({
-                    showToast: true,
-                    message: 'Access from your region is not allowed.',
-                    status: 'error',
-                  });
+                setToastState?.({
+                  showToast: true,
+                  message: 'Access from your region is not allowed.',
+                  status: 'error',
+                });
                 return;
               }
               window.location.href =
-                process.env.NEXT_PUBLIC_BACKEND_URL +
-                '/api/v1/auth/sso/facebook';
+                process.env.NEXT_PUBLIC_BACKEND_URL + '/api/v1/auth/sso/facebook';
             }}
           >
             <span>Sign in with Facebook</span>
