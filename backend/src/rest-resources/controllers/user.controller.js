@@ -19,7 +19,8 @@ import { VerifyOtpHandler } from '@src/services/user/verifyOtp.service'
 import { GetAllWithdrawRequestsHandler } from '@src/services/wallet'
 import { UpdateKycStatusService } from '@src/services/veriff/callbacks/updateKycStatus.service'
 import { CreateVeriffSessionService } from '@src/services/veriff/createVeriffSession.service'
-
+import db from '@src/db/models'
+import { AppError } from '@src/errors/app.error'
 
 export default class UserController {
 
@@ -181,23 +182,53 @@ export default class UserController {
     }
   }
 
- static async getOtp (req, res, next) {
+static async getOtp (req, res, next) {
   try {
     const { userId, userEmail, username } = { ...req.body, ...req.query };
 
     if (!userId || !userEmail) {
-      throw new AppError(Errors.MISSING_REQUIRED_FIELDS);
+      throw new AppError({
+        name: 'ValidationError',
+        message: 'Missing required fields',
+        explanation: 'userId and userEmail are required',
+        httpStatusCode: 400,
+        code: 400
+      });
     }
 
+    // ✅ Email format check
+   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+if (!emailRegex.test(userEmail)) {
+  throw new AppError({
+    name: 'ValidationError',
+    message: 'Invalid email format',
+    explanation: 'Please provide a valid email address',
+    httpStatusCode: 400,
+    code: 400
+  });
+}
+
+    // ✅ Duplicate email check
+    const existingUser = await db.User.findOne({ where: { email: userEmail } });
+    if (existingUser) {
+      throw new AppError({
+        name: 'ValidationError',
+        message: 'Email already in use',
+        explanation: 'This email is already registered with another account',
+        httpStatusCode: 400,
+        code: 400
+      });
+    }
+
+    // ✅ Continue if valid
     const data = await GetOtpHandler.execute({ userId, userEmail, username });
     sendResponse({ req, res, next }, data);
 
   } catch (error) {
-    console.error('❌ OTP Error:', error); // shows stack trace in console
+    console.error('❌ OTP Error:', error);
     next(error);
   }
 }
-
 
 
 

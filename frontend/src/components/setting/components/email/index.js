@@ -59,9 +59,11 @@ const Email = () => {
                   rules={{
                     required: 'Please enter email',
                     pattern: {
-                      value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                      value:
+                        /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/
+,
                       message:
-                        'Only the following email providers are available:Google, Yahoo, Apple.',
+                        'Please enter a valid email address',
                     },
                   }}
                   render={({ field, fieldState }) => {
@@ -70,7 +72,9 @@ const Email = () => {
                       <>
                         <div className="flex items-center space-x-2 w-[50%]">
                           <div
-                            className={`${error ? 'border-red-500' : 'border-gray-300'} transition-colors duration-200`}
+                            className={`${
+                              error ? 'border-red-500' : 'border-gray-300'
+                            } transition-colors duration-200`}
                           >
                             <Input
                               className="border border-[rgb(var(--lb-blue-200))] w-[200%] "
@@ -129,7 +133,9 @@ const Email = () => {
                       <>
                         <div className="flex items-center space-x-2 w-[50%]">
                           <div
-                            className={`${error ? 'border-red-500' : 'border-gray-300'} transition-colors duration-200`}
+                            className={`${
+                              error ? 'border-red-500' : 'border-gray-300'
+                            } transition-colors duration-200`}
                           >
                             <Input
                               className="border border-[rgb(var(--lb-blue-200))] w-[200%]"

@@ -107,8 +107,21 @@ export const BASIC_INFO_FORM_CONTROLS = [
     type: 'input',
     placeholder: 'Enter Address',
     required: 'This field is required',
+    validate: (value) => {
+      const trimmed = value.trim();
+      if (!/^[A-Za-z0-9\s]+$/.test(trimmed)) {
+        return 'Only letters, numbers, and spaces are allowed';
+      }
+      if (trimmed.length > 100) {
+        return 'Maximum 100 characters allowed';
+      }
+      if (trimmed.length < 5) {
+        return 'Minimum 5 characters needed';
+      }
+    },
     // width: '400px',
-  },
+  }
+  ,
 
   // {
   //   name: 'country',
