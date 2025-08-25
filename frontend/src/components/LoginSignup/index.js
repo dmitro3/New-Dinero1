@@ -34,7 +34,8 @@ const US_STATE_NAME_TO_CODE = {
 
 const DEBUG_FORCE_BLOCK = false;
 
-const BLOCKED_REGIONS = [
+// Regions/Countries that ARE ALLOWED
+const ALLOWED_REGIONS = [
   { country: 'US', state: 'MI' },
   { country: 'US', state: 'ID' },
   { country: 'US', state: 'WA' },
@@ -47,7 +48,7 @@ const BLOCKED_REGIONS = [
   { country: 'US', state: 'VA' },
   { country: 'US', state: 'OR' },
 ];
-const BLOCKED_COUNTRIES = ['MX'];
+const ALLOWED_COUNTRIES = ['MX','IN'];
 
 function normalizeState(stateCode, stateName) {
   if (stateCode) {
@@ -61,12 +62,12 @@ function normalizeState(stateCode, stateName) {
   return null;
 }
 
-function isBlockedRegion(geo) {
+function isAllowedRegion(geo) {
   if (!geo) return false;
   const stateCode = normalizeState(geo.state_code, geo.state_name);
-  if (BLOCKED_COUNTRIES.includes(geo.country_code)) return true;
+  if (ALLOWED_COUNTRIES.includes(geo.country_code)) return true;
   if (geo.country_code === 'US' &&
-      BLOCKED_REGIONS.some(r => r.state.toUpperCase() === stateCode)) {
+      ALLOWED_REGIONS.some(r => r.state.toUpperCase() === stateCode)) {
     return true;
   }
   return false;
@@ -117,12 +118,6 @@ const LoginSignup = () => {
       if (DEBUG_FORCE_BLOCK) {
         const fakeGeo = { country_code: 'US', state_code: 'MI', state_name: 'Michigan' };
         setGeoInfo(fakeGeo);
-        setGeoBlock(true);
-        setToastState({
-          showToast: true,
-          message: '[TEST MODE] Access from your region is restricted.',
-          status: 'error',
-        });
         return;
       }
 
@@ -139,7 +134,7 @@ const LoginSignup = () => {
           };
           setGeoInfo(geo);
 
-          if (isBlockedRegion(geo)) {
+          if (!isAllowedRegion(geo)) {
             setGeoBlock(true);
             setToastState({
               showToast: true,

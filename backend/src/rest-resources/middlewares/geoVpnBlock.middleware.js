@@ -1,11 +1,12 @@
 const axios = require("axios");
 
-const GEO_BLOCKING_ENABLED = process.env.GEO_BLOCKING_ENABLED ;
-const VPN_DETECTION_ENABLED = process.env.VPN_DETECTION_ENABLED ;
-const GEO_BLOCKING_FALLBACK = process.env.GEO_BLOCKING_FALLBACK ;
+const GEO_BLOCKING_ENABLED = process.env.GEO_BLOCKING_ENABLED;
+const VPN_DETECTION_ENABLED = process.env.VPN_DETECTION_ENABLED;
+const GEO_BLOCKING_FALLBACK = process.env.GEO_BLOCKING_FALLBACK;
 const GEO_API_TIMEOUT = parseInt(process.env.GEO_API_TIMEOUT);
 
-const blockedRegions = [
+// Regions/Countries that ARE ALLOWED
+const allowedRegions = [
   { country: "US", state: "MI" }, // Michigan
   { country: "US", state: "ID" }, // Idaho
   { country: "US", state: "WA" }, // Washington
@@ -18,7 +19,8 @@ const blockedRegions = [
   { country: "US", state: "VA" }, // Virginia
   { country: "US", state: "OR" }, // Oregon
 ];
-const blockedCountries = ["MX"];
+
+const allowedCountries = ["MX", "IN"]; 
 
 const US_STATE_NAME_TO_CODE = {
   "Alabama": "AL", "Alaska": "AK", "Arizona": "AZ", "Arkansas": "AR",
@@ -69,31 +71,35 @@ async function geoVpnBlockMiddleware(req, res, next) {
       { timeout: GEO_API_TIMEOUT }
     );
 
-    let { country_code2, state_prov, state_code, city } = geoRes.data;
-    let normalizedStateCode = normalizeStateCode(state_code, state_prov);
+    const { country_code2, state_prov, state_code, city } = geoRes.data;
+    const normalizedStateCode = normalizeStateCode(state_code, state_prov);
 
     console.log(`[Geo] IP: ${ip} | Country: ${country_code2} | State: ${normalizedStateCode} | City: ${city}`);
 
-    const inBlockedRegion =
-      blockedCountries.includes(country_code2) ||
-      (country_code2 === "US" && blockedRegions.some(r => r.state === normalizedStateCode));
+    // **Allowlist check**
+    const inAllowedRegion =
+      allowedCountries.includes(country_code2) ||
+      (country_code2 === "US" &&
+        allowedRegions.some(r => r.state === normalizedStateCode));
 
-    if (inBlockedRegion) {
-      if (VPN_DETECTION_ENABLED) {
-        const vpnApiKey = process.env.IPQUALITYSCORE_API_KEY;
-        if (vpnApiKey) {
-          const vpnRes = await axios.get(
-            `https://ipqualityscore.com/api/json/ip/${vpnApiKey}/${ip}`,
-            { timeout: GEO_API_TIMEOUT }
-          );
-          const { vpn, proxy, tor } = vpnRes.data;
-          console.log(`[VPN Check] VPN: ${vpn} | Proxy: ${proxy} | Tor: ${tor}`);
-          if (vpn || proxy || tor) {
-            return res.status(403).json({ error: "VPN/Proxy detected from a restricted region. Access denied." });
-          }
+    if (!inAllowedRegion) {
+      return res.status(403).json({ error: "Access from your region is not allowed." });
+    }
+
+    // Optional VPN/proxy detection for allowed users
+    if (VPN_DETECTION_ENABLED) {
+      const vpnApiKey = process.env.IPQUALITYSCORE_API_KEY;
+      if (vpnApiKey) {
+        const vpnRes = await axios.get(
+          `https://ipqualityscore.com/api/json/ip/${vpnApiKey}/${ip}`,
+          { timeout: GEO_API_TIMEOUT }
+        );
+        const { vpn, proxy, tor } = vpnRes.data;
+        console.log(`[VPN Check] VPN: ${vpn} | Proxy: ${proxy} | Tor: ${tor}`);
+        if (vpn || proxy || tor) {
+          return res.status(403).json({ error: "VPN/Proxy detected. Access denied." });
         }
       }
-      return res.status(403).json({ error: "Access from your region is not allowed." });
     }
 
     next();
