@@ -32,23 +32,10 @@ const US_STATE_NAME_TO_CODE = {
   "Wisconsin": "WI", "Wyoming": "WY"
 };
 
-const DEBUG_FORCE_BLOCK = false;
-
-// Regions/Countries that ARE ALLOWED
-const ALLOWED_REGIONS = [
-  { country: 'US', state: 'MI' },
-  { country: 'US', state: 'ID' },
-  { country: 'US', state: 'WA' },
-  { country: 'US', state: 'LA' },
-  { country: 'US', state: 'NV' },
-  { country: 'US', state: 'MT' },
-  { country: 'US', state: 'CT' },
-  { country: 'US', state: 'HI' },
-  { country: 'US', state: 'DE' },
-  { country: 'US', state: 'VA' },
-  { country: 'US', state: 'OR' },
-];
-const ALLOWED_COUNTRIES = ['MX','IN'];
+// Blocked states
+const BLOCKED_STATES = ["MI", "ID", "WA", "LA", "NV", "MT", "CT", "HI", "DE"];
+// Allowed countries
+const ALLOWED_COUNTRIES = ["US", "IN"];
 
 function normalizeState(stateCode, stateName) {
   if (stateCode) {
@@ -62,14 +49,15 @@ function normalizeState(stateCode, stateName) {
   return null;
 }
 
-function isAllowedRegion(geo) {
-  if (!geo) return false;
+function isBlockedRegion(geo) {
+  if (!geo) return true;
+
   const stateCode = normalizeState(geo.state_code, geo.state_name);
-  if (ALLOWED_COUNTRIES.includes(geo.country_code)) return true;
-  if (geo.country_code === 'US' &&
-      ALLOWED_REGIONS.some(r => r.state.toUpperCase() === stateCode)) {
-    return true;
-  }
+
+  if (!ALLOWED_COUNTRIES.includes(geo.country_code)) return true;
+  if (geo.country_code === 'IN') return false;
+  if (geo.country_code === 'US' && BLOCKED_STATES.includes(stateCode)) return true;
+
   return false;
 }
 
@@ -115,12 +103,6 @@ const LoginSignup = () => {
 
   useEffect(() => {
     async function fetchGeo() {
-      if (DEBUG_FORCE_BLOCK) {
-        const fakeGeo = { country_code: 'US', state_code: 'MI', state_name: 'Michigan' };
-        setGeoInfo(fakeGeo);
-        return;
-      }
-
       if (location.loaded && !location.error && location.coordinates.lat && location.coordinates.lng) {
         try {
           const res = await fetch(
@@ -134,7 +116,7 @@ const LoginSignup = () => {
           };
           setGeoInfo(geo);
 
-          if (!isAllowedRegion(geo)) {
+          if (isBlockedRegion(geo)) {
             setGeoBlock(true);
             setToastState({
               showToast: true,

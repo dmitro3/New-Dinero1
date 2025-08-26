@@ -5,22 +5,11 @@ const VPN_DETECTION_ENABLED = process.env.VPN_DETECTION_ENABLED;
 const GEO_BLOCKING_FALLBACK = process.env.GEO_BLOCKING_FALLBACK;
 const GEO_API_TIMEOUT = parseInt(process.env.GEO_API_TIMEOUT);
 
-// Regions/Countries that ARE ALLOWED
-const allowedRegions = [
-  { country: "US", state: "MI" }, // Michigan
-  { country: "US", state: "ID" }, // Idaho
-  { country: "US", state: "WA" }, // Washington
-  { country: "US", state: "LA" }, // Louisiana
-  { country: "US", state: "NV" }, // Nevada
-  { country: "US", state: "MT" }, // Montana
-  { country: "US", state: "CT" }, // Connecticut
-  { country: "US", state: "HI" }, // Hawaii
-  { country: "US", state: "DE" }, // Delaware
-  { country: "US", state: "VA" }, // Virginia
-  { country: "US", state: "OR" }, // Oregon
-];
+// Blocked U.S. states
+const blockedStates = ["MI", "ID", "WA", "LA", "NV", "MT", "CT", "HI", "DE"];
 
-const allowedCountries = ["MX", "IN"]; 
+// Countries that are allowed
+const allowedCountries = ["US", "IN"];
 
 const US_STATE_NAME_TO_CODE = {
   "Alabama": "AL", "Alaska": "AK", "Arizona": "AZ", "Arkansas": "AR",
@@ -50,6 +39,18 @@ function normalizeStateCode(stateCode, stateName) {
   return null;
 }
 
+function isBlockedRegion(country, stateCode) {
+  if (!allowedCountries.includes(country)) return true; // Only allow US + IN
+
+  if (country === "IN") return false; // India always allowed
+
+  if (country === "US" && blockedStates.includes(stateCode)) {
+    return true; // Block listed states
+  }
+
+  return false; // Other US states allowed
+}
+
 async function geoVpnBlockMiddleware(req, res, next) {
   if (!GEO_BLOCKING_ENABLED) return next();
 
@@ -76,17 +77,11 @@ async function geoVpnBlockMiddleware(req, res, next) {
 
     console.log(`[Geo] IP: ${ip} | Country: ${country_code2} | State: ${normalizedStateCode} | City: ${city}`);
 
-    // **Allowlist check**
-    const inAllowedRegion =
-      allowedCountries.includes(country_code2) ||
-      (country_code2 === "US" &&
-        allowedRegions.some(r => r.state === normalizedStateCode));
-
-    if (!inAllowedRegion) {
+    if (isBlockedRegion(country_code2, normalizedStateCode)) {
       return res.status(403).json({ error: "Access from your region is not allowed." });
     }
 
-    // Optional VPN/proxy detection for allowed users
+    // VPN/proxy detection (optional)
     if (VPN_DETECTION_ENABLED) {
       const vpnApiKey = process.env.IPQUALITYSCORE_API_KEY;
       if (vpnApiKey) {
@@ -108,7 +103,6 @@ async function geoVpnBlockMiddleware(req, res, next) {
     if (GEO_BLOCKING_FALLBACK === "block") {
       return res.status(403).json({ error: "Geolocation check failed. Access denied." });
     }
-    console.warn("Geolocation check failed, allowing access as fallback");
     next();
   }
 }
