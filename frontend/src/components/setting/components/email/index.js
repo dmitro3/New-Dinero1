@@ -45,13 +45,13 @@ const Email = () => {
         </div>
       ) : (
         <>
+          {/* Email Form */}
           <form onSubmit={handleSubmit(handleEmailSubmit)}>
             <div className="p-4 border-b border-[rgb(var(--lb-blue-300))]">
               <div className="mb-2">
                 <div className="text-white text-[14px] font-bold">Email</div>
                 <div className="text-[rgb(var(--lb-blue-250))] text-[13px] mb-2">
-                  (Gear up, because every week you&apos;ll unlock an epic bonus
-                  email)
+                  (Gear up, because every week you&apos;ll unlock an epic bonus email)
                 </div>
                 <Controller
                   control={control}
@@ -59,11 +59,8 @@ const Email = () => {
                   rules={{
                     required: 'Please enter email',
                     pattern: {
-                      value:
-                        /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/
-,
-                      message:
-                        'Please enter a valid email address',
+                      value: /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/,
+                      message: 'Please enter a valid email address (lowercase only)',
                     },
                   }}
                   render={({ field, fieldState }) => {
@@ -77,8 +74,12 @@ const Email = () => {
                             } transition-colors duration-200`}
                           >
                             <Input
-                              className="border border-[rgb(var(--lb-blue-200))] w-[200%] "
                               {...field}
+                              placeholder="Enter your email"
+                              className="border border-[rgb(var(--lb-blue-200))] w-[200%]"
+                              onChange={(e) =>
+                                field.onChange(e.target.value.toLowerCase())
+                              }
                             />
                           </div>
                         </div>
@@ -104,13 +105,14 @@ const Email = () => {
                 loading={isEmailLoading}
                 disabled={isEmailLoading || emailSubmitted}
                 type="submit"
-                className="bg-green-500 py-2  text-white rounded hover:bg-green-600"
+                className="bg-green-500 py-2 text-white rounded hover:bg-green-600"
               >
                 Send
               </Button>
             </div>
           </form>
 
+          {/* OTP Form */}
           <form onSubmit={handleSubmit(onOtpSubmit)}>
             <div className="p-4 border-b border-[rgb(var(--lb-blue-300))]">
               <div className="mb-2">
@@ -118,14 +120,13 @@ const Email = () => {
                   Verification Code <span className="text-red-500">*</span>
                 </div>
                 <div className="text-[rgb(var(--lb-blue-250))] text-[13px] mb-2">
-                  (haven&apos;t receive? please check junk email)
+                  (Haven&apos;t received? Please check junk email)
                 </div>
                 <Controller
                   control={control}
                   name="otp"
                   rules={{
-                    required:
-                      emailSubmitted && 'Please enter your Verification Code',
+                    required: emailSubmitted && 'Please enter your Verification Code',
                   }}
                   render={({ field, fieldState }) => {
                     const error = fieldState?.error;
@@ -138,17 +139,14 @@ const Email = () => {
                             } transition-colors duration-200`}
                           >
                             <Input
-                              className="border border-[rgb(var(--lb-blue-200))] w-[200%]"
                               {...field}
+                              className="border border-[rgb(var(--lb-blue-200))] w-[200%]"
                               type="tel"
                               maxLength={6}
                               pattern="[0-9]*"
                               inputMode="numeric"
                               onInput={(e) => {
-                                e.target.value = e.target.value.replace(
-                                  /[^0-9]/g,
-                                  ''
-                                ); // Removes non-numeric characters
+                                e.target.value = e.target.value.replace(/[^0-9]/g, '');
                               }}
                               disabled={!emailSubmitted || isOtpLoading}
                             />
@@ -187,7 +185,7 @@ const Email = () => {
                 loading={isOtpLoading}
                 disabled={!emailSubmitted || isOtpLoading}
                 type="submit"
-                className="bg-green-500 py-2  text-white rounded hover:bg-green-600"
+                className="bg-green-500 py-2 text-white rounded hover:bg-green-600"
               >
                 Submit
               </Button>
@@ -204,4 +202,5 @@ const Email = () => {
     </section>
   );
 };
+
 export default Email;

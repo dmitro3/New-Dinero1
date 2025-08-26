@@ -94,12 +94,13 @@ export const BASIC_INFO_FORM_CONTROLS = [
       if (!/^[A-Za-z]+(?: [A-Za-z]+)*$/.test(trimmed)) {
         return 'Only alphabets with single spaces between words are allowed';
       }
-
+      if (trimmed.length < 2) {
+        return 'Minimum 2 characters required';
+      }
       if (trimmed.length > 40) {
         return 'Maximum 40 characters allowed';
       }
     },
-    // width: '400px',
   },
   {
     name: 'address',
@@ -136,13 +137,13 @@ export const BASIC_INFO_FORM_CONTROLS = [
   //     { label: 'Canada', value: 'canada' },
   //   ],
   // },
-  {
+    {
     name: 'stateCode',
     label: 'State',
     type: 'select',
-    placeholder: 'State',
-    // required: 'This field is required',
-    // width: '400px',
+    placeholder: 'Select State',
+    required: 'This field is required',
+    isRequired: true,
   },
 ];
 

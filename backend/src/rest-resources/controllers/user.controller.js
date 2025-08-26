@@ -21,6 +21,7 @@ import { UpdateKycStatusService } from '@src/services/veriff/callbacks/updateKyc
 import { CreateVeriffSessionService } from '@src/services/veriff/createVeriffSession.service'
 import db from '@src/db/models'
 import { AppError } from '@src/errors/app.error'
+import dns from "dns";
 
 export default class UserController {
 
@@ -182,41 +183,63 @@ export default class UserController {
     }
   }
 
-static async getOtp (req, res, next) {
+static async getOtp(req, res, next) {
   try {
     const { userId, userEmail, username } = { ...req.body, ...req.query };
 
     if (!userId || !userEmail) {
       throw new AppError({
-        name: 'ValidationError',
-        message: 'Missing required fields',
-        explanation: 'userId and userEmail are required',
+        name: "ValidationError",
+        message: "Missing required fields",
+        explanation: "userId and userEmail are required",
         httpStatusCode: 400,
-        code: 400
+        code: 400,
       });
     }
 
-    // ✅ Email format check
-   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-if (!emailRegex.test(userEmail)) {
-  throw new AppError({
-    name: 'ValidationError',
-    message: 'Invalid email format',
-    explanation: 'Please provide a valid email address',
-    httpStatusCode: 400,
-    code: 400
-  });
-}
+    // ✅ Step 1: Basic email format check
+   const emailRegex = /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/;
+    if (!emailRegex.test(userEmail)) {
+      throw new AppError({
+        name: "ValidationError",
+        message: "Invalid email format",
+        explanation: "Please provide a valid email address",
+        httpStatusCode: 400,
+        code: 400,
+      });
+    }
+
+    // ✅ Step 2: Domain MX record check
+    const domain = userEmail.split("@")[1];
+    const hasValidDomain = await new Promise((resolve) => {
+      dns.resolveMx(domain, (err, addresses) => {
+        if (err || !addresses || addresses.length === 0) {
+          resolve(false);
+        } else {
+          resolve(true);
+        }
+      });
+    });
+
+    if (!hasValidDomain) {
+      throw new AppError({
+        name: "ValidationError",
+        message: "Invalid email domain",
+        explanation: "The email domain does not exist or cannot receive mail",
+        httpStatusCode: 400,
+        code: 400,
+      });
+    }
 
     // ✅ Duplicate email check
     const existingUser = await db.User.findOne({ where: { email: userEmail } });
     if (existingUser) {
       throw new AppError({
-        name: 'ValidationError',
-        message: 'Email already in use',
-        explanation: 'This email is already registered with another account',
+        name: "ValidationError",
+        message: "Email already in use",
+        explanation: "This email is already registered with another account",
         httpStatusCode: 400,
-        code: 400
+        code: 400,
       });
     }
 
@@ -225,10 +248,11 @@ if (!emailRegex.test(userEmail)) {
     sendResponse({ req, res, next }, data);
 
   } catch (error) {
-    console.error('❌ OTP Error:', error);
+    console.error("❌ OTP Error:", error);
     next(error);
   }
 }
+
 
 
 
