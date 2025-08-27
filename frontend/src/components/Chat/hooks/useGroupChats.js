@@ -13,9 +13,31 @@ const useGroupChats = ({ webSocketChat }) => {
   const {
     state: { user },
   } = useStateContext();
+
+  
   const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    requestAnimationFrame(() => {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    });
   };
+
+  const addLocalMessage = (message) => {
+    setGroupChatsData((prev) => [
+      ...prev,
+      {
+        ...message,
+        messageId: Date.now(),
+        createdAt: new Date().toISOString(),
+        user: user,
+      },
+    ]);
+  };
+
+
+
+
+
+
   const handleClick = async (chatRainId) => {
     try {
       await claimChatRain({
@@ -26,12 +48,12 @@ const useGroupChats = ({ webSocketChat }) => {
         prevChats.map((chat) =>
           chat.ChatRain && parseInt(chat.ChatRain.id) === parseInt(chatRainId)
             ? {
-                ...chat,
-                ChatRain: {
-                  ...chat.ChatRain,
-                  isUserClaimed: true,
-                },
-              }
+              ...chat,
+              ChatRain: {
+                ...chat.ChatRain,
+                isUserClaimed: true,
+              },
+            }
             : chat
         )
       );
@@ -51,6 +73,7 @@ const useGroupChats = ({ webSocketChat }) => {
       setError(error?.message);
     }
   };
+
   const formatTime = (dateTime) => {
     if (dateTime) {
       const date = new Date(dateTime);
@@ -61,6 +84,7 @@ const useGroupChats = ({ webSocketChat }) => {
       }).format(date);
     }
   };
+
   const fetchGroupChat = async () => {
     setLoading(true);
     try {
@@ -69,17 +93,20 @@ const useGroupChats = ({ webSocketChat }) => {
         limit: 200,
         pageNo: 1,
       });
-      setGroupChatsData(response?.data?.data);
+      setGroupChatsData(response?.data?.data || []);
     } catch (error) {
       console.log(error?.message);
     } finally {
       setLoading(false);
     }
   };
+
+  
   useEffect(() => {
     if (user?.userId) fetchGroupChat();
   }, [user?.userId]);
 
+  
   useEffect(() => {
     if (webSocketChat?.data) {
       const messageType = webSocketChat?.data?.messageType;
@@ -121,9 +148,24 @@ const useGroupChats = ({ webSocketChat }) => {
     }
   }, [webSocketChat]);
 
+
   useEffect(() => {
     scrollToBottom();
   }, [groupChatsData]);
+
+  
+  useEffect(() => {
+    if (!loading) scrollToBottom();
+  }, [loading]);
+
+  
+  useEffect(() => {
+    const handleLocalMessage = (e) => addLocalMessage(e.detail);
+    window.addEventListener('new-local-message', handleLocalMessage);
+    return () =>
+      window.removeEventListener('new-local-message', handleLocalMessage);
+  }, []);
+
   return {
     groupChatsData,
     formatTime,

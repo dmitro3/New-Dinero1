@@ -37,7 +37,7 @@ const UserForm = ({
 
   const [isMarkTick, setIsMarkTick] = useState(false);
 
-  // Intercept submit to block if region is blocked
+  
   const onSubmit = (data) => {
     if (isSignUp) {
       if (!data.isAge || !data.terms) {
@@ -229,7 +229,7 @@ const UserForm = ({
             {isSignUp ? 'Sign Up' : 'Sign In'}
           </Button>
 
-          {/* Google Sign-In */}
+
           <Button
             type="button"
             disabled={isBlocked}
@@ -247,10 +247,10 @@ const UserForm = ({
                 process.env.NEXT_PUBLIC_BACKEND_URL + '/api/v1/auth/sso/google';
             }}
           >
-            <span>Sign in with Google</span>
+            <span>{isSignUp? "Sign up with Google" : "Sign in with Google"}</span>
           </Button>
 
-          {/* Facebook Sign-In */}
+
           <Button
             type="button"
             disabled={isBlocked}
@@ -268,7 +268,7 @@ const UserForm = ({
                 process.env.NEXT_PUBLIC_BACKEND_URL + '/api/v1/auth/sso/facebook';
             }}
           >
-            <span>Sign in with Facebook</span>
+            <span>{isSignUp? "Sign up with Facebook" : "Sign in with Facebook"}</span>
           </Button>
         </>
       )}

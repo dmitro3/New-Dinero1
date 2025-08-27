@@ -70,18 +70,18 @@ const ChatFooter = ({ sendMessage }) => {
           </span>
 
           {isPickerOpen && (
-            <div className="absolute bottom-[50px] right-2 z-10">
+            <div className="fixed bottom-[60px] right-2 z-50">
               <Picker
                 data={data}
                 onEmojiSelect={handleEmojiSelect}
                 theme="dark"
                 emojiSize={20}
-                onClickOutside={() => setIsPickerOpen(false)}
                 perLine={8}
                 showPreview={false}
               />
             </div>
           )}
+
           {isGifOpen && (
             <div
               className="absolute bottom-[50px] right-[0px] z-10 "
@@ -100,8 +100,7 @@ const ChatFooter = ({ sendMessage }) => {
         {error && <p className="text-red-500 text-xs mt-1">{error}</p>}
         <div className="flex justify-between mt-3">
           <div className="flex items-center gap-2">
-            {/* <span className="bg-green-400 p-1 rounded-full"></span> */}
-            {/* <span className="text-sm text-white">Online:1000</span> */}
+           
           </div>
           <div className="inline-flex gap-3 items-center relative">
             <span
@@ -111,9 +110,8 @@ const ChatFooter = ({ sendMessage }) => {
             </span>
             <Button
               type="submit"
-              className={`bg-green-400 hover:bg-green-300 w-[60px] h-[35px] leading-[42px] cursor-pointer text-center text-black rounded-[6px] ${
-                error ? 'cursor-not-allowed opacity-50' : ''
-              }`}
+              className={`bg-green-400 hover:bg-green-300 w-[60px] h-[35px] leading-[42px] cursor-pointer text-center text-black rounded-[6px] ${error ? 'cursor-not-allowed opacity-50' : ''
+                }`}
               disabled={!!error}
             >
               Send

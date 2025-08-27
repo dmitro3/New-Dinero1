@@ -1,9 +1,10 @@
 /* eslint-disable no-undef */
-
+'use client';
 import { toast } from '@/hooks/use-toast';
 import { useStateContext } from '@/store';
 import { useEffect, useRef, useState } from 'react';
 import { useForm } from 'react-hook-form';
+import { GLOBAL_CHAT_ID } from "../constants"; 
 
 const useSendChat = ({ sendMessage }) => {
   const {
@@ -16,24 +17,18 @@ const useSendChat = ({ sendMessage }) => {
   const [isPickerOpen, setIsPickerOpen] = useState(false);
   const [isGifOpen, setIsGifOpen] = useState(false);
   const pickerRef = useRef(null);
+
   const handleGifClick = () => {
-    // if (user?.wagered > 50 ) {
     setIsGifOpen(!isGifOpen);
     setError('');
-    // } else {
-    //   toast({
-    //     description: 'Yor need wager over 50 SC to use the gif feature.',
-    //     className:
-    //       'fixed bottom-[110px] right-4 z-50 w-[55%] sm:w-[45%] md:w-[30%] text-black font-semibold border shadow-lg rounded-md p-4 bg-red-400 border-red-50',
-    //   });
-    // }
   };
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    
+
     const handleClickOutside = (event) => {
       if (pickerRef.current && !pickerRef.current.contains(event.target)) {
-        setIsGifOpen(!isGifOpen);
+        setIsGifOpen(false);
       }
     };
 
@@ -41,7 +36,7 @@ const useSendChat = ({ sendMessage }) => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [isGifOpen]);
+  }, []);
   const autoResizeTextarea = () => {
     const textarea = textareaRef.current;
     if (textarea) {
@@ -77,7 +72,7 @@ const useSendChat = ({ sendMessage }) => {
     setError('');
     const gifValue = gif?.url;
     onSubmit({ message: gifValue, isGif: true });
-    setIsGifOpen(!isGifOpen);
+    setIsGifOpen(false);
   };
 
   const onSubmit = async (data) => {
@@ -90,13 +85,28 @@ const useSendChat = ({ sendMessage }) => {
       setError('Message cannot be empty.');
       return;
     }
+
     if (user?.email) {
       const payload = {
-        message: message,
+        message,
         isprivate: false,
-        messageType: isGif ? 'GIF' : 'MESSAGE',
+        messageType: isGif ? "GIF" : "MESSAGE",
+        userId: user?.userId,
+        groupId: GLOBAL_CHAT_ID,
+        user: user,
       };
+
+
+
+
       sendMessage(payload, 'SEND_MESSAGE');
+
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(
+          new CustomEvent('new-local-message', { detail: payload })
+        );
+      }
+
       reset();
       setCharacterCount(0);
       setError('');

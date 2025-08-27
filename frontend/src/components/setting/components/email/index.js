@@ -45,7 +45,7 @@ const Email = () => {
         </div>
       ) : (
         <>
-          {/* Email Form */}
+
           <form onSubmit={handleSubmit(handleEmailSubmit)}>
             <div className="p-4 border-b border-[rgb(var(--lb-blue-300))]">
               <div className="mb-2">
@@ -69,9 +69,8 @@ const Email = () => {
                       <>
                         <div className="flex items-center space-x-2 w-[50%]">
                           <div
-                            className={`${
-                              error ? 'border-red-500' : 'border-gray-300'
-                            } transition-colors duration-200`}
+                            className={`${error ? 'border-red-500' : 'border-gray-300'
+                              } transition-colors duration-200`}
                           >
                             <Input
                               {...field}
@@ -85,11 +84,10 @@ const Email = () => {
                         </div>
                         {error && (
                           <div
-                            className={`text-red-500 text-sm absolute transition-opacity duration-300 ease-in-out ${
-                              error
+                            className={`text-red-500 text-sm absolute transition-opacity duration-300 ease-in-out ${error
                                 ? 'opacity-100 translate-y-0'
                                 : 'opacity-0 translate-y-2'
-                            }`}
+                              }`}
                           >
                             {error?.message}
                           </div>
@@ -131,42 +129,33 @@ const Email = () => {
                   render={({ field, fieldState }) => {
                     const error = fieldState?.error;
                     return (
-                      <>
-                        <div className="flex items-center space-x-2 w-[50%]">
-                          <div
-                            className={`${
-                              error ? 'border-red-500' : 'border-gray-300'
-                            } transition-colors duration-200`}
-                          >
-                            <Input
-                              {...field}
-                              className="border border-[rgb(var(--lb-blue-200))] w-[200%]"
-                              type="tel"
-                              maxLength={6}
-                              pattern="[0-9]*"
-                              inputMode="numeric"
-                              onInput={(e) => {
-                                e.target.value = e.target.value.replace(/[^0-9]/g, '');
-                              }}
-                              disabled={!emailSubmitted || isOtpLoading}
-                            />
-                          </div>
+                      <div className="w-full md:w-1/2">
+                        <div className="flex flex-col">
+                          <Input
+                            {...field}
+                            className={`border w-full ${error ? 'border-red-500' : 'border-[rgb(var(--lb-blue-200))]'
+                              }`}
+                            type="tel"
+                            maxLength={6}
+                            pattern="[0-9]*"
+                            inputMode="numeric"
+                            onInput={(e) => {
+                              e.target.value = e.target.value.replace(/[^0-9]/g, '');
+                            }}
+                            disabled={!emailSubmitted || isOtpLoading}
+                          />
+
+                          {error && (
+                            <p className="text-red-500 text-sm mt-1 break-words">
+                              {error?.message}
+                            </p>
+                          )}
                         </div>
-                        {error && (
-                          <div
-                            className={`text-red-500 text-sm absolute transition-opacity duration-300 ease-in-out ${
-                              error
-                                ? 'opacity-100 translate-y-0'
-                                : 'opacity-0 translate-y-2'
-                            }`}
-                          >
-                            {error?.message}
-                          </div>
-                        )}
-                      </>
+                      </div>
                     );
                   }}
                 />
+
               </div>
               {isTimerActive && (
                 <div className="text-md font-medium text-green-500 w-fit rounded-xl mt-2">

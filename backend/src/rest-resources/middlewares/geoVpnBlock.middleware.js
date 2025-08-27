@@ -40,15 +40,15 @@ function normalizeStateCode(stateCode, stateName) {
 }
 
 function isBlockedRegion(country, stateCode) {
-  if (!allowedCountries.includes(country)) return true; // Only allow US + IN
+  if (!allowedCountries.includes(country)) return true; 
 
-  if (country === "IN") return false; // India always allowed
+  if (country === "IN") return false; 
 
   if (country === "US" && blockedStates.includes(stateCode)) {
-    return true; // Block listed states
+    return true; 
   }
 
-  return false; // Other US states allowed
+  return false; 
 }
 
 async function geoVpnBlockMiddleware(req, res, next) {
@@ -89,11 +89,13 @@ async function geoVpnBlockMiddleware(req, res, next) {
           `https://ipqualityscore.com/api/json/ip/${vpnApiKey}/${ip}`,
           { timeout: GEO_API_TIMEOUT }
         );
-        const { vpn, proxy, tor } = vpnRes.data;
-        console.log(`[VPN Check] VPN: ${vpn} | Proxy: ${proxy} | Tor: ${tor}`);
-        if (vpn || proxy || tor) {
-          return res.status(403).json({ error: "VPN/Proxy detected. Access denied." });
+        const { vpn, proxy, tor, fraud_score, recent_abuse } = vpnRes.data;
+
+        // only block if it's *high confidence* proxy/VPN
+        if ((vpn || proxy || tor) && fraud_score > 80) {
+          return res.status(403).json({ error: "High confidence VPN/Proxy detected. Access denied." });
         }
+
       }
     }
 
