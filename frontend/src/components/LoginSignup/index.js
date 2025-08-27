@@ -32,10 +32,15 @@ const US_STATE_NAME_TO_CODE = {
   "Wisconsin": "WI", "Wyoming": "WY"
 };
 
-// Blocked states
+// Blocked US states
 const BLOCKED_STATES = ["MI", "ID", "WA", "LA", "NV", "MT", "CT", "HI", "DE"];
-// Allowed countries
+
+// Only India + US are allowed
 const ALLOWED_COUNTRIES = ["US", "IN"];
+
+// Explicitly blocked countries
+const BLOCKED_COUNTRIES = ["MX"]; // Mexico
+
 
 function normalizeState(stateCode, stateName) {
   if (stateCode) {
@@ -54,12 +59,21 @@ function isBlockedRegion(geo) {
 
   const stateCode = normalizeState(geo.state_code, geo.state_name);
 
+  // Block if not in allowed list
   if (!ALLOWED_COUNTRIES.includes(geo.country_code)) return true;
-  if (geo.country_code === 'IN') return false;
-  if (geo.country_code === 'US' && BLOCKED_STATES.includes(stateCode)) return true;
 
-  return false;
+  // Block explicit restricted countries
+  if (BLOCKED_COUNTRIES.includes(geo.country_code)) return true;
+
+  // India is fully allowed
+  if (geo.country_code === "IN") return false;
+
+  // For US, only allow states not in BLOCKED_STATES
+  if (geo.country_code === "US" && BLOCKED_STATES.includes(stateCode)) return true;
+
+  return false; // Otherwise allowed
 }
+
 
 const LoginSignup = () => {
   const router = useRouter();

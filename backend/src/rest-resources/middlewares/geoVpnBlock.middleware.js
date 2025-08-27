@@ -92,7 +92,7 @@ async function geoVpnBlockMiddleware(req, res, next) {
         const { vpn, proxy, tor, fraud_score, recent_abuse } = vpnRes.data;
 
         // only block if it's *high confidence* proxy/VPN
-        if ((vpn || proxy || tor) && fraud_score > 80) {
+        if ((vpn || proxy || tor) && fraud_score > 90) {
           return res.status(403).json({ error: "High confidence VPN/Proxy detected. Access denied." });
         }
 

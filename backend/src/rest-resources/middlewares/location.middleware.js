@@ -2,100 +2,113 @@ import config from '@src/configs/app.config'
 import { AppError } from '@src/errors/app.error'
 import { Errors } from '@src/errors/errorCodes'
 import axios from 'axios'
-
 import validator from 'validator'
 
-const restrictedStates = ['US-MI', 'US-ID', 'US-WA', 'US-LA', 'US-NV', 'US-MT', 'US-CT', 'US-HI', 'US-DE']
-const restrictedCountries = ['MX'] // Mexico
+/**
+ * Allowed / Blocked Locations
+ */
+const allowedCountries = ["US", "IN"];
+const blockedStates = ["MI", "ID", "WA", "LA", "NV", "MT", "CT", "HI", "DE"];
+const blockedCountries = ["MX"];
 
-
+/**
+ * Extract client IP from request headers / connection
+ */
 export const getClientIp = (req) => {
-  if (!req || !req.headers) return null // Prevent errors
+  if (!req || !req.headers) return null; // Prevent errors
 
   const ipHeaders = [
-    'x-client-ip',
-    'cf-connecting-ip',
-    'fastly-client-ip',
-    'true-client-ip',
-    'x-real-ip',
-    'x-cluster-client-ip',
-    'x-forwarded',
-    'x-forwarded-for',
-    'forwarded-for',
-    'forwarded',
-    'x-appengine-user-ip',
-    'Cf-Pseudo-IPv4'
-  ]
+    "x-client-ip",
+    "cf-connecting-ip",
+    "fastly-client-ip",
+    "true-client-ip",
+    "x-real-ip",
+    "x-cluster-client-ip",
+    "x-forwarded",
+    "x-forwarded-for",
+    "forwarded-for",
+    "forwarded",
+    "x-appengine-user-ip",
+    "Cf-Pseudo-IPv4",
+  ];
 
   for (const header of ipHeaders) {
     if (req.headers[header] && validator.isIP(req.headers[header])) {
-      return req.headers[header]
+      return req.headers[header];
     }
   }
 
   // Handle x-forwarded-for (can contain multiple IPs)
-  if (req.headers['x-forwarded-for']) {
-    const xForwardedFor = req.headers['x-forwarded-for'].split(',')[0].trim()
+  if (req.headers["x-forwarded-for"]) {
+    const xForwardedFor = req.headers["x-forwarded-for"].split(",")[0].trim();
     if (validator.isIP(xForwardedFor)) {
-      return xForwardedFor
+      return xForwardedFor;
     }
   }
 
   // Check other request properties
   if (req.connection?.remoteAddress && validator.isIP(req.connection.remoteAddress)) {
-    return req.connection.remoteAddress
+    return req.connection.remoteAddress;
   }
 
   if (req.socket?.remoteAddress && validator.isIP(req.socket.remoteAddress)) {
-    return req.socket.remoteAddress
+    return req.socket.remoteAddress;
   }
 
   if (req.connection?.socket?.remoteAddress && validator.isIP(req.connection.socket.remoteAddress)) {
-    return req.connection.socket.remoteAddress
+    return req.connection.socket.remoteAddress;
   }
 
   if (req.info?.remoteAddress && validator.isIP(req.info.remoteAddress)) {
-    return req.info.remoteAddress
+    return req.info.remoteAddress;
   }
 
   if (req.requestContext?.identity?.sourceIp && validator.isIP(req.requestContext.identity.sourceIp)) {
-    return req.requestContext.identity.sourceIp
+    return req.requestContext.identity.sourceIp;
   }
 
-  return null
-}
+  return null;
+};
 
-export function geoBlock () {
+/**
+ * Middleware: Geo Location Blocking
+ */
+export function geoBlock() {
   return async function (req, res, next) {
     try {
-      // console.log("request header",req.headers);
+      const ip = getClientIp(req);
 
-      const ip = await getClientIp(req)
+      if (!ip) return next(new AppError(Errors.IP_NOT_FOUND));
 
-      if (!ip) return next(new AppError(Errors.IP_NOT_FOUND))
+      const geoApiBaseUrl = config.get("geoapi.url");
+      const geoApiKey = config.get("geoapi.apikey");
 
-      const geoApiBaseUrl = config.get('geoapi.url')
-      const geoApiKey = config.get('geoapi.apikey')
+      const geoApiUrl = `${geoApiBaseUrl}?apiKey=${geoApiKey}&ip=${ip}`;
+      const response = await axios.get(geoApiUrl);
 
-      const geoApiUrl = `${geoApiBaseUrl}?apiKey=${geoApiKey}&ip=${ip}`
-      const response = await axios.get(geoApiUrl)
-      const state = response.data.state_code
-      const country = response.data.country_code2
-      
-      // Check if state is restricted
-      if (restrictedStates.includes(state)) {
-        return next(new AppError(Errors.GEO_BLOCKED_LOCATION))
-      }
-      
-      // Check if country is restricted (Mexico)
-      if (restrictedCountries.includes(country)) {
-        return next(new AppError(Errors.GEO_BLOCKED_LOCATION))
+      const state = response.data.state_code;
+      const country = response.data.country_code2;
+
+      // --- Rule 1: Block if country is not in allowlist
+      if (!allowedCountries.includes(country)) {
+        return next(new AppError(Errors.GEO_BLOCKED_LOCATION));
       }
 
-      next()
+      // --- Rule 2: Explicitly block restricted countries (e.g., Mexico)
+      if (blockedCountries.includes(country)) {
+        return next(new AppError(Errors.GEO_BLOCKED_LOCATION));
+      }
+
+      // --- Rule 3: Block restricted US states
+      if (country === "US" && blockedStates.includes(state)) {
+        return next(new AppError(Errors.GEO_BLOCKED_LOCATION));
+      }
+
+      // ✅ Allowed
+      next();
     } catch (error) {
-      console.error('Error fetching geolocation data:', error)
-      next(new AppError(Errors.PERMISSION_DENIED))
+      console.error("Error fetching geolocation data:", error);
+      next(new AppError(Errors.PERMISSION_DENIED));
     }
-  }
+  };
 }
