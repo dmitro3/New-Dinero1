@@ -11,7 +11,7 @@ export class GetUserDetailsHandler extends BaseHandler {
 
     const user = await db.User.findOne({
       where: { userId },
-      attributes: ['userId', 'username', 'email', 'city', 'firstName', 'lastName', 'createdAt', 'dateOfBirth', 'profileImage', 'veriffStatus', 'isActive'],
+      attributes: ['userId', 'username', 'email','isEmailVerified', 'city', 'firstName', 'lastName', 'createdAt', 'dateOfBirth', 'profileImage', 'veriffStatus', 'isActive'],
       include: [
         {
           model: db.Wallet,
@@ -167,6 +167,7 @@ export class GetUserDetailsHandler extends BaseHandler {
     // Prepare response with current and next VIP tier information and rewards
     const response = {
       ...user.dataValues,
+      isEmailVerified: user.isEmailVerified,
       losses: losses,
       win: totalWinAmount,
       wagered: totalBetAmount,

@@ -15,7 +15,7 @@ const blockedCountries = ["MX"];
  * Extract client IP from request headers / connection
  */
 export const getClientIp = (req) => {
-  if (!req || !req.headers) return null; // Prevent errors
+  if (!req || !req.headers) return null;
 
   const ipHeaders = [
     "x-client-ip",
@@ -29,42 +29,37 @@ export const getClientIp = (req) => {
     "forwarded-for",
     "forwarded",
     "x-appengine-user-ip",
-    "Cf-Pseudo-IPv4",
+    "cf-pseudo-ipv4", // lowercase fix
   ];
 
+  // Loop through headers
   for (const header of ipHeaders) {
-    if (req.headers[header] && validator.isIP(req.headers[header])) {
-      return req.headers[header];
-    }
+    const val = req.headers[header];
+    if (val && validator.isIP(val)) return val;
   }
 
-  // Handle x-forwarded-for (can contain multiple IPs)
+  // Handle x-forwarded-for (pick last public IP)
   if (req.headers["x-forwarded-for"]) {
-    const xForwardedFor = req.headers["x-forwarded-for"].split(",")[0].trim();
-    if (validator.isIP(xForwardedFor)) {
-      return xForwardedFor;
-    }
+    const ips = req.headers["x-forwarded-for"].split(",").map(ip => ip.trim());
+    const publicIp = ips.reverse().find(ip => validator.isIP(ip) && !/^10\.|^192\.168\.|^172\.(1[6-9]|2\d|3[01])\./.test(ip));
+    if (publicIp) return publicIp;
   }
 
   // Check other request properties
-  if (req.connection?.remoteAddress && validator.isIP(req.connection.remoteAddress)) {
-    return req.connection.remoteAddress;
-  }
+  const candidates = [
+    req.connection?.remoteAddress,
+    req.socket?.remoteAddress,
+    req.connection?.socket?.remoteAddress,
+    req.info?.remoteAddress,
+    req.requestContext?.identity?.sourceIp,
+  ];
 
-  if (req.socket?.remoteAddress && validator.isIP(req.socket.remoteAddress)) {
-    return req.socket.remoteAddress;
-  }
-
-  if (req.connection?.socket?.remoteAddress && validator.isIP(req.connection.socket.remoteAddress)) {
-    return req.connection.socket.remoteAddress;
-  }
-
-  if (req.info?.remoteAddress && validator.isIP(req.info.remoteAddress)) {
-    return req.info.remoteAddress;
-  }
-
-  if (req.requestContext?.identity?.sourceIp && validator.isIP(req.requestContext.identity.sourceIp)) {
-    return req.requestContext.identity.sourceIp;
+  for (const candidate of candidates) {
+    if (candidate) {
+      // Strip IPv6 prefix (::ffff:)
+      const cleanIp = candidate.replace(/^::ffff:/, "");
+      if (validator.isIP(cleanIp)) return cleanIp;
+    }
   }
 
   return null;

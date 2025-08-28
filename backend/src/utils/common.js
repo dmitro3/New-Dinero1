@@ -164,11 +164,22 @@ export const updateUser = async (detail, req) => {
 }
 
 export const getRequestIP = (req) => {
-  let ipAddress = (req.headers['x-forwarded-for'] || '').split(',')[0] || req.connection.remoteAddress?.split(':ffff:')[1] || req.ip
-  if (ipAddress === '::1') ipAddress = '1.1.1.1'
+  if (!req) return '0.0.0.0';
 
-  return ipAddress
-}
+  const headers = req.headers || {};
+  let ipAddress =
+    (headers['x-forwarded-for'] || '').split(',')[0] ||
+    req.connection?.remoteAddress?.split(':ffff:')[1] ||
+    req.socket?.remoteAddress ||
+    req.ip ||
+    '0.0.0.0';
+
+  // Normalize localhost IPv6
+  if (ipAddress === '::1') ipAddress = '1.1.1.1';
+
+  return ipAddress;
+};
+
 
 export const userId = (req) => {
   let token, response

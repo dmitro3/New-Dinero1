@@ -51,7 +51,7 @@ const useUserAuth = ({ setOpen = () => {}, isSignUp = false, setToastState }) =>
     } catch (error) {
       setLoading(false);
 
-      const fallbackMessage = 'An unknown error occurred';
+      const fallbackMessage = 'Access denied, VPN  detected.';
       // Prefer backend geo/VPN block error if present
       const apiMessage = error?.response?.data?.error || error?.errors?.message || error?.message || fallbackMessage;
 

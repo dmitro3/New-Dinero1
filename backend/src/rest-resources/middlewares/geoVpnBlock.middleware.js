@@ -40,23 +40,24 @@ function normalizeStateCode(stateCode, stateName) {
 }
 
 function isBlockedRegion(country, stateCode) {
-  if (!allowedCountries.includes(country)) return true; 
+  if (!allowedCountries.includes(country)) return true;
 
-  if (country === "IN") return false; 
+  if (country === "IN") return false;
 
   if (country === "US" && blockedStates.includes(stateCode)) {
-    return true; 
+    return true;
   }
 
-  return false; 
+  return false;
 }
 
 async function geoVpnBlockMiddleware(req, res, next) {
   if (!GEO_BLOCKING_ENABLED) return next();
 
-  const ip =
-    (req.headers["x-forwarded-for"] || "").split(",")[0].trim() ||
-    req.connection?.remoteAddress?.replace(/^.*:/, "");
+const ip =
+  (req.headers["x-forwarded-for"] || "").split(",")[0].trim() ||
+  req.connection?.remoteAddress?.replace(/^.*:/, "");
+
 
   console.log(`[Geo/VPN Middleware] Detected IP: ${ip}`);
 
@@ -80,8 +81,6 @@ async function geoVpnBlockMiddleware(req, res, next) {
     if (isBlockedRegion(country_code2, normalizedStateCode)) {
       return res.status(403).json({ error: "Access from your region is not allowed." });
     }
-
-    // VPN/proxy detection (optional)
     if (VPN_DETECTION_ENABLED) {
       const vpnApiKey = process.env.IPQUALITYSCORE_API_KEY;
       if (vpnApiKey) {
@@ -89,24 +88,30 @@ async function geoVpnBlockMiddleware(req, res, next) {
           `https://ipqualityscore.com/api/json/ip/${vpnApiKey}/${ip}`,
           { timeout: GEO_API_TIMEOUT }
         );
-        const { vpn, proxy, tor, fraud_score, recent_abuse } = vpnRes.data;
 
-        // only block if it's *high confidence* proxy/VPN
-        if ((vpn || proxy || tor) && fraud_score > 90) {
-          return res.status(403).json({ error: "High confidence VPN/Proxy detected. Access denied." });
+       { console.log("vpn res : ", vpnRes.data);}
+        const { vpn, fraud_score } = vpnRes.data;
+        if (vpn && fraud_score > 90) {
+          return res.status(403).json({
+            error: "Access Denied, VPN is detected",
+          });
         }
-
       }
     }
 
+
     next();
   } catch (err) {
-    console.error("Geo/VPN check failed:", err.message);
-    if (GEO_BLOCKING_FALLBACK === "block") {
-      return res.status(403).json({ error: "Geolocation check failed. Access denied." });
-    }
-    next();
+  console.error("Geo/VPN check failed:", err.response?.data || err.message);
+
+  if (GEO_BLOCKING_FALLBACK === "block") {
+    return res.status(403).json({ error: "Geolocation check failed. Access denied." });
   }
+
+  // Fallback: allow access
+  next();
+}
+
 }
 
 module.exports = geoVpnBlockMiddleware;

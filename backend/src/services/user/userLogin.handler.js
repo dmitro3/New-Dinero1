@@ -10,16 +10,40 @@ import { AddUserTierProgressHandler } from '../userTierProgress'
 
 export class UserLoginHandler extends BaseHandler {
   async run() {
-    const { username, password } = this.args
+    const { username, password, email, signInType = 'NORMAL', googleId, facebookId } = this.args
     const transaction = await this.context.sequelizeTransaction
 
+    // Build where condition dynamically
+    let whereCondition = {}
+    if (signInType === 'NORMAL') {
+      if (!username) throw new AppError(Errors.USER_NOT_EXISTS)
+      whereCondition.username = username
+    } else if (signInType === 'GOOGLE') {
+      if (!googleId && !email) throw new AppError(Errors.USER_NOT_EXISTS)
+      if (googleId) whereCondition.googleId = googleId
+      else whereCondition.email = email
+    } else if (signInType === 'FACEBOOK') {
+      if (!facebookId && !email) throw new AppError(Errors.USER_NOT_EXISTS)
+      if (facebookId) whereCondition.facebookId = facebookId
+      else whereCondition.email = email
+    }
+
     const user = await db.User.findOne({
-      where: { username },
-      attributes: ['userId', 'username', 'firstName', 'lastName', 'password', 'createdAt', 'lastLoginDate', 'isActive'],
+      where: whereCondition,
+      attributes: [
+        'userId',
+        'username',
+        'firstName',
+        'lastName',
+        'password',
+        'createdAt',
+        'lastLoginDate',
+        'isActive'
+      ],
       include: [
         {
           model: db.User,
-          as: 'referrer', // Parent User
+          as: 'referrer',
           attributes: ['userId', 'username', 'firstName', 'lastName']
         },
         {
@@ -30,31 +54,18 @@ export class UserLoginHandler extends BaseHandler {
         {
           model: db.UserDetails,
           as: 'userDetails',
-          attributes: ['ipAddress', 'vipTierId', 'nextVipTierId', 'id'], // Include nextVipTierId here
+          attributes: ['ipAddress', 'vipTierId', 'nextVipTierId', 'id'],
           include: [
             {
               model: db.VipTier,
               as: 'VipTier',
               attributes: ['vipTierId', 'name', 'icon', 'level'],
-              include: [
-                {
-                  model: db.Reward,
-                  as: 'rewards',
-                  attributes: { exclude: ['createdAt', 'updatedAt'] }
-                }
-              ]
+              include: [{ model: db.Reward, as: 'rewards', attributes: { exclude: ['createdAt', 'updatedAt'] } }]
             },
             {
               model: db.VipTier,
               as: 'nextVipTier',
-              // attributes: ['vipTierId', 'name', 'icon', 'level'],  // Include nextVipTier
-              include: [
-                {
-                  model: db.Reward,
-                  as: 'rewards',
-                  attributes: { exclude: ['createdAt', 'updatedAt'] }
-                }
-              ]
+              include: [{ model: db.Reward, as: 'rewards', attributes: { exclude: ['createdAt', 'updatedAt'] } }]
             }
           ]
         },
@@ -67,46 +78,78 @@ export class UserLoginHandler extends BaseHandler {
         }
       ]
     }, transaction)
+
     if (!user) throw new AppError(Errors.USER_NOT_EXISTS)
     if (!user.isActive) throw new AppError(Errors.USER_ACCOUNT_INACTIVE)
-    if (!await comparePassword(password, user.password)) throw new AppError(Errors.WRONG_PASSWORD_ERROR)
 
-    const currentVipTier = user.userDetails ? user.userDetails.VipTier : null
-    const nextVipTier = user.userDetails ? user.userDetails.nextVipTier : null
-    const userTierProgress = user?.userTierProgresses || []
-    await user.userDetails.set({ loginIpAddress: getRequestIP(this.context.req) }).save({ transaction })
-    if (!currentVipTier) throw new AppError(Errors.USER_VIP_TIER_NOT_FOUND)
-    // Create access token
-    const accessToken = await createAccessToken(user)
-
-    // Compare last login date to today's date (UTC)
-    const lastLoginDate = user.dataValues?.lastLoginDate ? dayjs(user.dataValues.lastLoginDate).utc().startOf('day') : null
-    const today = serverDayjs().startOf('day')
-    let isNewLoginDay = false
-    if (!lastLoginDate || !lastLoginDate.isSame(today, 'day')) {
-      // If last login date is not today, set `isNewLoginDay` to true and update the login date
-      isNewLoginDay = true
-    }
-    // Update last login date to the current UTC date
-    await db.User.update({ lastLoginDate: serverDayjs().utc().toDate() }, // Set the current UTC time
-      { where: { userId: user.userId } }, transaction)
-
-    if (isNewLoginDay || !userTierProgress.length) {
-      await AddUserTierProgressHandler.execute({
-        userId: user?.userId,
-        loginStreak: USER_VIP_TIER_PROGRESS_KEYS.loginStreak
-      }, this.context)
-
-      if (userTierProgress && userTierProgress.length > 0) {
-        userTierProgress[0].loginStreak = userTierProgress[0]?.loginStreak + 1
+    // password check only for NORMAL login
+    if (signInType === 'NORMAL') {
+      if (!(await comparePassword(password, user.password))) {
+        throw new AppError(Errors.WRONG_PASSWORD_ERROR)
       }
     }
 
+    // Ensure userDetails exists
+    if (!user.userDetails) {
+      const defaultTier = await db.VipTier.findOne({ where: { level: 1, isActive: true }, transaction })
+      if (!defaultTier) throw new AppError(Errors.USER_VIP_TIER_NOT_FOUND)
+
+      const nextTier = await db.VipTier.findOne({ where: { level: defaultTier.level + 1, isActive: true }, transaction })
+
+      user.userDetails = await db.UserDetails.create(
+        {
+          userId: user.userId,
+          ipAddress: getRequestIP(this.context?.req) || null,
+          vipTierId: defaultTier.vipTierId,
+          nextVipTierId: nextTier?.vipTierId || defaultTier.vipTierId
+        },
+        { transaction }
+      )
+    } else {
+      await user.userDetails.set({ loginIpAddress: getRequestIP(this.context.req) }).save({ transaction })
+    }
+
+    const currentVipTier = user.userDetails?.VipTier
+    const nextVipTier = user.userDetails?.nextVipTier
+    const userTierProgress = user?.userTierProgresses || []
+
+    if (!currentVipTier) throw new AppError(Errors.USER_VIP_TIER_NOT_FOUND)
+
+    if (!user.username) {
+      user.username = user.email || `user_${user.userId}`
+    }
+    // Create access token
+    const accessToken = await createAccessToken(user)
+
+    // Handle daily login streak
+    const lastLoginDate = user.dataValues?.lastLoginDate
+      ? dayjs(user.dataValues.lastLoginDate).utc().startOf('day')
+      : null
+    const today = serverDayjs().startOf('day')
+    let isNewLoginDay = !lastLoginDate || !lastLoginDate.isSame(today, 'day')
+
+    await db.User.update(
+      { lastLoginDate: serverDayjs().utc().toDate() },
+      { where: { userId: user.userId } },
+      transaction
+    )
+
+    if (isNewLoginDay || !userTierProgress.length) {
+      await AddUserTierProgressHandler.execute(
+        { userId: user.userId, loginStreak: USER_VIP_TIER_PROGRESS_KEYS.loginStreak },
+        this.context
+      )
+
+      if (userTierProgress.length > 0) {
+        userTierProgress[0].loginStreak = userTierProgress[0].loginStreak + 1
+      }
+    }
+
+    // Cleanup sensitive/extra fields
     delete user.dataValues.password
     delete user.dataValues.userDetails.dataValues.nextVipTier
     delete user.dataValues.userDetails.dataValues.VipTier
     delete user.dataValues.userTierProgresses
-    // delete user.dataValues.nextVipTier
     delete user.dataValues.lastLoginDate
 
     if (userTierProgress.length === 0) {
@@ -117,30 +160,26 @@ export class UserLoginHandler extends BaseHandler {
         depositsThreshold: 0,
         loginStreak: 0,
         referralsCount: 0,
-        // sweepstakesEntries: 0,
-        // sweepstakesWins: 0,
-        // timeBasedConsistency: 0,
         isActive: true
       })
     }
-    // Prepare response with current and next VIP tier information and rewards
-    const response = {
+
+    return {
       user: {
         ...user.dataValues,
-        currentVipTier: currentVipTier ? {
-          vipTierId: currentVipTier.vipTierId,
-          name: currentVipTier.name,
-          icon: currentVipTier.icon,
-          level: currentVipTier.level,
-          rewards: currentVipTier.rewards || []
-        } : null,
+        currentVipTier: currentVipTier
+          ? {
+            vipTierId: currentVipTier.vipTierId,
+            name: currentVipTier.name,
+            icon: currentVipTier.icon,
+            level: currentVipTier.level,
+            rewards: currentVipTier.rewards || []
+          }
+          : null,
         nextVipTier: nextVipTier || null,
         userTierProgress: userTierProgress || []
-
       },
       accessToken
     }
-
-    return response
   }
 }
