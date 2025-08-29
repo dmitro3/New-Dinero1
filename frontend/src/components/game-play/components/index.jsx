@@ -131,7 +131,7 @@ const GamePlay = () => {
         {gameStarted && (
           <div className="absolute top-4 left-4 z-[10000]">
             <button
-              className="bg-[#] hover:bg-white hover:text-[#811af0] text-white p-3 rounded-full shadow-lg"
+              className="bg-[#811af0] hover:bg-white hover:text-[#811af0] text-white p-3 rounded-full shadow-lg"
               onClick={() => {
                 exitFullscreen();
                 setIsFullScreen(false);
