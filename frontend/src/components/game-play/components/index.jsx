@@ -8,7 +8,7 @@ import { Home } from 'lucide-react';
 const GamePlay = () => {
   const gamePlayRef = useRef(null);
   const [isFullScreen, setIsFullScreen] = useState(false);
-  const [gameStarted, setGameStarted] = useState(false); // ✅ track play clicked
+  const [gameStarted, setGameStarted] = useState(false); // ✅ track game start
 
   const isMobile = useIsMobile();
 
@@ -57,16 +57,18 @@ const GamePlay = () => {
     );
   };
 
-  // 🔹 Handle Play button click
-  const handlePlayClick = () => {
-    if (isMobile) {
-      setIsFullScreen(true);
-      const element = gamePlayRef.current?.parentElement;
-      if (element) enterFullscreen(element);
+  // 🔹 Auto-start the game (instead of waiting for Play button)
+  useEffect(() => {
+    if (!isLoading && !error && gameLauchUrl) {
+      if (isMobile) {
+        setIsFullScreen(true);
+        const element = gamePlayRef.current?.parentElement;
+        if (element) enterFullscreen(element);
+      }
+      setGameStarted(true);
+      handleIsDemo(false);
     }
-    setGameStarted(true); // ✅ show home button after play
-    handleIsDemo(false);
-  };
+  }, [isLoading, error, gameLauchUrl]);
 
   // 🔹 Sync fullscreen state if user exits manually
   useEffect(() => {
@@ -115,19 +117,7 @@ const GamePlay = () => {
           ></iframe>
         )}
 
-        {/* Play button overlay */}
-        {!isGameTypeSelected && !isLoading && !error && !isFullScreen && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
-            <button
-              className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded shadow-lg"
-              onClick={handlePlayClick}
-            >
-              Play
-            </button>
-          </div>
-        )}
-
-        {/* ✅ Home icon: only show after Play is clicked */}
+        {/* ✅ Home icon: only show after game starts */}
         {gameStarted && (
           <div className="absolute top-4 left-4 z-[10000]">
             <button
