@@ -1,14 +1,16 @@
 'use client';
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import useGamePlay from '../hook/useGamePlay';
 import GamePlayBottom from './game-play-bottom';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Home } from 'lucide-react';
 
 const GamePlay = () => {
   const gamePlayRef = useRef(null);
   const [isFullScreen, setIsFullScreen] = useState(false);
+  const [gameStarted, setGameStarted] = useState(false); // ✅ track play clicked
 
-  const isMobile = useIsMobile()
+  const isMobile = useIsMobile();
 
   const {
     gamePlayData,
@@ -21,17 +23,78 @@ const GamePlay = () => {
 
   const { gameLauchUrl, isFavourite } = gamePlayData || {};
 
-  // Handler to enter fullscreen on mobile
-  const handlePlayClick = () => {
-        if (isMobile) {
-      setIsFullScreen(true); // only fullscreen on mobile
+  // 🔹 Fullscreen helpers
+  const enterFullscreen = (element) => {
+    if (element.requestFullscreen) {
+      element.requestFullscreen();
+    } else if (element.webkitRequestFullscreen) {
+      element.webkitRequestFullscreen(); // Safari
+    } else if (element.mozRequestFullScreen) {
+      element.mozRequestFullScreen(); // Firefox
+    } else if (element.msRequestFullscreen) {
+      element.msRequestFullscreen(); // IE/Edge
     }
-    handleIsDemo(false); // always goes to real play
   };
+
+  const exitFullscreen = () => {
+    if (document.exitFullscreen) {
+      document.exitFullscreen();
+    } else if (document.webkitExitFullscreen) {
+      document.webkitExitFullscreen();
+    } else if (document.mozCancelFullScreen) {
+      document.mozCancelFullScreen();
+    } else if (document.msExitFullscreen) {
+      document.msExitFullscreen();
+    }
+  };
+
+  const isFullscreenActive = () => {
+    return (
+      document.fullscreenElement ||
+      document.webkitFullscreenElement ||
+      document.mozFullScreenElement ||
+      document.msFullscreenElement
+    );
+  };
+
+  // 🔹 Handle Play button click
+  const handlePlayClick = () => {
+    if (isMobile) {
+      setIsFullScreen(true);
+      const element = gamePlayRef.current?.parentElement;
+      if (element) enterFullscreen(element);
+    }
+    setGameStarted(true); // ✅ show home button after play
+    handleIsDemo(false);
+  };
+
+  // 🔹 Sync fullscreen state if user exits manually
+  useEffect(() => {
+    const onFullScreenChange = () => {
+      if (!isFullscreenActive()) {
+        setIsFullScreen(false);
+      }
+    };
+
+    document.addEventListener('fullscreenchange', onFullScreenChange);
+    document.addEventListener('webkitfullscreenchange', onFullScreenChange);
+    document.addEventListener('mozfullscreenchange', onFullScreenChange);
+    document.addEventListener('MSFullscreenChange', onFullScreenChange);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', onFullScreenChange);
+      document.removeEventListener('webkitfullscreenchange', onFullScreenChange);
+      document.removeEventListener('mozfullscreenchange', onFullScreenChange);
+      document.removeEventListener('MSFullscreenChange', onFullScreenChange);
+    };
+  }, []);
 
   return (
     <div className={`bg-[hsl(var(--main-background))] ${isFullScreen ? 'fixed inset-0 z-[9999]' : ''}`}>
-      <div className={`relative w-full ${isFullScreen ? 'h-screen' : 'h-[90vh] md:h-[87vh]'} bg-gray-800`}>
+      <div
+        className={`relative w-full ${isFullScreen ? 'h-screen' : 'h-[90vh] md:h-[87vh]'} bg-gray-800`}
+        ref={gamePlayRef}
+      >
         {isLoading ? (
           <div className="flex items-center justify-center h-full">
             <div className="relative w-16 h-16">
@@ -46,14 +109,13 @@ const GamePlay = () => {
           <iframe
             allowFullScreen
             referrerPolicy="no-referrer"
-            ref={gamePlayRef}
             src={gameLauchUrl}
             title="game-play"
             className={`border-none w-full h-full ${!isGameTypeSelected && 'blur-sm'}`}
           ></iframe>
         )}
 
-        {/* Single Play button overlay */}
+        {/* Play button overlay */}
         {!isGameTypeSelected && !isLoading && !error && !isFullScreen && (
           <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50">
             <button
@@ -64,8 +126,26 @@ const GamePlay = () => {
             </button>
           </div>
         )}
+
+        {/* ✅ Home icon: only show after Play is clicked */}
+        {gameStarted && (
+          <div className="absolute top-4 left-4 z-[10000]">
+            <button
+              className="bg-[#] hover:bg-white hover:text-[#811af0] text-white p-3 rounded-full shadow-lg"
+              onClick={() => {
+                exitFullscreen();
+                setIsFullScreen(false);
+                setGameStarted(false);
+                window.location.href = '/'; // redirect to home
+              }}
+            >
+              <Home className="w-6 h-6" />
+            </button>
+          </div>
+        )}
       </div>
 
+      {/* Bottom bar only if not fullscreen */}
       {!isFullScreen && isGameTypeSelected && (
         <GamePlayBottom
           gamePlayRef={gamePlayRef}
