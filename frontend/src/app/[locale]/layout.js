@@ -36,7 +36,7 @@ export const metadata = {
   openGraph: {
     title: "Dinero Sweeps",
     description: "Play and win with Dinero Sweeps!",
-    url: "https://yourdomain.com",
+    url: "dinerosweeps.com",
     siteName: "Dinero Sweeps",
     locale: "en_US",
     type: "website",
