@@ -4,11 +4,13 @@ import useGamePlay from '../hook/useGamePlay';
 import GamePlayBottom from './game-play-bottom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Home } from 'lucide-react';
+import Image from 'next/image';
+import { maximize, minimize } from '@/assets/svg'; 
 
 const GamePlay = () => {
   const gamePlayRef = useRef(null);
   const [isFullScreen, setIsFullScreen] = useState(false);
-  const [gameStarted, setGameStarted] = useState(false); // ✅ track game start
+  const [gameStarted, setGameStarted] = useState(false);
 
   const isMobile = useIsMobile();
 
@@ -23,16 +25,16 @@ const GamePlay = () => {
 
   const { gameLauchUrl, isFavourite } = gamePlayData || {};
 
-  // 🔹 Fullscreen helpers
+  // Fullscreen helpers
   const enterFullscreen = (element) => {
     if (element.requestFullscreen) {
       element.requestFullscreen();
     } else if (element.webkitRequestFullscreen) {
-      element.webkitRequestFullscreen(); // Safari
+      element.webkitRequestFullscreen();
     } else if (element.mozRequestFullScreen) {
-      element.mozRequestFullScreen(); // Firefox
+      element.mozRequestFullScreen();
     } else if (element.msRequestFullscreen) {
-      element.msRequestFullscreen(); // IE/Edge
+      element.msRequestFullscreen();
     }
   };
 
@@ -57,7 +59,7 @@ const GamePlay = () => {
     );
   };
 
-  // 🔹 Auto-start the game (instead of waiting for Play button)
+  // Auto-start game
   useEffect(() => {
     if (!isLoading && !error && gameLauchUrl) {
       if (isMobile) {
@@ -70,12 +72,10 @@ const GamePlay = () => {
     }
   }, [isLoading, error, gameLauchUrl]);
 
-  // 🔹 Sync fullscreen state if user exits manually
+  // Sync fullscreen state
   useEffect(() => {
     const onFullScreenChange = () => {
-      if (!isFullscreenActive()) {
-        setIsFullScreen(false);
-      }
+      setIsFullScreen(!!isFullscreenActive());
     };
 
     document.addEventListener('fullscreenchange', onFullScreenChange);
@@ -91,10 +91,27 @@ const GamePlay = () => {
     };
   }, []);
 
+  const toggleFullscreen = () => {
+    const element = gamePlayRef.current?.parentElement;
+    if (!isFullScreen && element) {
+      enterFullscreen(element);
+      setIsFullScreen(true);
+    } else {
+      exitFullscreen();
+      setIsFullScreen(false);
+    }
+  };
+
   return (
-    <div className={`bg-[hsl(var(--main-background))] ${isFullScreen ? 'fixed inset-0 z-[9999]' : ''}`}>
+    <div
+      className={`bg-[hsl(var(--main-background))] ${
+        isFullScreen ? 'fixed inset-0 z-[9999]' : ''
+      }`}
+    >
       <div
-        className={`relative w-full ${isFullScreen ? 'h-screen' : 'h-[90vh] md:h-[87vh]'} bg-gray-800`}
+        className={`relative w-full ${
+          isFullScreen ? 'h-screen' : 'h-[90vh] md:h-[87vh]'
+        } bg-gray-800`}
         ref={gamePlayRef}
       >
         {isLoading ? (
@@ -113,23 +130,39 @@ const GamePlay = () => {
             referrerPolicy="no-referrer"
             src={gameLauchUrl}
             title="game-play"
-            className={`border-none w-full h-full ${!isGameTypeSelected && 'blur-sm'}`}
+            className={`border-none w-full h-full ${
+              !isGameTypeSelected && 'blur-sm'
+            }`}
           ></iframe>
         )}
 
-        {/* ✅ Home icon: only show after game starts */}
+        {/* ✅ Home + Fullscreen buttons */}
         {gameStarted && (
-          <div className="absolute top-4 left-4 z-[10000]">
+          <div className="absolute top-4 left-4 flex flex-col gap-3 z-[10000]">
+            {/* Home button */}
             <button
               className="bg-[#811af0] hover:bg-white hover:text-[#811af0] text-white p-3 rounded-full shadow-lg"
               onClick={() => {
                 exitFullscreen();
                 setIsFullScreen(false);
                 setGameStarted(false);
-                window.location.href = '/'; // redirect to home
+                window.location.href = '/';
               }}
             >
               <Home className="w-6 h-6" />
+            </button>
+
+            {/* Fullscreen toggle button */}
+            <button
+              className="bg-[#811af0] hover:bg-white hover:text-[#811af0] text-white p-3 rounded-full shadow-lg flex items-center justify-center"
+              onClick={toggleFullscreen}
+            >
+              <Image
+                src={isFullScreen ? minimize : maximize}
+                alt="fullscreen-toggle"
+                width={24}
+                height={24}
+              />
             </button>
           </div>
         )}
