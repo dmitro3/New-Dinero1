@@ -21,4 +21,11 @@ jobs:
           key: ${{ secrets.EC2_KEY }}
           script: |
             cd /var/www/dinerosweeps
+
+            # Ensure env setup
+            if [ -f ./frontend/.env.production ]; then
+              cp ./frontend/.env.production ./frontend/.env.local
+            fi
+
+            # Run your deployment script
             ./deploy.sh
