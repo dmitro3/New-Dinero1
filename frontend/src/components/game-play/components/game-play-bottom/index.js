@@ -1,55 +1,34 @@
 'use client';
-import { heart, heartLike, maximize, minimize } from '@/assets/svg';
+import { maximize, minimize } from '@/assets/svg'; // ✅ removed heart imports
 import Image from 'next/image';
 import useBottom from '../../hook/useBottom';
 // import LiveStatusModal from '../live-status-modal';
 
-const GamePlayBottom = ({ gamePlayRef, handleIsDemo, isDemo, isFavourite }) => {
+const GamePlayBottom = ({ gamePlayRef, handleIsDemo, isDemo }) => {
   const {
     // isModalOpen,
     // setModalOpen,
     toggleFullscreen,
     isFullscreen,
-    favSucess,
-    handleFavoriteGame,
-  } = useBottom(gamePlayRef, isFavourite);
+  } = useBottom(gamePlayRef);
 
   return (
     <div className="flex items-center justify-between p-4 rounded-lg h-[63]">
       <div className="flex gap-5">
+        {/* ✅ Only fullscreen toggle remains */}
         <Image
           src={isFullscreen ? minimize : maximize}
-          alt="maximize"
+          alt="fullscreen-toggle"
           height={20}
           width={20}
           className="cursor-pointer"
           onClick={toggleFullscreen}
         />
-        {favSucess ? (
-          <Image
-            src={heartLike}
-            alt="Game Img"
-            onClick={handleFavoriteGame}
-            className="cursor-pointer"
-          />
-        ) : (
-          <Image
-            src={heart}
-            alt="Game Img"
-            onClick={handleFavoriteGame}
-            className="cursor-pointer"
-          />
-        )}
-        {/* <Image
-          src={status}
-          alt="live status"
-          height={20}
-          width={20}
-          className="cursor-pointer"
-          onClick={() => setModalOpen(!isModalOpen)}
-        /> */}
       </div>
-      {/* <div className="flex items-center gap-2">
+
+      {/* Demo/Real Play toggle still here if you want to enable it later */}
+      {/* 
+      <div className="flex items-center gap-2">
         <span
           className={`text-sm font-bold ${
             isDemo ? 'text-green-400' : 'text-[rgb(var(--lb-blue-200))]'
@@ -58,7 +37,7 @@ const GamePlayBottom = ({ gamePlayRef, handleIsDemo, isDemo, isFavourite }) => {
           Fun Play
         </span>
         <div
-          className="relative w-12 h-5  rounded-full cursor-pointer transition-all duration-300 bg-[rgb(var(--lb-blue-600))]"
+          className="relative w-12 h-5 rounded-full cursor-pointer transition-all duration-300 bg-[rgb(var(--lb-blue-600))]"
           onClick={() => {
             handleIsDemo(!isDemo);
           }}
@@ -76,8 +55,8 @@ const GamePlayBottom = ({ gamePlayRef, handleIsDemo, isDemo, isFavourite }) => {
         >
           Real Play
         </span>
-      </div> */}
-      {/* <LiveStatusModal open={isModalOpen} onOpenChange={setModalOpen} /> */}
+      </div> 
+      */}
     </div>
   );
 };
