@@ -24,8 +24,9 @@ casinoRouter.route('/favorite')
   .delete(requestValidationMiddleware(removeFavoriteGameSchema), isUserAuthenticated, CasinoController.removeFavoriteGame)
 casinoRouter.route('/transactions').get(isUserAuthenticated, requestValidationMiddleware(getCasinoTransactionsSchema), CasinoController.getCasinoTransactions)
 casinoRouter.route('/play-game').get(semiAuth, CasinoController.genericGamelaunch) // according to specific sub category
+casinoRouter.route('/sync-onegamehub-games').post(isUserAuthenticated, CasinoController.syncOneGameHubGames) // sync 1GameHub games
 
-// Casino Callbacks 
+// Casino Callbacks
 casinoRouter.use('/alea', aleaRouter)
 casinoRouter.use('/one-game-hub', oneGameHubRouter)
 

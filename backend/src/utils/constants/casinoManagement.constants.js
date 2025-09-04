@@ -17,6 +17,10 @@ export const AGGREGATORS = {
   ALEA: {
     id: '2',
     name: 'alea'
+  },
+  ONEGAMEHUB: {
+    id: '3',
+    name: '1GameHub'
   }
 }
 

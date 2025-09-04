@@ -17,6 +17,7 @@ import {
   GetLeaderBoardDetails,
   RemoveFavoriteGameHandler
 } from '@src/services/casino'
+import { LoadOneGameHubGamesHandler } from '@src/services/providers/1GameHub/loadOneGameHubGames.service'
 import { GenericGameLaunchHandler } from '@src/services/common/gameLaunch.service'
 import { getRequestIP, userId } from '@src/utils/common'
 import { GSOFT_CALLBACK_METHODS } from '@src/utils/constants/casino.constants'
@@ -108,6 +109,15 @@ export class CasinoController {
   static async getLeaderBoardDetails(req, res, next) {
     try {
       const data = await GetLeaderBoardDetails.execute({ ...req.body, ...req.query })
+      sendResponse({ req, res, next }, data)
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  static async syncOneGameHubGames(req, res, next) {
+    try {
+      const data = await LoadOneGameHubGamesHandler.execute({})
       sendResponse({ req, res, next }, data)
     } catch (error) {
       next(error)
