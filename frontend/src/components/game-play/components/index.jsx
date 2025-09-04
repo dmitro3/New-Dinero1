@@ -5,14 +5,33 @@ import GamePlayBottom from './game-play-bottom';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Home } from 'lucide-react';
 import Image from 'next/image';
-import { maximize, minimize } from '@/assets/svg'; 
+import { maximize, minimize } from '@/assets/svg';
 
 const GamePlay = () => {
   const gamePlayRef = useRef(null);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const [gameStarted, setGameStarted] = useState(false);
 
-  const isMobile = useIsMobile();
+  // ✅ Fix Safari viewport height issues (address bar hiding on rotate)
+  useEffect(() => {
+    const setVh = () => {
+      const vh = (window.visualViewport?.height || window.innerHeight) * 0.01;
+      document.documentElement.style.setProperty('--vh', `${vh}px`);
+    };
+
+    setVh();
+
+    window.visualViewport?.addEventListener('resize', setVh);
+    window.addEventListener('orientationchange', setVh);
+
+    return () => {
+      window.visualViewport?.removeEventListener('resize', setVh);
+      window.removeEventListener('orientationchange', setVh);
+    };
+  }, []);
+
+  // More robust mobile detection
+  const isMobile = /Mobi|Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
 
   const {
     gamePlayData,
@@ -59,18 +78,47 @@ const GamePlay = () => {
     );
   };
 
-  // Auto-start game
+  // Auto-start game (mobile)
   useEffect(() => {
     if (!isLoading && !error && gameLauchUrl) {
       if (isMobile) {
         setIsFullScreen(true);
-        const element = gamePlayRef.current?.parentElement;
-        if (element) enterFullscreen(element);
+        const element = document.documentElement;
+        if (element) {
+          enterFullscreen(element);
+
+          // ✅ Force Safari to hide bars on rotate
+          setTimeout(() => {
+            window.scrollTo(0, 0);
+            document.documentElement.style.height = '100%';
+            document.body.style.height = '100%';
+            const vh = (window.visualViewport?.height || window.innerHeight) * 0.01;
+            document.documentElement.style.setProperty('--vh', `${vh}px`);
+          }, 200);
+        }
       }
       setGameStarted(true);
       handleIsDemo(false);
     }
-  }, [isLoading, error, gameLauchUrl]);
+  }, [isLoading, error, gameLauchUrl, isMobile]);
+
+  // Ensure fullscreen is maintained on orientation changes
+  useEffect(() => {
+    const handleOrientationChange = () => {
+      if (isMobile && gameStarted && !isFullscreenActive()) {
+        const element = document.documentElement;
+        if (element) {
+          enterFullscreen(element);
+          setIsFullScreen(true);
+        }
+      }
+    };
+
+    window.addEventListener('orientationchange', handleOrientationChange);
+    return () => {
+      window.removeEventListener('orientationchange', handleOrientationChange);
+    };
+  }, [isMobile, gameStarted]);
 
   // Sync fullscreen state
   useEffect(() => {
@@ -96,6 +144,14 @@ const GamePlay = () => {
     if (!isFullScreen && element) {
       enterFullscreen(element);
       setIsFullScreen(true);
+
+      if (isMobile) {
+        setTimeout(() => {
+          window.scrollTo(0, 0);
+          document.documentElement.style.height = '100%';
+          document.body.style.height = '100%';
+        }, 200);
+      }
     } else {
       exitFullscreen();
       setIsFullScreen(false);
@@ -110,7 +166,9 @@ const GamePlay = () => {
     >
       <div
         className={`relative w-full ${
-          isFullScreen ? 'h-screen' : 'h-[90vh] md:h-[87vh]'
+          isFullScreen
+            ? 'h-[100dvh] h-[calc(var(--vh)*100)]'
+            : 'h-[calc(var(--vh)*90)] md:h-[calc(var(--vh)*87)]'
         } bg-gray-800`}
         ref={gamePlayRef}
       >
