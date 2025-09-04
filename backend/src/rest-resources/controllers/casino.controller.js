@@ -117,7 +117,7 @@ export class CasinoController {
 
   static async syncOneGameHubGames(req, res, next) {
     try {
-      const data = await LoadOneGameHubGamesHandler.execute({})
+      const data = await LoadOneGameHubGamesHandler.execute({}, req.context)
       sendResponse({ req, res, next }, data)
     } catch (error) {
       next(error)

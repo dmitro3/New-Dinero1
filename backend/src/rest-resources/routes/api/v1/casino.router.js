@@ -7,6 +7,7 @@ import { removeFavoriteGameSchema } from '@src/json-schemas/casino/removeFavorit
 import { CasinoController } from '@src/rest-resources/controllers/casino.controller'
 import { isUserAuthenticated, semiAuth } from '@src/rest-resources/middlewares/isUserAuthenticated'
 import requestValidationMiddleware from '@src/rest-resources/middlewares/requestValidation.middleware'
+import contextMiddleware from '@src/rest-resources/middlewares/context.middleware'
 import express from 'express'
 import { aleaRouter } from './aleaCasino.routes'
 import { oneGameHubRouter } from './oneGameHubCasino.routes.'
@@ -24,7 +25,7 @@ casinoRouter.route('/favorite')
   .delete(requestValidationMiddleware(removeFavoriteGameSchema), isUserAuthenticated, CasinoController.removeFavoriteGame)
 casinoRouter.route('/transactions').get(isUserAuthenticated, requestValidationMiddleware(getCasinoTransactionsSchema), CasinoController.getCasinoTransactions)
 casinoRouter.route('/play-game').get(semiAuth, CasinoController.genericGamelaunch) // according to specific sub category
-casinoRouter.route('/sync-onegamehub-games').post(isUserAuthenticated, CasinoController.syncOneGameHubGames) // sync 1GameHub games
+casinoRouter.route('/sync-onegamehub-games').post(contextMiddleware(true), isUserAuthenticated, CasinoController.syncOneGameHubGames) // sync 1GameHub games
 
 // Casino Callbacks
 casinoRouter.use('/alea', aleaRouter)

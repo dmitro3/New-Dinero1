@@ -11,24 +11,78 @@ export class LoadOneGameHubGamesHandler extends BaseHandler {
     const transaction = this.context.sequelizeTransaction
 
     try {
-      // Create/find 1GameHub aggregator
-      const aggregator = await this.createAggregator(AGGREGATORS.ONEGAMEHUB.id, AGGREGATORS.ONEGAMEHUB.name, transaction)
+      console.log('Starting 1GameHub games synchronization...')
 
-      // Fetch games from 1GameHub API
-      const gamesData = await this.fetchGamesFromOneGameHub()
+      // Step 1: Create/find 1GameHub aggregator
+      console.log('Step 1: Creating/finding aggregator...')
+      let aggregator
+      try {
+        aggregator = await this.createAggregator(AGGREGATORS.ONEGAMEHUB.id, AGGREGATORS.ONEGAMEHUB.name, transaction)
+        console.log('Aggregator created/found:', aggregator.id)
+      } catch (error) {
+        console.error('Error in createAggregator:', error.message, error.stack)
+        throw new AppError(Errors.INTERNAL_SERVER_ERROR, `Failed to create/find aggregator: ${error.message}`)
+      }
 
-      // Create providers and get provider mappings
-      const providerIdsMap = await this.createProviders(aggregator.id, gamesData, transaction)
+      // Step 2: Fetch games from 1GameHub API
+      console.log('Step 2: Fetching games from 1GameHub API...')
+      let gamesData
+      try {
+        gamesData = await this.fetchGamesFromOneGameHub()
+        console.log(`Fetched ${gamesData.length} games from 1GameHub`)
 
-      // Create categories
-      const categoryIdsMap = await this.createCategories(transaction)
+        // Validate games data structure
+        if (!Array.isArray(gamesData)) {
+          throw new AppError(Errors.INTERNAL_SERVER_ERROR, 'Games data is not an array')
+        }
 
-      // Create/update games
-      await this.createGames(categoryIdsMap, providerIdsMap, gamesData, transaction)
+        // Log sample game structure for debugging
+        if (gamesData.length > 0) {
+          console.log('Sample game structure:', JSON.stringify(gamesData[0], null, 2))
+        }
+      } catch (error) {
+        console.error('Error in fetchGamesFromOneGameHub:', error.message, error.stack)
+        throw new AppError(Errors.INTERNAL_SERVER_ERROR, `Failed to fetch games: ${error.message}`)
+      }
+
+      // Step 3: Create providers and get provider mappings
+      console.log('Step 3: Creating providers...')
+      let providerIdsMap
+      try {
+        providerIdsMap = await this.createProviders(aggregator.id, gamesData, transaction)
+        console.log(`Created ${Object.keys(providerIdsMap).length} providers`)
+      } catch (error) {
+        console.error('Error in createProviders:', error.message, error.stack)
+        throw new AppError(Errors.INTERNAL_SERVER_ERROR, `Failed to create providers: ${error.message}`)
+      }
+
+      // Step 4: Create categories
+      console.log('Step 4: Creating categories...')
+      let categoryIdsMap
+      try {
+        categoryIdsMap = await this.createCategories(transaction)
+        console.log(`Created ${Object.keys(categoryIdsMap).length} categories`)
+      } catch (error) {
+        console.error('Error in createCategories:', error.message, error.stack)
+        throw new AppError(Errors.INTERNAL_SERVER_ERROR, `Failed to create categories: ${error.message}`)
+      }
+
+      // Step 5: Create/update games
+      console.log('Step 5: Creating/updating games...')
+      try {
+        await this.createGames(categoryIdsMap, providerIdsMap, gamesData, transaction)
+        console.log('Games synchronization completed successfully')
+      } catch (error) {
+        console.error('Error in createGames:', error.message, error.stack)
+        throw new AppError(Errors.INTERNAL_SERVER_ERROR, `Failed to create games: ${error.message}`)
+      }
 
       return { success: true, message: '1GameHub games synchronized successfully' }
     } catch (error) {
-      console.error('Error syncing 1GameHub games:', error.message)
+      console.error('Error syncing 1GameHub games:', error.message, error.stack)
+      if (error.innerError) {
+        console.error('Inner error:', error.innerError)
+      }
       throw new AppError(error)
     }
   }
@@ -48,60 +102,141 @@ export class LoadOneGameHubGamesHandler extends BaseHandler {
 
     console.log('Fetching 1GameHub games from:', url)
 
-    try {
-      const response = await axios.get(url, {
-        timeout: 30000,
-        headers: {
-          'User-Agent': 'DineroSweeps/1.0',
-          'Accept': 'application/json',
-          'Content-Type': 'application/json'
+    const maxRetries = 3
+    let attempt = 0
+
+    while (attempt < maxRetries) {
+      try {
+        const response = await axios.get(url, {
+          timeout: 30000,
+          headers: {
+            'User-Agent': 'DineroSweeps/1.0',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
+        })
+
+        console.log('1GameHub API Response Status:', response.status)
+
+        if (response.data && response.data.code && response.data.code !== 'SUCCESS') {
+          console.error('1GameHub API Error:', response.data)
+          throw new AppError(Errors.INTERNAL_SERVER_ERROR, `1GameHub API error: ${response.data.message || 'Unknown error'}`)
         }
-      })
 
-      console.log('1GameHub API Response Status:', response.status)
+        // Extract games from response
+        let games = []
+        if (response.data?.games) {
+          games = response.data.games
+        } else if (Array.isArray(response.data)) {
+          games = response.data
+        } else {
+          console.error('Unexpected 1GameHub response structure:', response.data)
+          throw new AppError(Errors.INTERNAL_SERVER_ERROR, 'Invalid response structure from 1GameHub')
+        }
 
-      if (response.data && response.data.code && response.data.code !== 'SUCCESS') {
-        console.error('1GameHub API Error:', response.data)
-        throw new AppError(Errors.INTERNAL_SERVER_ERROR, `1GameHub API error: ${response.data.message || 'Unknown error'}`)
+        console.log(`Fetched ${games.length} games from 1GameHub`)
+        return games
+
+      } catch (error) {
+        attempt++
+        console.error(`Attempt ${attempt} - Error fetching games from 1GameHub:`, error.message)
+        if (error.response) {
+          console.error('1GameHub Error Response Status:', error.response.status)
+          try {
+            console.error('1GameHub Error Response Data:', JSON.stringify(error.response.data, null, 2))
+          } catch (jsonError) {
+            console.error('Failed to stringify error response data:', jsonError)
+          }
+          console.error('1GameHub Error Response Data keys:', Object.keys(error.response.data))
+          console.error('1GameHub Error Response Data type:', typeof error.response.data)
+          console.error('1GameHub Error Response Data has games:', !!error.response.data.games)
+          // If error response has games data, use it (API might be buggy)
+          if (error.response.data) {
+            // Try to extract games from different possible structures
+            if (error.response.data.games && Array.isArray(error.response.data.games)) {
+              console.log('1GameHub returned error but with games data.games array, using it anyway')
+              return error.response.data.games
+            }
+            if (Array.isArray(error.response.data)) {
+              console.log('1GameHub returned error but with games array, using it anyway')
+              return error.response.data
+            }
+            // If data is object with nested games array
+            for (const key in error.response.data) {
+              if (Array.isArray(error.response.data[key])) {
+                console.log(`1GameHub returned error but with games array in key '${key}', using it anyway`)
+                return error.response.data[key]
+              }
+            }
+            // If data itself is an object but not array, try to convert to array
+            if (typeof error.response.data === 'object') {
+              console.log('1GameHub returned error with object data, converting to array')
+              return [error.response.data]
+            }
+          }
+        }
+        if (attempt < maxRetries) {
+          const delay = 2000 * attempt
+          console.log(`Retrying after ${delay}ms...`)
+          await new Promise(resolve => setTimeout(resolve, delay))
+        } else {
+          throw new AppError(Errors.INTERNAL_SERVER_ERROR, `Failed to fetch games from 1GameHub after ${maxRetries} attempts: ${error.message}`)
+        }
       }
-
-      // Extract games from response
-      let games = []
-      if (response.data?.games) {
-        games = response.data.games
-      } else if (Array.isArray(response.data)) {
-        games = response.data
-      } else {
-        console.error('Unexpected 1GameHub response structure:', response.data)
-        throw new AppError(Errors.INTERNAL_SERVER_ERROR, 'Invalid response structure from 1GameHub')
-      }
-
-      console.log(`Fetched ${games.length} games from 1GameHub`)
-      return games
-
-    } catch (error) {
-      console.error('Error fetching games from 1GameHub:', error.message)
-      if (error.response) {
-        console.error('1GameHub Error Response:', error.response.data)
-      }
-      throw new AppError(Errors.INTERNAL_SERVER_ERROR, `Failed to fetch games from 1GameHub: ${error.message}`)
     }
   }
 
   /**
    * Create/find aggregator
    */
-  async createAggregator(uniqueId, name, transaction) {
+  async createAggregator(id, name, transaction) {
     const aggregatorNames = this.getNames(['EN'], name)
-    const [aggregator] = await this.context.sequelize.models.casinoAggregator.findOrCreate({
-      defaults: { name: aggregatorNames, uniqueId },
-      where: { uniqueId },
-      returning: ['id'],
-      transaction,
-      logging: true
-    })
+    const aggregatorId = parseInt(id, 10)
 
-    return aggregator
+    console.log('Creating/finding aggregator with id:', aggregatorId, 'name:', aggregatorNames)
+
+    try {
+      // First try to find existing aggregator
+      let aggregator = await this.context.sequelize.models.CasinoAggregator.findOne({
+        where: { id: aggregatorId },
+        transaction,
+        logging: true
+      })
+
+      if (aggregator) {
+        console.log('Found existing aggregator:', aggregator.id, aggregator.name)
+        return aggregator
+      }
+
+      // If not found, create new one
+      console.log('Creating new aggregator with id:', aggregatorId)
+      aggregator = await this.context.sequelize.models.CasinoAggregator.create({
+        id: aggregatorId,
+        name: aggregatorNames
+      }, {
+        transaction,
+        logging: true
+      })
+
+      console.log('Created new aggregator:', aggregator.id, aggregator.name)
+      return aggregator
+    } catch (error) {
+      console.error('Error in createAggregator:', error.message, error.stack)
+      // If creation with specific id fails, try without id
+      if (error.message.includes('duplicate key') || error.message.includes('already exists')) {
+        console.log('Aggregator with id', aggregatorId, 'already exists, finding it...')
+        const existingAggregator = await this.context.sequelize.models.CasinoAggregator.findOne({
+          where: { id: aggregatorId },
+          transaction,
+          logging: true
+        })
+        if (existingAggregator) {
+          console.log('Found existing aggregator after error:', existingAggregator.id)
+          return existingAggregator
+        }
+      }
+      throw error
+    }
   }
 
   /**
@@ -112,12 +247,16 @@ export class LoadOneGameHubGamesHandler extends BaseHandler {
     const uniqueProvidersMap = new Map()
 
     games.forEach(game => {
-      if (game.provider && !uniqueProvidersMap.has(game.provider.id)) {
-        uniqueProvidersMap.set(game.provider.id, {
-          casinoAggregatorId: aggregatorId,
-          uniqueId: game.provider.id,
-          name: this.getNames(['EN'], game.provider.name || `Provider ${game.provider.id}`)
-        })
+      if (game.provider) {
+        const providerKey = typeof game.provider === 'string' ? game.provider : game.provider?.id
+        if (providerKey && !uniqueProvidersMap.has(providerKey)) {
+          uniqueProvidersMap.set(providerKey, {
+            game_aggregator_id: aggregatorId,  // updated foreign key column name
+            unique_id: providerKey,
+            name: this.getNames(['EN'], typeof game.provider === 'string' ? game.provider : game.provider?.name || `Provider ${providerKey}`),
+            is_active: true
+          })
+        }
       }
     })
 
@@ -127,23 +266,55 @@ export class LoadOneGameHubGamesHandler extends BaseHandler {
     if (uniqueProviders.length === 0) {
       // If no providers found, create a default one
       uniqueProviders.push({
-        casinoAggregatorId: aggregatorId,
-        uniqueId: '1gamehub-default',
-        name: this.getNames(['EN'], '1GameHub Provider')
+        game_aggregator_id: aggregatorId,  // updated foreign key column name
+        unique_id: '1gamehub-default',
+        name: this.getNames(['EN'], '1GameHub Provider'),
+        is_active: true
       })
     }
 
-    const updatedProviders = await this.context.sequelize.models.casinoProvider.bulkCreate(uniqueProviders, {
-      updateOnDuplicate: ['name'],
-      transaction,
-      logging: true
-    })
+    console.log('Unique providers to create:', JSON.stringify(uniqueProviders, null, 2))
 
-    // Create mapping
-    return updatedProviders.reduce((prev, updatedProvider) => {
-      prev[updatedProvider.uniqueId] = updatedProvider.id
-      return prev
-    }, {})
+    try {
+      // Check existing providers to avoid duplicates
+      const existingProviders = await this.context.sequelize.models.CasinoProvider.findAll({
+        where: {
+          unique_id: Array.from(uniqueProvidersMap.keys())
+        },
+        transaction,
+        logging: true
+      })
+
+      const existingUniqueIds = new Set(existingProviders.map(p => p.unique_id))
+
+      // Filter out providers that already exist
+      const providersToCreate = uniqueProviders.filter(p => !existingUniqueIds.has(p.unique_id))
+
+      if (providersToCreate.length > 0) {
+        await this.context.sequelize.models.CasinoProvider.bulkCreate(providersToCreate, {
+          transaction,
+          logging: true
+        })
+      }
+
+      // Fetch all providers again to get their IDs
+      const allProviders = await this.context.sequelize.models.CasinoProvider.findAll({
+        where: {
+          unique_id: Array.from(uniqueProvidersMap.keys())
+        },
+        transaction,
+        logging: true
+      })
+
+      // Create mapping
+      return allProviders.reduce((prev, provider) => {
+        prev[provider.unique_id] = provider.id
+        return prev
+      }, {})
+    } catch (error) {
+      console.error('Error in bulkCreate for providers:', error.message, error.stack)
+      throw error
+    }
   }
 
   /**
@@ -155,7 +326,7 @@ export class LoadOneGameHubGamesHandler extends BaseHandler {
       name: this.getNames(['EN'], category.name)
     }))
 
-    const updatedCategories = await this.context.sequelize.models.casinoCategory.bulkCreate(categories, {
+    const updatedCategories = await this.context.sequelize.models.CasinoCategory.bulkCreate(categories, {
       updateOnDuplicate: ['name'],
       transaction,
       logging: true
@@ -171,40 +342,73 @@ export class LoadOneGameHubGamesHandler extends BaseHandler {
    * Create/update games
    */
   async createGames(categoryIdsMap, providerIdsMap, games, transaction) {
-    const gamesToCreate = games.map(game => {
-      // Map category - use default if not found
-      let categoryId = categoryIdsMap[game.category] || categoryIdsMap['Slots'] || 2
+    console.log(`Processing ${games.length} games...`)
 
-      // Map provider - use default if not found
-      let providerId = providerIdsMap[game.provider?.id] || providerIdsMap['1gamehub-default']
+    const batchSize = 500 // Process games in batches to avoid overwhelming the database
+    const totalBatches = Math.ceil(games.length / batchSize)
 
-      if (!providerId) {
-        console.warn(`No provider found for game ${game.id}, using first available provider`)
-        providerId = Object.values(providerIdsMap)[0]
+    for (let batchIndex = 0; batchIndex < totalBatches; batchIndex++) {
+      const startIndex = batchIndex * batchSize
+      const endIndex = Math.min(startIndex + batchSize, games.length)
+      const gamesBatch = games.slice(startIndex, endIndex)
+
+      console.log(`Processing batch ${batchIndex + 1}/${totalBatches} (games ${startIndex + 1}-${endIndex})`)
+
+      try {
+        const gamesToCreate = gamesBatch.map(game => {
+          // Validate game structure
+          if (!game || !game.id) {
+            console.warn('Invalid game structure:', game)
+            return null
+          }
+
+          // Map category - use default if not found
+          let categoryKey = game.categories?.[0] || game.category
+          let categoryId = categoryIdsMap[categoryKey] || categoryIdsMap['Slots'] || 2
+
+          // Map provider - use default if not found
+          let providerKey = typeof game.provider === 'string' ? game.provider : game.provider?.id
+          let providerId = providerIdsMap[providerKey] || providerIdsMap['1gamehub-default']
+
+          if (!providerId) {
+            console.warn(`No provider found for game ${game.id}, using first available provider`)
+            providerId = Object.values(providerIdsMap)[0]
+          }
+
+          return {
+            casinoProviderId: providerId,
+            casinoCategoryId: categoryId,
+            uniqueId: game.id.toString(),
+            name: this.getNames(['EN'], game.name || `Game ${game.id}`),
+            wageringContribution: 0,
+            devices: game.devices || ['Desktop', 'Mobile'],
+            demoAvailable: game.is_demo_supported || game.demo || false,
+            thumbnailUrl: game.media?.[0]?.url || game.thumbnail || game.image || null,
+            mobileThumbnailUrl: game.media?.[0]?.url || game.mobileThumbnail || game.thumbnail || game.image || null,
+            returnToPlayer: game.rtp || 0,
+            isFeatured: game.featured || false,
+            moreDetails: game.description || null
+          }
+        }).filter(game => game !== null) // Remove invalid games
+
+        if (gamesToCreate.length > 0) {
+          await this.context.sequelize.models.CasinoGame.bulkCreate(gamesToCreate, {
+            updateOnDuplicate: ['name', 'thumbnailUrl', 'mobileThumbnailUrl', 'returnToPlayer', 'isFeatured', 'moreDetails'],
+            transaction,
+            logging: false // Disable logging for bulk operations to reduce noise
+          })
+          console.log(`Successfully processed ${gamesToCreate.length} games in batch ${batchIndex + 1}`)
+        } else {
+          console.warn(`No valid games found in batch ${batchIndex + 1}`)
+        }
+      } catch (error) {
+        console.error(`Error processing batch ${batchIndex + 1}:`, error.message)
+        // Continue with next batch instead of failing completely
+        console.log('Continuing with next batch...')
       }
+    }
 
-      return {
-        casinoProviderId: providerId,
-        casinoCategoryId: categoryId,
-        uniqueId: game.id.toString(),
-        name: this.getNames(['EN'], game.name || `Game ${game.id}`),
-        wageringContribution: 0,
-        devices: game.devices || ['Desktop', 'Mobile'],
-        demoAvailable: game.demo || false,
-        thumbnailUrl: game.thumbnail || game.image || null,
-        mobileThumbnailUrl: game.mobileThumbnail || game.thumbnail || game.image || null,
-        returnToPlayer: game.rtp || 0,
-        isFeatured: game.featured || false,
-        moreDetails: game.description || null
-      }
-    })
-
-    await this.context.sequelize.models.casinoGame.bulkCreate(gamesToCreate, {
-      updateOnDuplicate: ['name', 'thumbnailUrl', 'mobileThumbnailUrl', 'returnToPlayer', 'isFeatured', 'moreDetails'],
-      transaction,
-      logging: true
-    })
-
+    console.log(`Completed processing all ${games.length} games in ${totalBatches} batches`)
     return true
   }
 

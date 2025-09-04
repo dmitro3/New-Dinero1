@@ -32,6 +32,8 @@ export default function contextMiddleware(automaticTransaction = false) {
     context.reqTimeStamp = Date.now()
     context.traceId = uuid()
     context.logger = Logger
+    context.sequelize = db.sequelize
+    context.sequelize.models = db
 
     if (automaticTransaction) {
       /** @type {import('sequelize').Transaction} */
