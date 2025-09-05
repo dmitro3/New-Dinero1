@@ -50,7 +50,13 @@ export class BetOneGameHubCasinoHandler extends BaseHandler {
         (total, wallet) => total + (+wallet?.balance || 0),
         0
       ));
-      if (+amount > realBalance) return OneGameHubError.insufficientFundsError;
+      if (+amount > realBalance) {
+        return {
+          status: 400,
+          error: 'Insufficient funds',
+          message: 'User does not have enough balance to place this bet.'
+        };
+      }
       const gotDeniedBefore = await db.CasinoTransaction.findOne({
         where: { transactionId: `${transaction_id}:cancel` },
         attributes: ['transactionId'],
@@ -95,7 +101,7 @@ export class BetOneGameHubCasinoHandler extends BaseHandler {
       };
     } catch (error) {
       console.error("BetOneGameHubCasinoHandler Error:", error);
-      if (transaction) {
+      if (transaction && !transaction.finished) {
         await transaction.rollback();
       }
       return OneGameHubError.unknownError;

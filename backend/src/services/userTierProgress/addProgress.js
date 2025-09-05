@@ -27,8 +27,8 @@ export class AddUserTierProgressHandler extends BaseHandler {
             transaction
         });
 
-        if (!userDetails) {
-            return { success: false, message: 'user details not found in DB' }
+        if (!userDetails || !userDetails.vipTierId) {
+            return { success: false, message: 'user details not found in DB or vipTierId is null' }
         }
         const { nextVipTier } = userDetails;
 

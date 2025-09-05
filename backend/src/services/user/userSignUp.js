@@ -115,7 +115,10 @@ export class UserSignUpHandler extends BaseHandler {
     // assign default tier
     await TierHandlerHandler.execute({ userId: user.userId, level: VIP_TIER.DEFAULT_TIER }, this.context)
 
-    await db.Limit.create({ userId: user.userId }, { transaction })
+    const existingLimit = await db.Limit.findOne({ where: { userId: user.userId }, transaction })
+    if (!existingLimit) {
+      await db.Limit.create({ userId: user.userId }, { transaction })
+    }
 
     delete user.dataValues.password
     const accessToken = await createAccessToken(user)
