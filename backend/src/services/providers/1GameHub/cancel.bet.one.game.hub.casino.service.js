@@ -112,6 +112,13 @@ export class CancelBetOneGameHubCasinoHandler extends BaseHandler {
             if (transaction) {
                 await transaction.rollback();
             }
+            if (error.code === 3002) {
+                return {
+                    status: 400,
+                    error: 'Insufficient funds',
+                    message: error.message
+                };
+            }
             return OneGameHubError.unknownError;
         }
     }

@@ -147,9 +147,16 @@ export class WinOneGameHubGameCasinoHandler extends BaseHandler {
       }
 
     } catch (error) {
-      console.error("Cancel Bet Error:", error);
+      console.error("WinOneGameHubGameCasinoHandler Error:", error);
       if (transaction) {
         await transaction.rollback();
+      }
+      if (error.code === 3002) {
+        return {
+          status: 400,
+          error: 'Insufficient funds',
+          message: error.message
+        };
       }
       return OneGameHubError.unknownError;
     }

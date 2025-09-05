@@ -104,6 +104,13 @@ export class BetOneGameHubCasinoHandler extends BaseHandler {
       if (transaction && !transaction.finished) {
         await transaction.rollback();
       }
+      if (error.code === 3002) {
+        return {
+          status: 400,
+          error: 'Insufficient funds',
+          message: error.message
+        };
+      }
       return OneGameHubError.unknownError;
     }
   }
