@@ -28,7 +28,8 @@ export class CreateLedgerHandlerHandler extends BaseHandler {
         if (direction === LEDGER_TYPES.CREDIT) {
             wallet.balance = MathPrecision.plus(wallet.balance, amount);
         } else if (direction === LEDGER_TYPES.DEBIT) {
-            if (wallet.balance < amount) {
+            // Skip balance check for casino transactions as it's already done in CreateCasinoTransactionHandler
+            if (transactionType !== 'casino' && wallet.balance < amount) {
                 throw new AppError(Errors.INSUFFICIENT_FUNDS);
             }
             wallet.balance = MathPrecision.minus(wallet.balance, amount);

@@ -151,7 +151,7 @@ export class WinOneGameHubGameCasinoHandler extends BaseHandler {
       if (transaction) {
         await transaction.rollback();
       }
-      if (error.code === 3002) {
+      if (error.name === 'InsufficientFundError') {
         return {
           status: 400,
           error: 'Insufficient funds',
