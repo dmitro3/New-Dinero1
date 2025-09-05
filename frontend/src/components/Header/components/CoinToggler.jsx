@@ -12,7 +12,9 @@ import {
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 // import useUserInfo from '@/components/UserInfo/hooks/useUserInfo';
 import useCoinToggler from '../hooks/useCoinToggler';
+import useWalletSocket from '../hooks/useWalletSocket';
 import { formatAmount } from '@/lib/utils';
+import { getAccessToken } from '@/services/storageUtils';
 
 function CoinToggler({ setCurrency = () => {}, isPopupRequired = true }) {
   const {
@@ -24,6 +26,12 @@ function CoinToggler({ setCurrency = () => {}, isPopupRequired = true }) {
   } = useCoinToggler(setCurrency, isPopupRequired);
 
   const [isMobile, setIsMobile] = useState(false);
+
+  // Get token from user context or storage
+  const token = getAccessToken();
+
+  // Use wallet socket hook to listen for wallet balance updates
+  useWalletSocket(token);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
