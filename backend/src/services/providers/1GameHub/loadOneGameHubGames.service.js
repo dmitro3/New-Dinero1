@@ -38,7 +38,9 @@ export class LoadOneGameHubGamesHandler extends BaseHandler {
 
         // Log sample game structure for debugging
         if (gamesData.length > 0) {
-          console.log('Sample game structure:', JSON.stringify(gamesData[0], null, 2))
+          console.log('Sample game keys:', Object.keys(gamesData[0]))
+          console.log('Sample game id:', gamesData[0].id)
+          console.log('Sample game name:', gamesData[0].name)
         }
       } catch (error) {
         console.error('Error in fetchGamesFromOneGameHub:', error.message, error.stack)
@@ -102,13 +104,13 @@ export class LoadOneGameHubGamesHandler extends BaseHandler {
 
     console.log('Fetching 1GameHub games from:', url)
 
-    const maxRetries = 3
+    const maxRetries = 5
     let attempt = 0
 
     while (attempt < maxRetries) {
       try {
         const response = await axios.get(url, {
-          timeout: 30000,
+          timeout: 120000, // Increased timeout for large data (2 minutes)
           headers: {
             'User-Agent': 'DineroSweeps/1.0',
             'Accept': 'application/json',
@@ -125,16 +127,70 @@ export class LoadOneGameHubGamesHandler extends BaseHandler {
 
         // Extract games from response
         let games = []
-        if (response.data?.games) {
+        console.log('1GameHub response data type:', typeof response.data)
+        console.log('1GameHub response data keys:', Object.keys(response.data))
+
+        if (response.data?.games && Array.isArray(response.data.games)) {
           games = response.data.games
+          console.log('Found games in response.data.games')
         } else if (Array.isArray(response.data)) {
           games = response.data
-        } else {
-          console.error('Unexpected 1GameHub response structure:', response.data)
-          throw new AppError(Errors.INTERNAL_SERVER_ERROR, 'Invalid response structure from 1GameHub')
+          console.log('Response data is direct array')
+        } else if (typeof response.data === 'object') {
+          // Try to find games array in any property
+          const possibleKeys = ['games', 'data', 'result', 'items', 'list', 'response']
+          for (const key of possibleKeys) {
+            if (response.data[key] && Array.isArray(response.data[key])) {
+              games = response.data[key]
+              console.log(`Found games in response.data.${key}`)
+              break
+            }
+          }
+
+          // If still no games found, check if response.data itself contains game-like objects
+          if (games.length === 0 && Object.keys(response.data).length > 0) {
+            const firstValue = Object.values(response.data)[0]
+            if (Array.isArray(firstValue) && firstValue.length > 0 && firstValue[0]?.id) {
+              games = firstValue
+              console.log('Found games in first object property')
+            }
+          }
+
+          // Last resort: if response.data has properties that look like games
+          if (games.length === 0) {
+            const dataKeys = Object.keys(response.data)
+            if (dataKeys.length > 0 && response.data[dataKeys[0]]?.id) {
+              games = [response.data]
+              console.log('Treating response.data as single game object')
+            }
+          }
+        }
+
+        if (games.length === 0) {
+          console.error('Could not extract games from response. Response structure:', {
+            type: typeof response.data,
+            keys: Object.keys(response.data),
+            hasGames: !!response.data?.games,
+            gamesType: typeof response.data?.games,
+            isGamesArray: Array.isArray(response.data?.games)
+          })
+          throw new AppError(Errors.INTERNAL_SERVER_ERROR, 'Could not extract games data from 1GameHub response')
         }
 
         console.log(`Fetched ${games.length} games from 1GameHub`)
+
+        // Validate that we have games data
+        if (!Array.isArray(games) || games.length === 0) {
+          throw new AppError(Errors.INTERNAL_SERVER_ERROR, 'No games data received from 1GameHub')
+        }
+
+        // Log sample without full JSON stringify to avoid memory issues
+        if (games.length > 0) {
+          console.log('Sample game keys:', Object.keys(games[0]))
+          console.log('Sample game id:', games[0].id)
+          console.log('Sample game name:', games[0].name)
+        }
+
         return games
 
       } catch (error) {
@@ -242,87 +298,100 @@ export class LoadOneGameHubGamesHandler extends BaseHandler {
   /**
    * Create providers from games data
    */
-  async createProviders(aggregatorId, games, transaction) {
-    // Extract unique providers from games
-    const uniqueProvidersMap = new Map()
+    async createProviders(aggregatorId, games, transaction) {
+      // Extract unique providers from games
+      const uniqueProvidersMap = new Map()
 
-    games.forEach(game => {
-      if (game.provider) {
-        const providerKey = typeof game.provider === 'string' ? game.provider : game.provider?.id
-        if (providerKey && !uniqueProvidersMap.has(providerKey)) {
-          uniqueProvidersMap.set(providerKey, {
-            game_aggregator_id: aggregatorId,  // updated foreign key column name
-            unique_id: providerKey,
-            name: this.getNames(['EN'], typeof game.provider === 'string' ? game.provider : game.provider?.name || `Provider ${providerKey}`),
-            is_active: true
-          })
+      games.forEach(game => {
+        if (game.provider) {
+          const providerKey = (typeof game.provider === 'string' ? game.provider : game.provider?.id)?.toString()
+          if (providerKey && !uniqueProvidersMap.has(providerKey)) {
+            uniqueProvidersMap.set(providerKey, {
+              gameAggregatorId: aggregatorId,  // updated foreign key column name
+              uniqueId: providerKey,
+              name: this.getNames(['EN'], typeof game.provider === 'string' ? game.provider : game.provider?.name || `Provider ${providerKey}`),
+              isActive: true,
+              thumbnailUrl: game.media?.[0]?.url || null,
+              mobileThumbnailUrl: game.media?.[0]?.url || null
+            })
+          }
         }
-      }
-    })
-
-    // Convert map to array
-    const uniqueProviders = Array.from(uniqueProvidersMap.values())
-
-    if (uniqueProviders.length === 0) {
-      // If no providers found, create a default one
-      uniqueProviders.push({
-        game_aggregator_id: aggregatorId,  // updated foreign key column name
-        unique_id: '1gamehub-default',
-        name: this.getNames(['EN'], '1GameHub Provider'),
-        is_active: true
-      })
-    }
-
-    console.log('Unique providers to create:', JSON.stringify(uniqueProviders, null, 2))
-
-    try {
-      // Check existing providers to avoid duplicates
-      const existingProviders = await this.context.sequelize.models.CasinoProvider.findAll({
-        where: {
-          unique_id: Array.from(uniqueProvidersMap.keys())
-        },
-        transaction,
-        logging: true
       })
 
-      const existingUniqueIds = new Set(existingProviders.map(p => p.unique_id))
+      // Convert map to array
+      const uniqueProviders = Array.from(uniqueProvidersMap.values())
 
-      // Filter out providers that already exist
-      const providersToCreate = uniqueProviders.filter(p => !existingUniqueIds.has(p.unique_id))
-
-      if (providersToCreate.length > 0) {
-        await this.context.sequelize.models.CasinoProvider.bulkCreate(providersToCreate, {
-          transaction,
-          logging: true
+      if (uniqueProviders.length === 0) {
+        // If no providers found, create a default one
+        uniqueProviders.push({
+          gameAggregatorId: aggregatorId,  // updated foreign key column name
+          uniqueId: '999999',
+          name: this.getNames(['EN'], '1GameHub Provider'),
+          isActive: true,
+          thumbnailUrl: null,
+          mobileThumbnailUrl: null
         })
       }
 
-      // Fetch all providers again to get their IDs
-      const allProviders = await this.context.sequelize.models.CasinoProvider.findAll({
-        where: {
-          unique_id: Array.from(uniqueProvidersMap.keys())
-        },
-        transaction,
-        logging: true
-      })
+      console.log(`Found ${uniqueProviders.length} unique providers to create`)
+      if (uniqueProviders.length > 0) {
+        console.log('Sample provider:', {
+          uniqueId: uniqueProviders[0].uniqueId,
+          name: uniqueProviders[0].name,
+          gameAggregatorId: uniqueProviders[0].gameAggregatorId,
+          thumbnailUrl: uniqueProviders[0].thumbnailUrl,
+          mobileThumbnailUrl: uniqueProviders[0].mobileThumbnailUrl
+        })
+      }
 
-      // Create mapping
-      return allProviders.reduce((prev, provider) => {
-        prev[provider.unique_id] = provider.id
-        return prev
-      }, {})
-    } catch (error) {
-      console.error('Error in bulkCreate for providers:', error.message, error.stack)
-      throw error
+      try {
+        // Check existing providers to avoid duplicates
+        const existingProviders = await this.context.sequelize.models.CasinoProvider.findAll({
+          where: {
+            uniqueId: Array.from(uniqueProvidersMap.keys()).map(k => k.toString())
+          },
+          transaction,
+          logging: true
+        })
+
+        const existingUniqueIds = new Set(existingProviders.map(p => p.uniqueId))
+
+        // Filter out providers that already exist
+        const providersToCreate = uniqueProviders.filter(p => !existingUniqueIds.has(p.uniqueId))
+
+        if (providersToCreate.length > 0) {
+          await this.context.sequelize.models.CasinoProvider.bulkCreate(providersToCreate, {
+            transaction,
+            logging: true
+          })
+        }
+
+        // Fetch all providers again to get their IDs
+        const allProviders = await this.context.sequelize.models.CasinoProvider.findAll({
+          where: {
+            uniqueId: Array.from(uniqueProvidersMap.keys()).map(k => k.toString())
+          },
+          transaction,
+          logging: true
+        })
+
+        // Create mapping
+        return allProviders.reduce((prev, provider) => {
+          prev[provider.uniqueId] = provider.id
+          return prev
+        }, {})
+      } catch (error) {
+        console.error('Error in bulkCreate for providers:', error.message, error.stack)
+        throw error
+      }
     }
-  }
 
   /**
    * Create categories
    */
   async createCategories(transaction) {
     const categories = DEFAULT_CATEGORIES.map(category => ({
-      uniqueId: category.id.toString(),
+      uniqueId: category.id,
       name: this.getNames(['EN'], category.name)
     }))
 
@@ -367,33 +436,60 @@ export class LoadOneGameHubGamesHandler extends BaseHandler {
           let categoryId = categoryIdsMap[categoryKey] || categoryIdsMap['Slots'] || 2
 
           // Map provider - use default if not found
-          let providerKey = typeof game.provider === 'string' ? game.provider : game.provider?.id
-          let providerId = providerIdsMap[providerKey] || providerIdsMap['1gamehub-default']
+          let providerKey = (typeof game.provider === 'string' ? game.provider : game.provider?.id)?.toString()
+          let providerId = providerIdsMap[providerKey] || providerIdsMap['999999']
 
           if (!providerId) {
             console.warn(`No provider found for game ${game.id}, using first available provider`)
             providerId = Object.values(providerIdsMap)[0]
           }
 
+          const moreDetailsObj = {
+            id: game.id,
+            bets: game.bets || [],
+            name: game.name || '',
+            alias: game.alias || '',
+            brand: game.brand || '',
+            media: {
+              icon: game.media?.icon || '',
+              thumbnails: {
+                '250x180': game.media?.thumbnails?.['250x180'] || '',
+                '500x280': game.media?.thumbnails?.['500x280'] || '',
+                '500x360': game.media?.thumbnails?.['500x360'] || '',
+                '500x500': game.media?.thumbnails?.['500x500'] || ''
+              }
+            },
+            brand_id: game.brand_id || 0,
+            demo_url: game.demo_url || '',
+            paylines: game.paylines || 0,
+            provider: game.provider || '',
+            categories: game.categories || [],
+            subcategories: game.subcategories || [],
+            is_demo_supported: game.is_demo_supported || false,
+            is_free_rounds_supported: game.is_free_rounds_supported || false
+          }
+
           return {
             casinoProviderId: providerId,
             casinoCategoryId: categoryId,
-            uniqueId: game.id.toString(),
-            name: this.getNames(['EN'], game.name || `Game ${game.id}`),
+            casinoGameId: game.id.toString(),
+            name: game.name || `Game ${game.id}`,
             wageringContribution: 0,
             devices: game.devices || ['Desktop', 'Mobile'],
             demoAvailable: game.is_demo_supported || game.demo || false,
-            thumbnailUrl: game.media?.[0]?.url || game.thumbnail || game.image || null,
-            mobileThumbnailUrl: game.media?.[0]?.url || game.mobileThumbnail || game.thumbnail || game.image || null,
+            thumbnailUrl: game.media?.icon || game.media?.thumbnails?.['500x500'] || game.thumbnail || game.image || null,
+            mobileThumbnailUrl: game.media?.thumbnails?.['250x180'] || game.mobileThumbnail || game.thumbnail || game.image || null,
             returnToPlayer: game.rtp || 0,
             isFeatured: game.featured || false,
-            moreDetails: game.description || null
+            description: game.description || null,
+            moreDetails: moreDetailsObj,
+            isActive: true
           }
         }).filter(game => game !== null) // Remove invalid games
 
         if (gamesToCreate.length > 0) {
           await this.context.sequelize.models.CasinoGame.bulkCreate(gamesToCreate, {
-            updateOnDuplicate: ['name', 'thumbnailUrl', 'mobileThumbnailUrl', 'returnToPlayer', 'isFeatured', 'moreDetails'],
+            updateOnDuplicate: ['name', 'thumbnailUrl', 'mobileThumbnailUrl', 'returnToPlayer', 'isFeatured', 'description'],
             transaction,
             logging: false // Disable logging for bulk operations to reduce noise
           })

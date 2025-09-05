@@ -38,8 +38,10 @@ export default function CardContent({
 
   const [isMobile, setIsMobile] = useState(false);
   const [tooltipOpen, setTooltipOpen] = useState(false);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    setIsClient(true);
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
     };
@@ -89,13 +91,13 @@ export default function CardContent({
           </button>
         )}
 
-        <Tooltip open={isMobile ? tooltipOpen : undefined}>
+        <Tooltip open={isClient && isMobile ? tooltipOpen : undefined}>
           <TooltipTrigger asChild>
             <Button type="button" className="play-btn" onClick={onclick}>
               <Image src={play} width={30} alt="Play Icon" />
             </Button>
           </TooltipTrigger>
-          {!user?.email && (
+          {!user?.email && isClient && (
             <TooltipContent
               side="top"
               className="z-[99999] text-white font-semibold border shadow-lg rounded-md p-4 mx-auto flex flex-col justify-center items-center"

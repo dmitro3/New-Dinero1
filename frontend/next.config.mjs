@@ -10,7 +10,9 @@ const nextConfig = {
       'media.tenor.com',
       'thumbs.alea.com',
       'mstatic-staging.mrslotty.com',
-      'mstatic-staging.1gamehub.com'
+      'mstatic-staging.1gamehub.com',
+      'mstatic-ire1.2omega.online',
+      'mstatic-ire1.1gamehub.com'
     ],
   },
   output: 'standalone',

@@ -25,7 +25,7 @@ module.exports = function (sequelize, DataTypes) {
 
   })
   CasinoAggregator.associate = function (model) {
-    CasinoAggregator.hasMany(model.CasinoProvider, { foreignKey: 'id' })
+    CasinoAggregator.hasMany(model.CasinoProvider, { foreignKey: 'gameAggregatorId' })
   }
   return CasinoAggregator
 }

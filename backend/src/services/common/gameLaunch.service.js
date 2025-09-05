@@ -54,9 +54,15 @@ export class GenericGameLaunchHandler extends BaseHandler {
       }
     }
 
+    // Determine if gameId is numeric or string
+    const isNumericId = !isNaN(Number(gameId))
+
+    // Build where clause accordingly
+    const whereClause = isNumericId ? { id: Number(gameId), isActive: true } : { casinoGameId: gameId, isActive: true }
+
     // if (!user || !user.active) return ALEA_ERROR_TYPES.PLAYER_NOT_FOUND
     const casinoGame = await db.CasinoGame.findOne({
-      where: { id: gameId, isActive: true },
+      where: whereClause,
       attributes: {
         include: [
           [
@@ -86,7 +92,14 @@ export class GenericGameLaunchHandler extends BaseHandler {
     console.log('   casinoGame   ', JSON.stringify(casinoGame))
     if (!casinoGame) throw new AppError(Errors.GAME_NOT_FOUND)
 
-    const LaunchService = HandlerMapper[casinoGame.CasinoProvider?.CasinoAggregator?.name?.EN]
+    // Normalize aggregator name to match HandlerMapper keys
+    const aggregatorNameRaw = casinoGame.CasinoProvider?.CasinoAggregator?.name?.EN || ''
+    let aggregatorNameKey = aggregatorNameRaw.toUpperCase().replace(/\s+/g, '')
+    // Map '1GAMEHUB' to 'ONEGAMEHUB' to match HandlerMapper keys
+    if (aggregatorNameKey === '1GAMEHUB') {
+      aggregatorNameKey = 'ONEGAMEHUB'
+    }
+    const LaunchService = HandlerMapper[aggregatorNameKey]
     if (!LaunchService) throw new AppError(Errors.GAME_NOT_FOUND)
 
     const gameLauchUrl = await LaunchService.execute({ providerCasinoGameId: casinoGame.casinoGameId, gameId: casinoGame.id, isMobile, userId, isDemo, coin: coinType })
