@@ -18,9 +18,16 @@ const useSendChat = ({ sendMessage }) => {
   const [isGifOpen, setIsGifOpen] = useState(false);
   const pickerRef = useRef(null);
 
+  // Track sending messages by tempMessageId
+  const [sendingMessages, setSendingMessages] = useState(new Set());
+
   const handleGifClick = () => {
     setIsGifOpen(!isGifOpen);
     setError('');
+  };
+
+  const togglePicker = () => {
+    setIsPickerOpen((prev) => !prev);
   };
 
   useEffect(() => {
@@ -29,6 +36,7 @@ const useSendChat = ({ sendMessage }) => {
     const handleClickOutside = (event) => {
       if (pickerRef.current && !pickerRef.current.contains(event.target)) {
         setIsGifOpen(false);
+        setIsPickerOpen(false);
       }
     };
 
@@ -75,6 +83,15 @@ const useSendChat = ({ sendMessage }) => {
     setIsGifOpen(false);
   };
 
+  // Function to be called by useGroupChats when WebSocket confirms message arrival
+  const confirmMessageSent = (tempMessageId) => {
+    setSendingMessages((prev) => {
+      const newSet = new Set(prev);
+      newSet.delete(tempMessageId);
+      return newSet;
+    });
+  };
+
   const onSubmit = async (data) => {
     const { message, isGif = false } = data;
     if (characterCount > 200) {
@@ -87,6 +104,7 @@ const useSendChat = ({ sendMessage }) => {
     }
 
     if (user?.email) {
+      const tempMessageId = `local-${Date.now()}-${Math.floor(Math.random() * 1000000)}`;
       const payload = {
         message,
         isprivate: false,
@@ -94,10 +112,11 @@ const useSendChat = ({ sendMessage }) => {
         userId: user?.userId,
         groupId: GLOBAL_CHAT_ID,
         user: user,
+        tempMessageId,  // Add temporary client message ID
       };
 
-
-
+      // Add to sending messages set to show loader
+      setSendingMessages((prev) => new Set(prev).add(tempMessageId));
 
       sendMessage(payload, 'SEND_MESSAGE');
 
@@ -149,6 +168,8 @@ const useSendChat = ({ sendMessage }) => {
     handleGifSelect,
     pickerRef,
     handleGifClick,
+    sendingMessages,
+    confirmMessageSent,
   };
 };
 

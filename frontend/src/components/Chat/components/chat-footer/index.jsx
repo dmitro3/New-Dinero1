@@ -71,6 +71,13 @@ const ChatFooter = ({ sendMessage }) => {
 
           {isPickerOpen && (
             <div className="fixed bottom-[60px] right-2 z-50">
+              <button
+                aria-label="Close emoji picker"
+                className="absolute top-1 right-1 z-50 text-white bg-gray-700 rounded-full w-6 h-6 flex items-center justify-center hover:bg-gray-600"
+                onClick={() => setIsPickerOpen(false)}
+              >
+                ✕
+              </button>
               <Picker
                 data={data}
                 onEmojiSelect={handleEmojiSelect}

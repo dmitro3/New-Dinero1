@@ -13,7 +13,7 @@ import { s3FileUpload } from "@src/utils/s3.utils";
 export class SendMessageHandler extends BaseHandler {
 
     async run() {
-        const { message, isPrivate, groupId, userId, messageType } = this.args
+        const { message, isPrivate, groupId, userId, messageType, tempMessageId } = this.args
         const transaction = this.context.sequelizeTransaction
 
         if (!message || message.trim().length === 0) throw new AppError(Errors.EMPTY_MESSAGE)
@@ -42,21 +42,6 @@ export class SendMessageHandler extends BaseHandler {
             checkUrl = containsLink(message)
         }
         else if (messageType === MESSAGE_TYPE.GIF && message) {
-            // let fileBuffer
-            // const isBase64 = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/.test(message);
-            // if (isBase64) {
-            //     fileBuffer = Buffer.from(message, 'base64');
-            // } else if (Buffer.isBuffer(message)) {
-            //     fileBuffer = message;
-            // } else {
-            //     throw new AppError(Errors.INVALID_INPUT);
-            // }
-            // const data = await s3FileUpload(fileBuffer, {
-            //     name: `gif-${Date.now()}.gif`,
-            //     mimetype: 'image/gif',
-            //     filePathInS3Bucket: S3_FILE_PREFIX.gif
-            // })
-            // fileName = data.location
             gifUrl = message.trim();
             const gifUrlRegex = /^(https?:\/\/.*\.(?:gif))$/i;
             if (!gifUrlRegex.test(gifUrl)) throw new AppError(Errors.INVALID_URL);
@@ -79,7 +64,6 @@ export class SendMessageHandler extends BaseHandler {
         if (!user) throw new AppError(Errors.USER_NOT_EXISTS)
         const createChat = {
             actioneeId: userId,
-            // chatGroupId: 2,
             message: (result) ? `${DELETED_MESSAGE}` : (checkUrl) ? `${URL_CHAT_MESSAGE}` : (messageType === MESSAGE_TYPE.GIF) ? `${gifUrl}` : message || null,
             isContainOffensiveWord: result,
             isPrivate: isPrivate || false,
@@ -108,10 +92,8 @@ export class SendMessageHandler extends BaseHandler {
                             level: user.userDetails?.VipTier?.level
                         }
                     }
-                    // rankingLevel: userSettings?.displayLevel === 'true' ? user.rankingLevel : null,
-                    // rankingName: userSettings?.displayLevel === 'true' ? user.rankingName : null
-                    //make clarify
-                }
+                },
+                tempMessageId // Include temporary client message ID in emitted message
             }, groupId)
             return { isContainOffensiveWord: result }
         } catch (error) {

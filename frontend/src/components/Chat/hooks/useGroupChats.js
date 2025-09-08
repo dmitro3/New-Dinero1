@@ -4,7 +4,6 @@ import { useStateContext } from '@/store';
 import { useEffect, useRef, useState } from 'react';
 import { GLOBAL_CHAT_ID } from '../constants';
 import { toast } from '@/hooks/use-toast';
-
 const useGroupChats = ({ webSocketChat }) => {
   const [groupChatsData, setGroupChatsData] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -22,15 +21,24 @@ const useGroupChats = ({ webSocketChat }) => {
   };
 
   const addLocalMessage = (message) => {
-    setGroupChatsData((prev) => [
-      ...prev,
-      {
-        ...message,
-        messageId: Date.now(),
-        createdAt: new Date().toISOString(),
-        user: user,
-      },
-    ]);
+    setGroupChatsData((prev) => {
+      // Prevent duplicate local messages by checking messageId
+      const exists = prev.some((chat) => chat.messageId === message.messageId);
+      if (exists) {
+        return prev;
+      }
+      // Use existing message.messageId (tempMessageId) if present, else generate unique id
+      const messageId = message.messageId || `local-${Date.now()}-${Math.floor(Math.random() * 1000000)}`;
+      return [
+        ...prev,
+        {
+          ...message,
+          messageId: messageId,
+          createdAt: new Date().toISOString(),
+          user: user,
+        },
+      ];
+    });
   };
 
 
@@ -110,14 +118,35 @@ const useGroupChats = ({ webSocketChat }) => {
   useEffect(() => {
     if (webSocketChat?.data) {
       const messageType = webSocketChat?.data?.messageType;
-      const { ChatRain, isClosed } = webSocketChat.data;
+      const { ChatRain, isClosed, tempMessageId } = webSocketChat.data;
 
       if (
         messageType === 'MESSAGE' ||
         messageType === 'GIF' ||
         messageType === 'TIP'
       ) {
-        setGroupChatsData((prevChats) => [...prevChats, webSocketChat.data]);
+        // Prevent duplicate messages by checking messageId or tempMessageId
+        setGroupChatsData((prevChats) => {
+          // If tempMessageId exists, replace local message with same tempMessageId
+          if (tempMessageId) {
+            const index = prevChats.findIndex(
+              (chat) => chat.messageId === tempMessageId
+            );
+            if (index !== -1) {
+              const newChats = [...prevChats];
+              newChats[index] = webSocketChat.data;
+              return newChats;
+            }
+          }
+          // Otherwise, check by messageId
+          const exists = prevChats.some(
+            (chat) => chat.messageId === webSocketChat.data.messageId
+          );
+          if (exists) {
+            return prevChats;
+          }
+          return [...prevChats, webSocketChat.data];
+        });
       } else {
         setGroupChatsData((prevChats) => {
           let isUpdated = false;

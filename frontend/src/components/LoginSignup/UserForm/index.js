@@ -8,7 +8,7 @@ import useUserAuth from '../hooks/useUserAuth';
 import useForgotPassword from '../hooks/useForgotPassword';
 import CustomDialog from '../TermsPrivacy';
 import useTermsPrivacy from '../TermsPrivacy/hooks/useTermsPrivacy';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 const UserForm = ({
   controls,
@@ -20,15 +20,18 @@ const UserForm = ({
   geoInfo,
   isBlocked = false,
 }) => {
+  // Use useForm to get control, handleSubmit, watch
+  const { control, handleSubmit, watch } = useForm();
+
+  // Use hooks for auth and forgot password but do not destructure control/handleSubmit from them
   const authHook = useUserAuth({ setOpen, isSignUp, setToastState });
   const forgotPasswordHook = useForgotPassword({
     setIsForgotPassword,
     setToastState,
   });
 
+  // Use originalOnSubmit, loading, showPassword, togglePasswordVisibility from hooks
   const {
-    control,
-    handleSubmit,
     onSubmit: originalOnSubmit,
     loading = false,
     showPassword = false,
@@ -36,6 +39,14 @@ const UserForm = ({
   } = isForgotPassword ? forgotPasswordHook : authHook;
 
   const [isMarkTick, setIsMarkTick] = useState(false);
+
+  // Use local state for checkboxes to track acceptance
+  const [isAgeChecked, setIsAgeChecked] = useState(false);
+  const [termsChecked, setTermsChecked] = useState(false);
+
+  useEffect(() => {
+    setIsMarkTick(!!isAgeChecked && !!termsChecked);
+  }, [isAgeChecked, termsChecked]);
 
   
   const onSubmit = (data) => {
@@ -128,7 +139,11 @@ const UserForm = ({
                           <Component
                             placeholder={item.placeholder}
                             checked={field.value}
-                            onCheckedChange={field.onChange}
+                            onCheckedChange={(checked) => {
+                              field.onChange(checked);
+                              if (item.name === 'isAge') setIsAgeChecked(checked);
+                              if (item.name === 'terms') setTermsChecked(checked);
+                            }}
                             name={item.name}
                             {...field}
                             className={`mt-0.5 ${error && 'border-red-500'}`}
@@ -232,13 +247,21 @@ const UserForm = ({
 
           <Button
             type="button"
-            disabled={isBlocked}
+            disabled={isBlocked || !isMarkTick}
             className="w-full border border-gray-300 bg-white text-black flex items-center justify-center gap-1 mt-4 hover:bg-gray-100"
             onClick={() => {
               if (isBlocked) {
                 setToastState?.({
                   showToast: true,
                   message: 'Access from your region is not allowed.',
+                  status: 'error',
+                });
+                return;
+              }
+              if (!isMarkTick) {
+                setToastState?.({
+                  showToast: true,
+                  message: 'Please accept Terms of Use, Privacy Policy, and Age/State restriction.',
                   status: 'error',
                 });
                 return;
@@ -253,13 +276,21 @@ const UserForm = ({
 
           <Button
             type="button"
-            disabled={isBlocked}
+            disabled={isBlocked || !isMarkTick}
             className="w-full border border-blue-600 bg-white text-black flex items-center justify-center gap-1 mt-2 hover:bg-blue-50"
             onClick={() => {
               if (isBlocked) {
                 setToastState?.({
                   showToast: true,
                   message: 'Access from your region is not allowed.',
+                  status: 'error',
+                });
+                return;
+              }
+              if (!isMarkTick) {
+                setToastState?.({
+                  showToast: true,
+                  message: 'Please accept Terms of Use, Privacy Policy, and Age/State restriction.',
                   status: 'error',
                 });
                 return;

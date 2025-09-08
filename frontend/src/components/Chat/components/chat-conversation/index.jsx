@@ -34,18 +34,19 @@ const ChatConversation = ({ webSocketChat, webSocketRainChat }) => {
 
   
   useEffect(() => {
-  if (messagesEndRef?.current) {
-    requestAnimationFrame(() => {
-      messagesEndRef.current.scrollIntoView({ behavior: "smooth" });
-    });
-  }
-}, [groupChatsData]);
+    if (messagesEndRef?.current) {
+      // Small delay to ensure DOM is fully updated before scrolling
+      setTimeout(() => {
+        messagesEndRef.current.scrollIntoView({ behavior: "auto", block: "end" });
+      }, 100);
+    }
+  }, [groupChatsData]);
 
   useEffect(() => {
-  if (messagesEndRef?.current) {
-    messagesEndRef.current.scrollIntoView({ behavior: "auto" });
-  }
-}, []); 
+    if (messagesEndRef?.current) {
+      messagesEndRef.current.scrollIntoView({ behavior: "auto", block: "end" });
+    }
+  }, []);
 
   const renderNoData = () => (
     <div className="flex justify-center items-center flex-col h-full font-bold gap-3 my-auto text-white">
@@ -107,7 +108,11 @@ const ChatConversation = ({ webSocketChat, webSocketRainChat }) => {
             const recepientUser =
               tip?.recipient?.username || chat?.tipUser || '';
 
-            return (
+            // Fix for undefined vipTierId and level on new messages
+            const displayVipTierId = vipTierId !== undefined ? vipTierId : 1;
+            const displayLevel = level !== undefined ? level : 1;
+
+          return (
               <div key={messageId} className="flex gap-4">
                 <div className="relative">
                   <Button
@@ -123,11 +128,11 @@ const ChatConversation = ({ webSocketChat, webSocketRainChat }) => {
                       variant="outline"
                       className="text-white font-thin border-none shadow-xl bg-[rgb(var(--lb-blue-600))] rounded-full absolute top-9"
                     >
-                      {`Lv${level}`}
+                      {`Lv${displayLevel}`}
                     </Badge>
                     {!isVip && (
                       <div className="hexagon absolute top-5 right-0 left-7">
-                        <span>{`V${vipTierId}`}</span>
+                        <span>{`V${displayVipTierId}`}</span>
                       </div>
                     )}
                   </Button>

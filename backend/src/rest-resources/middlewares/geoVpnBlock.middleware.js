@@ -1,4 +1,5 @@
 const axios = require("axios");
+const config = require("../../configs/app.config");
 
 const GEO_BLOCKING_ENABLED = process.env.GEO_BLOCKING_ENABLED;
 const VPN_DETECTION_ENABLED = process.env.VPN_DETECTION_ENABLED;
@@ -84,11 +85,10 @@ const ip =
     if (VPN_DETECTION_ENABLED) {
       const vpnApiKey = process.env.IPQUALITYSCORE_API_KEY;
       if (vpnApiKey) {
-        const vpnRes = await axios.get(
-          `https://ipqualityscore.com/api/json/ip/${vpnApiKey}/${ip}`,
-          { timeout: GEO_API_TIMEOUT }
-        );
-
+      const geoRes = await axios.get(
+      `${config.get('geoapi.url')}?apiKey=${geoApiKey}&ip=${ip}`,
+      { timeout: GEO_API_TIMEOUT }
+    );
        { console.log("vpn res : ", vpnRes.data);}
         const { vpn, fraud_score } = vpnRes.data;
         if (vpn && fraud_score > 90) {

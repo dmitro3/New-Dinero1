@@ -184,6 +184,13 @@ export class AddUserTierProgressHandler extends BaseHandler {
                         attributes: ['vipTierId', 'level'],
                         transaction
                     });
+
+                    if (!newCurrentTier) {
+                        // Handle case where the calculated tier level doesn't exist
+                        // For example, if level goes below 1, we can skip the downgrade or handle appropriately
+                        return { success: false, message: 'Unable to downgrade tier: invalid tier level' };
+                    }
+
                     currentVipTierId = newCurrentTier.vipTierId
 
                 }

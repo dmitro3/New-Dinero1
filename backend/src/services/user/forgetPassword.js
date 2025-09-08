@@ -54,7 +54,7 @@ export class ForgetPasswordHandler extends BaseHandler {
       emailTemplate: EMAIL_TEMPLATE_TYPES.RESET_PASSWORD,
       data: {
         link: `${origin}/reset-password?newPasswordKey=${newPasswordKey}`,
-        subject: EMAIL_SUBJECTS[checkUserExist.locale].reset || EMAIL_SUBJECTS.EN.reset
+        subject: (EMAIL_SUBJECTS[checkUserExist.locale] && EMAIL_SUBJECTS[checkUserExist.locale].reset) || EMAIL_SUBJECTS.EN.reset
       },
       message: SUCCESS_MSG.RESET_PASSWORD_EMAIL,
     })
