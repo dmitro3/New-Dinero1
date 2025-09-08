@@ -247,7 +247,7 @@ const UserForm = ({
 
           <Button
             type="button"
-            disabled={isBlocked || !isMarkTick}
+            disabled={isBlocked || (isSignUp && !isMarkTick)}
             className="w-full border border-gray-300 bg-white text-black flex items-center justify-center gap-1 mt-4 hover:bg-gray-100"
             onClick={() => {
               if (isBlocked) {
@@ -258,7 +258,7 @@ const UserForm = ({
                 });
                 return;
               }
-              if (!isMarkTick) {
+              if (isSignUp && !isMarkTick) {
                 setToastState?.({
                   showToast: true,
                   message: 'Please accept Terms of Use, Privacy Policy, and Age/State restriction.',
@@ -276,7 +276,7 @@ const UserForm = ({
 
           <Button
             type="button"
-            disabled={isBlocked || !isMarkTick}
+            disabled={isBlocked || (isSignUp && !isMarkTick)}
             className="w-full border border-blue-600 bg-white text-black flex items-center justify-center gap-1 mt-2 hover:bg-blue-50"
             onClick={() => {
               if (isBlocked) {
@@ -287,7 +287,7 @@ const UserForm = ({
                 });
                 return;
               }
-              if (!isMarkTick) {
+              if (isSignUp && !isMarkTick) {
                 setToastState?.({
                   showToast: true,
                   message: 'Please accept Terms of Use, Privacy Policy, and Age/State restriction.',
