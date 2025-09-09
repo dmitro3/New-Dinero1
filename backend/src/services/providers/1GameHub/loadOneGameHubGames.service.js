@@ -433,7 +433,12 @@ export class LoadOneGameHubGamesHandler extends BaseHandler {
 
           // Map category - use default if not found
           let categoryKey = game.categories?.[0] || game.category
-          let categoryId = categoryIdsMap[categoryKey] || categoryIdsMap['Slots'] || 2
+          // Normalize category name to match DEFAULT_CATEGORIES casing
+          if (categoryKey && typeof categoryKey === 'string') {
+            // Handle hyphenated categories: split by '-', capitalize each part, join with space
+            categoryKey = categoryKey.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
+          }
+          let categoryId = categoryIdsMap[categoryKey] || categoryIdsMap['Slots'] || Object.values(categoryIdsMap)[0]
 
           // Map provider - use default if not found
           let providerKey = (typeof game.provider === 'string' ? game.provider : game.provider?.id)?.toString()

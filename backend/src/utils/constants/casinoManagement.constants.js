@@ -29,50 +29,37 @@ export const AGGREGATORS = {
  */
 export const DEFAULT_CATEGORIES = [{
   id: 1,
-  name: 'Live'
+  name: 'Table Games'
 }, {
   id: 2,
-  name: 'Slots'
+  name: 'Scratch Cards'
 }, {
   id: 3,
-  name: 'Virtuals'
+  name: 'Instant Win'
 }, {
   id: 4,
-  name: 'TvGames'
+  name: 'Slots'
 }, {
   id: 5,
-  name: 'Poker'
+  name: 'Video Poker'
 }, {
   id: 6,
-  name: 'SportBook'
+  name: 'Bingo'
 }, {
   id: 7,
-  name: 'video-poker'
+  name: 'Keno'
 }, {
   id: 8,
-  name: 'SportBook'
+  name: 'Crash Game'
 }, {
   id: 9,
-  name: 'video-slot'
+  name: 'Lottery'
 }, {
   id: 10,
-  name: 'scratch-card'
+  name: 'Shooting'
 }, {
   id: 11,
-  name: 'crash'
-}, {
-  id: 12,
-  name: 'Scratchcards'
-}, {
-  id: 13,
-  name: 'probability'
-}, {
-  id: 14,
-  name: 'keno'
-},
-{
-  id: 15,
-  name: 'Roulette'
+  name: 'Fishing'
 }
 ]
 
