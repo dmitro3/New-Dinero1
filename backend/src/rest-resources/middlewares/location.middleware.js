@@ -8,7 +8,7 @@ import validator from 'validator'
  * Allowed / Blocked Locations
  */
 const allowedCountries = ["US", "IN"];
-const blockedStates = ["MI", "ID", "WA", "LA", "NV", "MT", "CT", "HI", "DE"];
+const blockedStates = ["MI", "ID", "WA", "LA",  "MT", "CT", "HI", "DE"];
 const blockedCountries = ["MX"];
 
 /**

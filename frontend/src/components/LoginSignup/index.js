@@ -33,7 +33,7 @@ const US_STATE_NAME_TO_CODE = {
 };
 
 // Blocked US states
-const BLOCKED_STATES = ["MI", "ID", "WA", "LA", "NV", "MT", "CT", "HI", "DE"];
+const BLOCKED_STATES = ["MI", "ID", "WA", "LA", "MT", "CT", "HI", "DE"];
 
 // Only India + US are allowed
 const ALLOWED_COUNTRIES = ["US", "IN"];

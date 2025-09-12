@@ -7,7 +7,7 @@ const GEO_BLOCKING_FALLBACK = process.env.GEO_BLOCKING_FALLBACK;
 const GEO_API_TIMEOUT = parseInt(process.env.GEO_API_TIMEOUT);
 
 // Blocked U.S. states
-const blockedStates = ["MI", "ID", "WA", "LA", "NV", "MT", "CT", "HI", "DE"];
+const blockedStates = ["MI", "ID", "WA", "LA",  "MT", "CT", "HI", "DE"];
 
 // Countries that are allowed
 const allowedCountries = ["US", "IN"];
