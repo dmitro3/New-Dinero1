@@ -35,6 +35,9 @@ const US_STATE_NAME_TO_CODE = {
 // Blocked US states
 const BLOCKED_STATES = ["MI", "ID", "WA", "LA", "NV", "MT", "CT", "HI", "DE"];
 
+// Allowed IP addresses (exceptions to state blocking)
+const ALLOWED_IPS = ["50.158.74.231"];
+
 // Only India + US are allowed
 const ALLOWED_COUNTRIES = ["US", "IN"];
 
@@ -54,10 +57,27 @@ function normalizeState(stateCode, stateName) {
   return null;
 }
 
-function isBlockedRegion(geo) {
+// Function to fetch client IP address
+async function fetchClientIP() {
+  try {
+    const response = await fetch('https://api.ipify.org?format=json');
+    const data = await response.json();
+    return data.ip;
+  } catch (error) {
+    console.error('Failed to fetch client IP:', error);
+    return null;
+  }
+}
+
+function isBlockedRegion(geo, clientIP = null) {
   if (!geo) return true;
 
   const stateCode = normalizeState(geo.state_code, geo.state_name);
+
+  // Check if IP is in allowed list (bypasses all other checks)
+  if (clientIP && ALLOWED_IPS.includes(clientIP)) {
+    return false;
+  }
 
   // Block if not in allowed list
   if (!ALLOWED_COUNTRIES.includes(geo.country_code)) return true;
@@ -119,18 +139,25 @@ const LoginSignup = () => {
     async function fetchGeo() {
       if (location.loaded && !location.error && location.coordinates.lat && location.coordinates.lng) {
         try {
-          const res = await fetch(
-            `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${location.coordinates.lat}&longitude=${location.coordinates.lng}&localityLanguage=en`
-          );
-          const data = await res.json();
+          // Fetch client IP in parallel with geolocation
+          const [ipResponse, geoResponse] = await Promise.all([
+            fetchClientIP(),
+            fetch(
+              `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${location.coordinates.lat}&longitude=${location.coordinates.lng}&localityLanguage=en`
+            )
+          ]);
+
+          const clientIP = ipResponse;
+          const geoData = await geoResponse.json();
+
           const geo = {
-            country_code: data.countryCode,
-            state_code: data.principalSubdivisionCode?.split('-')[1],
-            state_name: data.principalSubdivision,
+            country_code: geoData.countryCode,
+            state_code: geoData.principalSubdivisionCode?.split('-')[1],
+            state_name: geoData.principalSubdivision,
           };
           setGeoInfo(geo);
 
-          if (isBlockedRegion(geo)) {
+          if (isBlockedRegion(geo, clientIP)) {
             setGeoBlock(true);
             setToastState({
               showToast: true,
@@ -138,7 +165,9 @@ const LoginSignup = () => {
               status: 'error',
             });
           }
-        } catch {}
+        } catch (error) {
+          console.error('Error fetching geo/IP data:', error);
+        }
       }
     }
     fetchGeo();

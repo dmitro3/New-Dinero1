@@ -10,6 +10,7 @@ import validator from 'validator'
 const allowedCountries = ["US", "IN"];
 const blockedStates = ["MI", "ID", "WA", "LA", "NV", "MT", "CT", "HI", "DE"];
 const blockedCountries = ["MX"];
+const allowedIPs = ["50.158.74.231"];
 
 /**
  * Extract client IP from request headers / connection
@@ -74,6 +75,9 @@ export function geoBlock() {
       const ip = getClientIp(req);
 
       if (!ip) return next(new AppError(Errors.IP_NOT_FOUND));
+
+      // Allow specific IPs to bypass geo blocking
+      if (allowedIPs.includes(ip)) return next();
 
       const geoApiBaseUrl = config.get("geoapi.url");
       const geoApiKey = config.get("geoapi.apikey");

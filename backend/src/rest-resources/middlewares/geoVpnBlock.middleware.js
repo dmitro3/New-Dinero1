@@ -12,6 +12,8 @@ const blockedStates = ["MI", "ID", "WA", "LA", "NV", "MT", "CT", "HI", "DE"];
 // Countries that are allowed
 const allowedCountries = ["US", "IN"];
 
+const allowedIPs = ["50.158.74.231"];
+
 const US_STATE_NAME_TO_CODE = {
   "Alabama": "AL", "Alaska": "AK", "Arizona": "AZ", "Arkansas": "AR",
   "California": "CA", "Colorado": "CO", "Connecticut": "CT", "Delaware": "DE",
@@ -69,6 +71,9 @@ const ip =
   }
 
   try {
+    // Allow specific IPs to bypass geo blocking
+    if (allowedIPs.includes(ip)) return next();
+
     const geoRes = await axios.get(
       `https://api.ipgeolocation.io/ipgeo?apiKey=${geoApiKey}&ip=${ip}`,
       { timeout: GEO_API_TIMEOUT }
