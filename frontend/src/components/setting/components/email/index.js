@@ -23,6 +23,31 @@ const Email = () => {
     isTimerActive,
   } = useEmail();
 
+  const isValidEmail = (email) => {
+    const basicRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    if (!basicRegex.test(email)) {
+      return 'Please enter valid email address';
+    }
+
+    const domain = email.split('@')[1].toLowerCase();
+
+    const strictProviders = [
+      'gmail.com',
+      'yahoo.com',
+      'outlook.com',
+      'hotmail.com',
+      'live.com',
+      'pervadorit.com',
+    ];
+
+    for (const provider of strictProviders) {
+      if (domain.includes(provider.split('.')[0]) && domain !== provider) {
+        return `Please enter a valid email providers eg: ${provider}`;
+      }
+    }
+    return true;
+  };
+
   return (
     <section className="border border-[rgb(var(--lb-blue-300))] rounded">
       {emailVerified ? (
@@ -32,8 +57,8 @@ const Email = () => {
               Current Email
             </div>
             <div className="text-[rgb(var(--lb-blue-250))] text-[13px] mb-2">
-              (Please check weekly airdrop email every weekend. Don&apos;t miss your
-              bonus.)
+              (Please check weekly airdrop email every weekend. Don&apos;t miss
+              your bonus.)
             </div>
 
             <Input
@@ -45,23 +70,20 @@ const Email = () => {
         </div>
       ) : (
         <>
-
           <form onSubmit={handleSubmit(handleEmailSubmit)}>
             <div className="p-4 border-b border-[rgb(var(--lb-blue-300))]">
               <div className="mb-2">
                 <div className="text-white text-[14px] font-bold">Email</div>
                 <div className="text-[rgb(var(--lb-blue-250))] text-[13px] mb-2">
-                  (Gear up, because every week you&apos;ll unlock an epic bonus email)
+                  (Gear up, because every week you&apos;ll unlock an epic bonus
+                  email)
                 </div>
                 <Controller
                   control={control}
                   name="userEmail"
                   rules={{
-                    required: 'Please enter email',
-                    pattern: {
-                      value: /^[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$/,
-                      message: 'Please enter a valid email address (lowercase only)',
-                    },
+                    required: 'Email is required',
+                    validate: isValidEmail,
                   }}
                   render={({ field, fieldState }) => {
                     const error = fieldState?.error;
@@ -69,29 +91,31 @@ const Email = () => {
                       <>
                         <div className="flex items-center space-x-2 w-[50%]">
                           <div
-                            className={`${error ? 'border-red-500' : 'border-gray-300'
-                              } transition-colors duration-200`}
+                            className={`${
+                              error ? 'border-red-500' : 'border-gray-300'
+                            } transition-colors duration-200`}
                           >
                             <Input
                               {...field}
-                              placeholder="Enter your email"
+                              placeholder="Email is required"
                               className="border border-[rgb(var(--lb-blue-200))] w-[200%]"
                               onChange={(e) =>
                                 field.onChange(e.target.value.toLowerCase())
                               }
                             />
+                            {error && (
+                              <div
+                                className={`text-red-500 text-sm  transition-opacity duration-300 ease-in-out ${
+                                  error
+                                    ? 'opacity-100 translate-y-0'
+                                    : 'opacity-0 translate-y-2'
+                                }`}
+                              >
+                                {error?.message}
+                              </div>
+                            )}
                           </div>
                         </div>
-                        {error && (
-                          <div
-                            className={`text-red-500 text-sm absolute transition-opacity duration-300 ease-in-out ${error
-                                ? 'opacity-100 translate-y-0'
-                                : 'opacity-0 translate-y-2'
-                              }`}
-                          >
-                            {error?.message}
-                          </div>
-                        )}
                       </>
                     );
                   }}
@@ -124,7 +148,8 @@ const Email = () => {
                   control={control}
                   name="otp"
                   rules={{
-                    required: emailSubmitted && 'Please enter your Verification Code',
+                    required:
+                      emailSubmitted && 'Please enter your Verification Code',
                   }}
                   render={({ field, fieldState }) => {
                     const error = fieldState?.error;
@@ -133,14 +158,20 @@ const Email = () => {
                         <div className="flex flex-col">
                           <Input
                             {...field}
-                            className={`border w-full ${error ? 'border-red-500' : 'border-[rgb(var(--lb-blue-200))]'
-                              }`}
+                            className={`border w-full ${
+                              error
+                                ? 'border-red-500'
+                                : 'border-[rgb(var(--lb-blue-200))]'
+                            }`}
                             type="tel"
                             maxLength={6}
                             pattern="[0-9]*"
                             inputMode="numeric"
                             onInput={(e) => {
-                              e.target.value = e.target.value.replace(/[^0-9]/g, '');
+                              e.target.value = e.target.value.replace(
+                                /[^0-9]/g,
+                                ''
+                              );
                             }}
                             disabled={!emailSubmitted || isOtpLoading}
                           />
@@ -155,7 +186,6 @@ const Email = () => {
                     );
                   }}
                 />
-
               </div>
               {isTimerActive && (
                 <div className="text-md font-medium text-green-500 w-fit rounded-xl mt-2">
