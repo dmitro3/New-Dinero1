@@ -36,7 +36,7 @@ export const SIGNUP = [
     label: 'I accept the Dinero Sweeps Terms of Use and Privacy Policy',
     type: 'checkbox',
     required: 'Terms and Condition is required!',
-    isLink : true,
+    isLink: true,
   },
 ];
 
@@ -63,7 +63,7 @@ export const FORGOT_PASSWORD = [
     placeholder: 'Enter your email address',
     required: 'Email is required!',
     pattern: {
-      value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+      value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
       message: 'Please enter a valid email address',
     },
   },
