@@ -81,7 +81,7 @@ const useEmail = () => {
       const response = await verifyOtp(data);
       setEmailVerified(true);
       setShowToast(true);
-      setMessage(response?.message || 'Email verified sucessfully');
+      setMessage(response?.message || 'Email verified successfully');
       setStatus('success');
       setIsTimerActive(false);
       setTimer(60);
