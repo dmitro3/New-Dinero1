@@ -25,10 +25,11 @@ const useForgotPassword = ({ setIsForgotPassword, setToastState }) => {
       setIsForgotPassword(false);
     } catch (error) {
       setLoading(false);
-      setError('email', {
-        type: 'manual',
+      setToastState({
+        showToast: true,
         message:
           error.message || 'Failed to send reset link. Please try again.',
+        status: 'error',
       });
     }
   };
