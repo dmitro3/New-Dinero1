@@ -99,9 +99,6 @@ const Email = () => {
                               {...field}
                               placeholder="Email is required"
                               className="border border-[rgb(var(--lb-blue-200))] w-[200%]"
-                              onChange={(e) =>
-                                field.onChange(e.target.value.toLowerCase())
-                              }
                             />
                             {error && (
                               <div
