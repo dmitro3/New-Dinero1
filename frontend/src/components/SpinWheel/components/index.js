@@ -1,6 +1,6 @@
 'use client';
 import { rewardPopers, spinLoader } from '@/assets/json';
-import { cross, warningIcon } from '@/assets/svg';
+import { cross, warningIcon, spinWheel } from '@/assets/svg';
 import CountdownTimer from '@/common/components/custom-countdown-timer';
 import {
   Dialog,
@@ -26,7 +26,7 @@ function SpinWheel({ handleClick, isOpen }) {
   useEffect(() => {
     if (spinWheelData) {
       setLoading(false);
-    } 
+    }
     if (spinWheelData?.isAvailable === false) {
       setShowTimer(true);
     }
@@ -46,9 +46,12 @@ function SpinWheel({ handleClick, isOpen }) {
       <DialogContent className=" max-w-[100%] md:max-w-[80%] md:max-h-[60%] w-[550px] mx-auto mb-6 rounded-lg shadow-lg border-none">
         <DialogHeader className="flex">
           <div className="flex justify-between">
-            <DialogTitle className={'text-[18px] text-white'}>
-              Spin a Wheel
-            </DialogTitle>
+            <div className='flex flex-row gap-2 items-center '>
+              <Image src={spinWheel} alt="store image" />
+              <DialogTitle className={'text-[18px] text-white'}>
+                Spin a Wheel
+              </DialogTitle>
+            </div>
             <Image
               src={cross}
               alt="close icon"
