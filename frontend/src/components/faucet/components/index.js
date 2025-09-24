@@ -65,7 +65,7 @@ const Faucet = ({ isOpen, handleClick }) => {
         <DialogHeader className="flex flex-row justify-between max-h-8">
           <div className="flex justify-center items-center space-x-2">
             <Image src={faucetIcon} alt="store image" />
-            <DialogTitle className="text-white">{t('faucet')}</DialogTitle>
+            <DialogTitle className="text-white">{t('Faucet')}</DialogTitle>
           </div>
           <div className="flex">
             <Image
