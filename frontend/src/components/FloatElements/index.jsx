@@ -34,7 +34,7 @@ function FloatElements() {
     };
   }, []);
   return (
-    <div className="relative hidden md:block">
+    <div className="relative hidden z-40 md:block">
       <SidebarTrigger
         className="-ml-1 button-floating"
         style={{
